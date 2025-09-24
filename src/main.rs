@@ -2,7 +2,7 @@
 // need dioxus
 use dioxus::prelude::*;
 
-use views::{ Home};
+use views::Home;
 mod components;
 mod views;
 
