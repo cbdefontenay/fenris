@@ -1,10 +1,9 @@
 use dioxus::prelude::*;
-use reqwest::Client; // Nous aurons besoin du client reqwest
+use reqwest::Client;
 use std::rc::Rc;
 use Key::Enter;
 use FetchState::{Error, Initial, Loading, Success};
 
-// Définition de l'état de la requête
 #[derive(Clone, PartialEq)]
 enum FetchState {
     Initial,
