@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.structurizer.app",
   "build": {
-    "beforeDevCommand": "dotnet watch run --project src/Structurizer.csproj",
+    "beforeDevCommand": "dotnet watch run --project ../src/Structurizer.csproj && npx @tailwindcss/cli -i wwwroot/css/app.css -o wwwroot/css/out.css --watch",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "dotnet publish -c release src/Structurizer.csproj -o dist",
+    "beforeBuildCommand": "dotnet publish -c release ../src/Structurizer.csproj -o dist",
     "frontendDist": "../dist/wwwroot"
   },
   "app": {
