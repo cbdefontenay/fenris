@@ -6,9 +6,6 @@ src/node_modules
 # dotenv files
 .env
 build
-macos
-windows
-linux
 
 # User-specific files
 *.rsuser
@@ -486,3 +483,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+macos
