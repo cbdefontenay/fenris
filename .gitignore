@@ -6,7 +6,7 @@ src/node_modules
 # dotenv files
 .env
 build
-
+macos
 # User-specific files
 *.rsuser
 *.suo
