@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
           backgroundColor: color.secondary,
           foregroundColor: color.onSecondary
         ),
-        child: const Text("data"),
+        child: const Text("data!"),
       ),
     );
   }
