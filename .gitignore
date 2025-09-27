@@ -7,6 +7,9 @@ src/node_modules
 .env
 build
 macos
+windows
+linux
+
 # User-specific files
 *.rsuser
 *.suo
