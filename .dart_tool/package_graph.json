@@ -9,6 +9,8 @@
       "dependencies": [
         "cupertino_icons",
         "flutter",
+        "flutter_html",
+        "flutter_markdown",
         "flutter_rust_bridge",
         "rust_lib_structurizer",
         "shared_preferences"
@@ -53,6 +55,27 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_html",
+      "version": "3.0.0",
+      "dependencies": [
+        "collection",
+        "csslib",
+        "flutter",
+        "html",
+        "list_counter"
+      ]
+    },
+    {
+      "name": "flutter_markdown",
+      "version": "0.7.7+1",
+      "dependencies": [
+        "flutter",
+        "markdown",
+        "meta",
+        "path"
       ]
     },
     {
@@ -212,6 +235,34 @@
         "stream_channel",
         "string_scanner",
         "term_glyph"
+      ]
+    },
+    {
+      "name": "list_counter",
+      "version": "1.0.2",
+      "dependencies": []
+    },
+    {
+      "name": "csslib",
+      "version": "1.0.2",
+      "dependencies": [
+        "source_span"
+      ]
+    },
+    {
+      "name": "html",
+      "version": "0.15.6",
+      "dependencies": [
+        "csslib",
+        "source_span"
+      ]
+    },
+    {
+      "name": "markdown",
+      "version": "7.3.0",
+      "dependencies": [
+        "args",
+        "meta"
       ]
     },
     {

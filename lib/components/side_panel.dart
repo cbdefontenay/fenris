@@ -14,12 +14,13 @@ class _SidePanelState extends State<SidePanel> {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
     double width = isCollapsed ? 70 : 250;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
       width: width,
-      color: Colors.blueGrey[900],
+      color: color.primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Keep menu to left
         children: [
@@ -27,7 +28,7 @@ class _SidePanelState extends State<SidePanel> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
+              icon: Icon(Icons.menu, color: color.onPrimary),
               onPressed: () {
                 setState(() {
                   isCollapsed = !isCollapsed;
@@ -48,16 +49,17 @@ class _SidePanelState extends State<SidePanel> {
   }
 
   Widget buildNavItem(IconData icon, String label, String route) {
+    final color = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () => widget.onNavigate(route),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
-            Icon(icon, color: Colors.white),
+            Icon(icon, color: color.onPrimary),
             if (!isCollapsed) ...[
-              const SizedBox(width: 10),
-              Text(label, style: const TextStyle(color: Colors.white)),
+              SizedBox(width: 10),
+              Text(label, style: TextStyle(color: color.onPrimary)),
             ],
           ],
         ),

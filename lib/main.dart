@@ -38,7 +38,7 @@ class _StructurizerAppState extends State<StructurizerApp> {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('themeMode', mode.index); // store as int
+    await prefs.setInt('themeMode', mode.index);
     setState(() {
       _themeMode = mode;
     });
@@ -59,7 +59,7 @@ class _StructurizerAppState extends State<StructurizerApp> {
       themeMode: _themeMode,
       home: Wrapper(
         onThemeChanged: setThemeMode,
-        currentThemeMode: _themeMode, // pass current theme mode
+        currentThemeMode: _themeMode,
       ),
     );
   }

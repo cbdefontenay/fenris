@@ -38,6 +38,8 @@ dependencies:
     path: rust_builder
   flutter_rust_bridge: 2.11.1
   shared_preferences: ^2.5.3
+  flutter_markdown: ^0.7.7+1
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:
