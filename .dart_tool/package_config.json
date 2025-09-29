@@ -86,6 +86,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "flutter_highlight",
+      "rootUri": "file:///home/cyprien/.pub-cache/hosted/pub.dev/flutter_highlight-0.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_html",
       "rootUri": "file:///home/cyprien/.pub-cache/hosted/pub.dev/flutter_html-3.0.0",
       "packageUri": "lib/",
@@ -126,6 +132,12 @@
       "rootUri": "file:///home/cyprien/flutter/packages/fuchsia_remote_debug_protocol",
       "packageUri": "lib/",
       "languageVersion": "3.8"
+    },
+    {
+      "name": "highlight",
+      "rootUri": "file:///home/cyprien/.pub-cache/hosted/pub.dev/highlight-0.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "html",

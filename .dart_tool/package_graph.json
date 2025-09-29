@@ -9,9 +9,11 @@
       "dependencies": [
         "cupertino_icons",
         "flutter",
+        "flutter_highlight",
         "flutter_html",
         "flutter_markdown",
         "flutter_rust_bridge",
+        "highlight",
         "rust_lib_structurizer",
         "shared_preferences"
       ],
@@ -55,6 +57,21 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "highlight",
+      "version": "0.7.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "flutter_highlight",
+      "version": "0.7.0",
+      "dependencies": [
+        "flutter",
+        "highlight"
       ]
     },
     {

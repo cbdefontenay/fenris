@@ -18,7 +18,7 @@ class _SidePanelState extends State<SidePanel> {
     double width = isCollapsed ? 70 : 250;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 300),
       width: width,
       color: color.primary,
       child: Column(
