@@ -1,1 +1,0 @@
- /home/cyprien/Documents/Tauri/structurizer/.dart_tool/flutter_build/f8b57b8d2948fd5bf96aa995bb45e410/native_assets.json: 
