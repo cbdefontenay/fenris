@@ -24,5 +24,42 @@
       "newFolder": "Créer un nouveau dossier",
       "saveNote": "Sauvegarder la note"
     }
+  },
+  "shell": {
+    "availableCommands": "Commandes disponibles :\n\n{{commands}}\n\nTapez 'help <commande>' pour plus d'informations sur une commande spécifique.",
+    "versionInfo": "Shell v1.0.0",
+    "navigatingToSettings": "Navigation vers les paramètres...",
+    "navigatingToJson": "Navigation vers le formateur JSON...",
+    "navigatingToHome": "Navigation vers l'accueil...",
+    "themeSetToDark": "Thème défini sur sombre",
+    "themeSetToLight": "Thème défini sur clair",
+    "commandNotFound": "Commande non trouvée : {{command}}. Tapez 'help' pour les commandes disponibles.",
+    "noHelpAvailable": "Aucune aide disponible pour la commande : {{command}}",
+    "error": "Erreur : {{error}}",
+    "descriptions": {
+      "help": "Afficher les informations d'aide",
+      "clear": "Effacer l'écran du terminal",
+      "date": "Afficher la date et l'heure actuelles",
+      "version": "Afficher les informations de version",
+      "pwd": "Afficher le répertoire courant",
+      "goto": "Naviguer vers différentes pages",
+      "theme": "Changer le thème (sombre|clair)",
+      "echo": "Afficher une ligne de texte",
+      "history": "Afficher l'historique des commandes",
+      "exit": "Fermer le terminal",
+      "noDescription": "Aucune description disponible"
+    },
+    "commands": {
+      "help": "{{command}} - Afficher les informations d'aide\nUtilisation : {{usage}}\n{{description}}",
+      "clear": "{{command}} - Effacer l'écran du terminal\nUtilisation : {{usage}}\n{{description}}",
+      "date": "{{command}} - Afficher la date et l'heure actuelles\nUtilisation : {{usage}}\n{{description}}",
+      "version": "{{command}} - Afficher les informations de version du système\nUtilisation : {{usage}}\n{{description}}",
+      "pwd": "{{command}} - Afficher le répertoire courant\nUtilisation : {{usage}}\n{{description}}",
+      "goto": "{{command}} - Naviguer vers différentes pages\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "theme": "{{command}} - Changer le thème de couleur\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "echo": "{{command}} - Afficher une ligne de texte\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "history": "{{command}} - Afficher l'historique des commandes\nUtilisation : {{usage}}\n{{description}}",
+      "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}"
+    }
   }
 }

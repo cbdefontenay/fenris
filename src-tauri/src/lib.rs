@@ -1,9 +1,11 @@
 use crate::cli::{cli_date_now, cli_help_command, cli_show_dir};
 use crate::json::{fetch_json, format_json};
 use tauri::{generate_context, Builder};
+use crate::ollama::ollama_api_call;
 
 mod cli;
 mod json;
+mod ollama;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,7 +16,8 @@ pub fn run() {
             cli_date_now,
             cli_show_dir,
             fetch_json,
-            format_json
+            format_json,
+            ollama_api_call
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

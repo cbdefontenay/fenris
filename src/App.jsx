@@ -7,6 +7,7 @@ import NavBarComponent from "./components/NavBarComponent.jsx";
 import {ShellProvider} from "./context/ShellContext.jsx";
 import ShellPopup from "./components/ShellPopup.jsx";
 import JsonUrlFormatPage from "./page/JsonUrlFormatPage.jsx";
+import AiChatbotPage from "./page/AiChatbotPage.jsx";
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
                         <Route path="/" element={<NavBarComponent/>}>
                             <Route index element={<HomePage/>}/>
                             <Route path="home" element={<HomePage/>}/>
+                            <Route path="ai-chatbot" element={<AiChatbotPage/>}/>
                             <Route path="json" element={<JsonUrlFormatPage/>}/>
                             <Route path="settings" element={<SettingPage/>}/>
                         </Route>

@@ -24,5 +24,42 @@
       "newFolder": "Neuen Ordner erstellen",
       "saveNote": "Notiz speichern"
     }
+  },
+  "shell": {
+    "availableCommands": "Verfügbare Befehle:\n\n{{commands}}\n\nGeben Sie 'help <befehl>' ein, um mehr Informationen zu einem bestimmten Befehl zu erhalten.",
+    "versionInfo": "Shell v1.0.0",
+    "navigatingToSettings": "Navigiere zu Einstellungen...",
+    "navigatingToJson": "Navigiere zu JSON-Formatierer...",
+    "navigatingToHome": "Navigiere zu Startseite...",
+    "themeSetToDark": "Theme auf Dunkel gesetzt",
+    "themeSetToLight": "Theme auf Hell gesetzt",
+    "commandNotFound": "Befehl nicht gefunden: {{command}}. Geben Sie 'help' ein, um verfügbare Befehle anzuzeigen.",
+    "noHelpAvailable": "Keine Hilfe verfügbar für Befehl: {{command}}",
+    "error": "Fehler: {{error}}",
+    "descriptions": {
+      "help": "Hilfeinformationen anzeigen",
+      "clear": "Terminalbildschirm löschen",
+      "date": "Aktuelles Datum und Uhrzeit anzeigen",
+      "version": "Versionsinformationen anzeigen",
+      "pwd": "Aktuelles Verzeichnis anzeigen",
+      "goto": "Zu verschiedenen Seiten navigieren",
+      "theme": "Theme ändern (dunkel|hell)",
+      "echo": "Textzeile anzeigen",
+      "history": "Befehlsverlauf anzeigen",
+      "exit": "Terminal schließen",
+      "noDescription": "Keine Beschreibung verfügbar"
+    },
+    "commands": {
+      "help": "{{command}} - Hilfeinformationen anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "clear": "{{command}} - Terminalbildschirm löschen\nVerwendung: {{usage}}\n{{description}}",
+      "date": "{{command}} - Aktuelles Datum und Uhrzeit anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "version": "{{command}} - Systemversionsinformationen anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "pwd": "{{command}} - Aktuelles Verzeichnis anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "goto": "{{command}} - Zu verschiedenen Seiten navigieren\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "theme": "{{command}} - Farbtheme ändern\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "echo": "{{command}} - Textzeile anzeigen\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "history": "{{command}} - Befehlsverlauf anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}"
+    }
   }
 }

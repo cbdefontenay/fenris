@@ -2,6 +2,7 @@ import {createContext, useContext, useEffect, useState} from 'react';
 import {invoke} from "@tauri-apps/api/core";
 import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
+import {useTranslation} from "react-i18next";
 
 const ShellContext = createContext();
 
@@ -11,6 +12,7 @@ export function ShellProvider({children}) {
     const [history, setHistory] = useState([]);
     const {theme, toggleTheme} = useTheme();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -32,18 +34,64 @@ export function ShellProvider({children}) {
         };
     }, []);
 
-    // Command explanations in frontend (easily translatable)
-    const commandExplanations = {
-        help: "help - Display help information\nUsage: help [command]\nDisplays available commands or detailed help for a specific command.",
-        clear: "clear - Clear the terminal screen\nUsage: clear\nClears all previous command output from the terminal.",
-        date: "date - Show current date and time\nUsage: date\nDisplays the current system date and time.",
-        version: "version - Display system version information\nUsage: version\nShows the current application version and build information.",
-        pwd: "pwd - Print working directory\nUsage: pwd\nShows the current directory path.",
-        goto: "goto - Navigate to different pages\nUsage: goto <page>\nExample: goto settings\nNavigates to the specified application page.",
-        theme: "theme - Change color theme\nUsage: theme <dark|light>\nExample: theme dark\nSwitches between dark and light color themes.",
-        echo: "echo - Display a line of text\nUsage: echo <text>\nExample: echo Hello World\nPrints the specified text to the terminal.",
-        history: "history - Show command history\nUsage: history\nDisplays previously executed commands.",
-        exit: "exit - Close the terminal\nUsage: exit\nCloses the terminal window."
+    // Command explanations with translations
+    const getCommandExplanation = (command) => {
+        const explanations = {
+            help: t('shell.commands.help', {
+                command: "help",
+                usage: "help [command]",
+                description: "Displays available commands or detailed help for a specific command."
+            }),
+            clear: t('shell.commands.clear', {
+                command: "clear",
+                usage: "clear",
+                description: "Clears all previous command output from the terminal."
+            }),
+            date: t('shell.commands.date', {
+                command: "date",
+                usage: "date",
+                description: "Displays the current system date and time."
+            }),
+            version: t('shell.commands.version', {
+                command: "version",
+                usage: "version",
+                description: "Shows the current application version and build information."
+            }),
+            pwd: t('shell.commands.pwd', {
+                command: "pwd",
+                usage: "pwd",
+                description: "Shows the current directory path."
+            }),
+            goto: t('shell.commands.goto', {
+                command: "goto",
+                usage: "goto <page>",
+                example: "goto settings",
+                description: "Navigates to the specified application page."
+            }),
+            theme: t('shell.commands.theme', {
+                command: "theme",
+                usage: "theme <dark|light>",
+                example: "theme dark",
+                description: "Switches between dark and light color themes."
+            }),
+            echo: t('shell.commands.echo', {
+                command: "echo",
+                usage: "echo <text>",
+                example: "echo Hello World",
+                description: "Prints the specified text to the terminal."
+            }),
+            history: t('shell.commands.history', {
+                command: "history",
+                usage: "history",
+                description: "Displays previously executed commands."
+            }),
+            exit: t('shell.commands.exit', {
+                command: "exit",
+                usage: "exit",
+                description: "Closes the terminal window."
+            })
+        };
+        return explanations[command] || t('shell.noHelpAvailable', {command});
     };
 
     async function cliHelpCommand(explanation = null) {
@@ -51,40 +99,40 @@ export function ShellProvider({children}) {
             const result = await invoke("cli_help_command", {explanation});
 
             if (explanation) {
-                // Return the translated explanation from frontend
-                return commandExplanations[result] || `No help available for command: ${result}`;
+                return getCommandExplanation(result);
             } else {
-                // Return formatted list of all commands
                 const commands = result.split(',');
-                return `Available commands:\n\n${commands.map(cmd => `  ${cmd.padEnd(20)} ${getCommandDescription(cmd)}`).join('\n')}\n\nType 'help <command>' for more information on a specific command.`;
+                return t('shell.availableCommands', {
+                    commands: commands.map(cmd => `  ${cmd.padEnd(20)} ${getCommandDescription(cmd)}`).join('\n')
+                });
             }
         } catch (error) {
-            return `Error: ${error}`;
+            return t('shell.error', {error});
         }
     }
 
     // Helper function to get short descriptions
     const getCommandDescription = (cmd) => {
         const descriptions = {
-            help: "Display help information",
-            clear: "Clear the terminal screen",
-            date: "Show current date and time",
-            version: "Display version information",
-            pwd: "Print working directory",
-            goto: "Navigate to different pages",
-            theme: "Change theme (dark|light)",
-            echo: "Display a line of text",
-            history: "Show command history",
-            exit: "Close the terminal"
+            help: t('shell.descriptions.help'),
+            clear: t('shell.descriptions.clear'),
+            date: t('shell.descriptions.date'),
+            version: t('shell.descriptions.version'),
+            pwd: t('shell.descriptions.pwd'),
+            goto: t('shell.descriptions.goto'),
+            theme: t('shell.descriptions.theme'),
+            echo: t('shell.descriptions.echo'),
+            history: t('shell.descriptions.history'),
+            exit: t('shell.descriptions.exit')
         };
-        return descriptions[cmd] || "No description available";
+        return descriptions[cmd] || t('shell.descriptions.noDescription');
     };
 
     async function cliDateNow() {
         try {
             return await invoke("cli_date_now");
         } catch (error) {
-            return `Error: ${error}`;
+            return t('shell.error', {error});
         }
     }
 
@@ -92,7 +140,7 @@ export function ShellProvider({children}) {
         try {
             return await invoke("cli_show_dir");
         } catch (error) {
-            return `Error: ${error}`;
+            return t('shell.error', {error});
         }
     }
 
@@ -117,30 +165,34 @@ export function ShellProvider({children}) {
                 setShowShell(false);
                 return "";
             case 'version':
-                return "Shell v1.0.0";
+                return t('shell.versionInfo');
             case 'pwd':
                 return await cliCurrentDir();
             case 'goto settings':
                 navigate('/settings');
                 setShowShell(false);
-                return "Navigating to settings...";
+                return t('shell.navigatingToSettings');
+            case 'goto json':
+                navigate('/json');
+                setShowShell(false);
+                return t('shell.navigatingToJson');
             case 'goto home':
                 navigate('/home');
                 setShowShell(false);
-                return "Navigating to home...";
+                return t('shell.navigatingToHome');
             case 'theme dark':
                 toggleTheme('dark');
-                return "Theme set to dark";
+                return t('shell.themeSetToDark');
             case 'theme light':
                 toggleTheme('light');
-                return "Theme set to light";
+                return t('shell.themeSetToLight');
             case '':
                 return "";
             default:
                 if (trimmedCmd.startsWith('echo ')) {
                     return trimmedCmd.substring(5);
                 }
-                return `Command not found: ${cmd}. Type 'help' for available commands.`;
+                return t('shell.commandNotFound', {command: cmd});
         }
     };
 

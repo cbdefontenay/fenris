@@ -24,5 +24,42 @@
       "newFolder": "Create new folder",
       "saveNote": "Save note"
     }
+  },
+  "shell": {
+    "availableCommands": "Available commands:\n\n{{commands}}\n\nType 'help <command>' for more information on a specific command.",
+    "versionInfo": "Shell v1.0.0",
+    "navigatingToSettings": "Navigating to settings...",
+    "navigatingToJson": "Navigating to JSON formatter...",
+    "navigatingToHome": "Navigating to home...",
+    "themeSetToDark": "Theme set to dark",
+    "themeSetToLight": "Theme set to light",
+    "commandNotFound": "Command not found: {{command}}. Type 'help' for available commands.",
+    "noHelpAvailable": "No help available for command: {{command}}",
+    "error": "Error: {{error}}",
+    "descriptions": {
+      "help": "Display help information",
+      "clear": "Clear the terminal screen",
+      "date": "Show current date and time",
+      "version": "Display version information",
+      "pwd": "Print working directory",
+      "goto": "Navigate to different pages",
+      "theme": "Change theme (dark|light)",
+      "echo": "Display a line of text",
+      "history": "Show command history",
+      "exit": "Close the terminal",
+      "noDescription": "No description available"
+    },
+    "commands": {
+      "help": "{{command}} - Display help information\nUsage: {{usage}}\n{{description}}",
+      "clear": "{{command}} - Clear the terminal screen\nUsage: {{usage}}\n{{description}}",
+      "date": "{{command}} - Show current date and time\nUsage: {{usage}}\n{{description}}",
+      "version": "{{command}} - Display system version information\nUsage: {{usage}}\n{{description}}",
+      "pwd": "{{command}} - Print working directory\nUsage: {{usage}}\n{{description}}",
+      "goto": "{{command}} - Navigate to different pages\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "theme": "{{command}} - Change color theme\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "echo": "{{command}} - Display a line of text\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "history": "{{command}} - Show command history\nUsage: {{usage}}\n{{description}}",
+      "exit": "{{command}} - Close the terminal\nUsage: {{usage}}\n{{description}}"
+    }
   }
 }
