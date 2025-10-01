@@ -1,0 +1,28 @@
+{
+  "home": {
+    "title": "Structurizer",
+    "welcome": "Willkommen bei Structurizer",
+    "description": "Organisieren Sie Ihre Notizen und strukturieren Sie Ihr Wissen.",
+    "goToSettings": "Zu den Einstellungen gehen"
+  },
+  "settings": {
+    "header": "Einstellungen",
+    "tabs": {
+      "appearance": "Erscheinungsbild",
+      "language": "Sprache"
+    },
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "darkMode": "Dunkler Modus",
+      "description": "Wechseln Sie zwischen hellem und dunklem Thema."
+    },
+    "language": {
+      "title": "Sprache"
+    },
+    "keyboard": {
+      "title": "Tastenkombinationen",
+      "newFolder": "Neuen Ordner erstellen",
+      "saveNote": "Notiz speichern"
+    }
+  }
+}

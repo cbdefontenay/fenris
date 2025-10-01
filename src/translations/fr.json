@@ -1,0 +1,28 @@
+{
+  "home": {
+    "title": "Structurizer",
+    "welcome": "Bienvenue dans Structurizer",
+    "description": "Organisez vos notes et structurez vos connaissances.",
+    "goToSettings": "Aller aux paramètres"
+  },
+  "settings": {
+    "header": "Paramètres",
+    "tabs": {
+      "appearance": "Apparence",
+      "language": "Langue"
+    },
+    "appearance": {
+      "title": "Apparence",
+      "darkMode": "Mode sombre",
+      "description": "Basculer entre le thème clair et sombre."
+    },
+    "language": {
+      "title": "Langue"
+    },
+    "keyboard": {
+      "title": "Raccourcis clavier",
+      "newFolder": "Créer un nouveau dossier",
+      "saveNote": "Sauvegarder la note"
+    }
+  }
+}
