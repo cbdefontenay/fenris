@@ -6,7 +6,7 @@ use pulldown_cmark::{Parser, Options, html};
 
 #[command]
 pub async fn ollama_api_call(prompt: String, model: String) -> Result<String, String> {
-    let ollama_base_url = "http://localhost:11434/v1/chat";
+    let ollama_base_url = "http://localhost:11434/api/chat";
 
     let client = Client::builder()
         .timeout(Duration::from_secs(300)) // 5-minute timeout for long responses
