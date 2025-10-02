@@ -1,4 +1,10 @@
 {
+  "navbar": {
+    "home": "Notizen",
+    "json": "JSON-Formatierer",
+    "aiChatbot": "AI-Chatbot",
+    "settings": "Einstellungen"
+  },
   "home": {
     "title": "Structurizer",
     "welcome": "Willkommen bei Structurizer",

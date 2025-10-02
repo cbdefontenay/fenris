@@ -21,22 +21,22 @@ export default function NavBarComponent() {
     // Navigation items
     const navItems = [
         {
-            nameKey: "navbar.home",
+            nameKey: t("navbar.home"),
             icon: <FiHome size={24} />,
             path: "/home",
         },
         {
-            nameKey: "navbar.json",
+            nameKey: t("navbar.json"),
             icon: <FiCode size={24} />,
             path: "/json",
         },
         {
-            nameKey: "navbar.ai-chatbot",
+            nameKey: t("navbar.aiChatbot"),
             icon: <FiCpu size={24} />,
             path: "/ai-chatbot",
         },
         {
-            nameKey: "navbar.settings",
+            nameKey: t("navbar.settings"),
             icon: <FiSettings size={24} />,
             path: "/settings",
         },

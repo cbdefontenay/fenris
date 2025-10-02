@@ -3,11 +3,34 @@ import {useState, useRef, useEffect} from "react";
 
 export const AiChatbotComponent = () => {
     const [prompt, setPrompt] = useState("");
-    const [model, setModel] = useState("llama2");
+    const [model, setModel] = useState(""); // Start empty
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [availableModels, setAvailableModels] = useState([]);
+    const [modelsLoaded, setModelsLoaded] = useState(false); // Track when models are loaded
     const messagesEndRef = useRef(null);
+
+    // Load model from localStorage AFTER models are loaded
+    useEffect(() => {
+        if (modelsLoaded && availableModels.length > 0) {
+            const savedModel = localStorage.getItem("ai-chat-model");
+            if (savedModel && availableModels.includes(savedModel)) {
+                setModel(savedModel);
+            } else if (availableModels.length > 0) {
+                // Fallback to first available model
+                setModel(availableModels[0]);
+                localStorage.setItem("ai-chat-model", availableModels[0]);
+            }
+        }
+    }, [modelsLoaded, availableModels]);
+
+    // Save model to localStorage whenever it changes
+    useEffect(() => {
+        if (model) {
+            localStorage.setItem("ai-chat-model", model);
+        }
+    }, [model]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
@@ -17,9 +40,32 @@ export const AiChatbotComponent = () => {
         scrollToBottom();
     }, [messages]);
 
+    useEffect(() => {
+        const loadModels = async () => {
+            try {
+                const models = await invoke("list_of_models");
+                setAvailableModels(models);
+                setModelsLoaded(true);
+            } catch (err) {
+                console.error("Failed to load models:", err);
+                setError("Failed to load models");
+                const fallbackModels = ["llama2", "llama3", "mistral", "codellama"];
+                setAvailableModels(fallbackModels);
+                setModelsLoaded(true);
+
+                // Set default model from fallback
+                if (!model) {
+                    setModel(fallbackModels[0]);
+                }
+            }
+        };
+
+        loadModels();
+    }, []);
+
     const callOllama = async () => {
         if (!prompt.trim()) return;
-        if (!model.trim()) {
+        if (!model) {
             setError("Please select a model");
             return;
         }
@@ -40,7 +86,7 @@ export const AiChatbotComponent = () => {
                 model: model
             });
 
-            // Add AI response (now contains HTML)
+            // Add AI response (contains HTML)
             const aiMessage = {
                 role: "assistant",
                 content: answer,
@@ -68,50 +114,70 @@ export const AiChatbotComponent = () => {
         setError("");
     };
 
-    // Safe HTML renderer component
     const SafeHtmlRenderer = ({htmlContent}) => {
         return (
-            <div
-                className="prose prose-sm max-w-none prose-headings:text-(--on-surface) prose-p:text-(--on-surface) prose-strong:text-(--on-surface) prose-em:text-(--on-surface) prose-code:text-(--on-surface) prose-pre:bg-(--surface-container-high) prose-pre:text-(--on-surface) prose-a:text-(--primary) prose-blockquote:text-(--on-surface-variant) prose-li:text-(--on-surface)"
-                dangerouslySetInnerHTML={{__html: htmlContent}}
-            />
+            <div className="ai-response-content">
+                <div
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    dangerouslySetInnerHTML={{__html: htmlContent}}
+                />
+                <style>{`
+                    .ai-response-content * {
+                        background: transparent !important;
+                        color: inherit !important;
+                    }
+                    .ai-response-content code {
+                        background: var(--surface-container-high) !important;
+                        color: var(--on-surface) !important;
+                        padding: 0.2em 0.4em;
+                        border-radius: 0.25rem;
+                        font-size: 0.875em;
+                    }
+                    .ai-response-content pre {
+                        background: var(--surface-container-high) !important;
+                        color: var(--on-surface) !important;
+                        padding: 1rem;
+                        border-radius: 0.5rem;
+                        overflow-x: auto;
+                        border: 1px solid var(--outline-variant);
+                    }
+                    .ai-response-content pre code {
+                        background: transparent !important;
+                        padding: 0;
+                    }
+                    .ai-response-content blockquote {
+                        border-left: 4px solid var(--primary);
+                        padding-left: 1rem;
+                        margin-left: 0;
+                        font-style: italic;
+                        color: var(--on-surface-variant);
+                    }
+                    .ai-response-content ul, 
+                    .ai-response-content ol {
+                        color: inherit;
+                    }
+                    .ai-response-content li {
+                        color: inherit;
+                    }
+                    .ai-response-content li::marker {
+                        color: var(--on-surface);
+                    }
+                    .ai-response-content table {
+                        border: 1px solid var(--outline-variant);
+                        border-collapse: collapse;
+                    }
+                    .ai-response-content th, 
+                    .ai-response-content td {
+                        border: 1px solid var(--outline-variant);
+                        padding: 0.5rem;
+                    }
+                    .ai-response-content th {
+                        background: var(--surface-container-high);
+                    }
+                `}</style>
+            </div>
         );
     };
-
-    const availableModels = [
-        "llama2",
-        "llama2:13b",
-        "llama2:70b",
-        "llama3.2:3b",
-        "codellama",
-        "mistral",
-        "mixtral",
-        "phi",
-        "neural-chat",
-        "starling-lm",
-        "orca-mini",
-        "vicuna",
-        "wizardcoder",
-        "gemma3",
-        "gemma3:4b",
-        "gemma2",
-        "gemma2:2b",
-        "gemma2:9b",
-        "llama3.1:8b",
-        "llama3.1:70b",
-        "llama3.3:70b",
-        "phi3",
-        "phi3:3.8b",
-        "phi3:14b",
-        "llava",
-        "llava-llama3",
-        "granite3.3",
-        "deepseek-r1",
-        "qwen2.5",
-        "mistral-nemo",
-        "dolphin-llama3",
-        "moondream2"
-    ];
 
     return (
         <div className="flex h-screen bg-(--background) ml-20">
@@ -136,17 +202,23 @@ export const AiChatbotComponent = () => {
                     <div className="form-control">
                         <label className="label">
                             <span className="label-text font-semibold text-(--on-surface)">Select Model</span>
+                            <span className="label-text-alt text-(--on-surface-variant)">Saved automatically</span>
                         </label>
                         <select
                             className="select select-bordered w-full bg-(--surface-container-high) border-(--outline-variant) text-(--on-surface)"
                             value={model}
                             onChange={(e) => setModel(e.target.value)}
+                            disabled={!modelsLoaded}
                         >
-                            {availableModels.map((modelOption) => (
-                                <option key={modelOption} value={modelOption}>
-                                    {modelOption}
-                                </option>
-                            ))}
+                            {!modelsLoaded ? (
+                                <option value="">Loading models...</option>
+                            ) : (
+                                availableModels.map((modelOption) => (
+                                    <option key={modelOption} value={modelOption}>
+                                        {modelOption}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
 
@@ -178,7 +250,7 @@ export const AiChatbotComponent = () => {
                         className={`p-3 rounded-lg ${error ? 'bg-(--error-container) text-(--on-error-container)' : 'bg-(--primary-container) text-(--on-primary-container)'}`}>
                         <div>
                             <span className="text-sm">
-                                {error || (loading ? "AI is thinking..." : "Ready to chat")}
+                                {error || (loading ? "AI is thinking..." : modelsLoaded ? "Ready to chat" : "Loading models...")}
                             </span>
                         </div>
                     </div>
@@ -186,7 +258,7 @@ export const AiChatbotComponent = () => {
             </div>
 
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col">
+            <div className="select-text flex-1 flex flex-col">
                 {/* Messages Container */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-(--surface-container-low)">
                     {messages.length === 0 ? (
@@ -210,7 +282,7 @@ export const AiChatbotComponent = () => {
                         messages.map((message, index) => (
                             <div
                                 key={index}
-                                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                className={`prose flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`max-w-2xl rounded-2xl p-4 ${
                                     message.role === 'user'
@@ -278,13 +350,13 @@ export const AiChatbotComponent = () => {
                                 onKeyPress={handleKeyPress}
                                 className="w-full h-24 p-4 resize-none rounded-xl border border-(--outline-variant) bg-(--surface-container-high) text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent"
                                 placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
-                                disabled={loading}
+                                disabled={loading || !model}
                             />
                         </div>
                         <div className="flex flex-col gap-2">
                             <button
                                 onClick={callOllama}
-                                disabled={loading || !prompt.trim()}
+                                disabled={loading || !prompt.trim() || !model}
                                 className="h-24 px-6 rounded-xl bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                             >
                                 {loading ? (
@@ -305,7 +377,14 @@ export const AiChatbotComponent = () => {
                         </div>
                     </div>
                     <div className="text-sm text-(--on-surface-variant) mt-2">
-                        Using model: <span className="font-mono text-(--primary)">{model}</span>
+                        {model ? (
+                            <>
+                                Using model: <span className="font-mono text-(--primary)">{model}</span>
+                                <span className="ml-2 text-xs opacity-70">(saved automatically)</span>
+                            </>
+                        ) : (
+                            <span className="text-(--error)">Please select a model first</span>
+                        )}
                     </div>
                 </div>
             </div>
