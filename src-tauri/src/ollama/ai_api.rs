@@ -2,6 +2,7 @@ use reqwest::Client;
 use tauri::command;
 use serde_json::{json, Value};
 use std::time::Duration;
+use html::push_html;
 use pulldown_cmark::{Parser, Options, html};
 
 #[command]
@@ -63,13 +64,23 @@ pub async fn ollama_api_call(prompt: String, model: String) -> Result<String, St
 fn markdown_to_html(markdown: &str) -> String {
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_SMART_PUNCTUATION);
+    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+    options.insert(Options::ENABLE_PLUSES_DELIMITED_METADATA_BLOCKS);
+    options.insert(Options::ENABLE_OLD_FOOTNOTES);
+    options.insert(Options::ENABLE_MATH);
+    options.insert(Options::ENABLE_GFM);
+    options.insert(Options::ENABLE_DEFINITION_LIST);
+    options.insert(Options::ENABLE_SUPERSCRIPT);
+    options.insert(Options::ENABLE_SUBSCRIPT);
+    options.insert(Options::ENABLE_WIKILINKS);
     options.insert(Options::ENABLE_TABLES);
     options.insert(Options::ENABLE_FOOTNOTES);
     options.insert(Options::ENABLE_TASKLISTS);
 
     let parser = Parser::new_ext(markdown, options);
     let mut html_output = String::new();
-    html::push_html(&mut html_output, parser);
+    push_html(&mut html_output, parser);
 
     html_output
 }

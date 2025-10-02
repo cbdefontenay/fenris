@@ -2,7 +2,7 @@ use crate::cli::{cli_date_now, cli_help_command, cli_show_dir};
 use crate::json::{fetch_json, format_json};
 use tauri::{generate_context, Builder};
 use crate::ollama::{list_of_models, ollama_api_call};
-use crate::ui_helpers::pick_json_file;
+use crate::ui_helpers::{pick_json_file, save_json_as_file};
 
 mod cli;
 mod json;
@@ -22,7 +22,8 @@ pub fn run() {
             format_json,
             ollama_api_call,
             pick_json_file,
-            list_of_models
+            list_of_models,
+            save_json_as_file
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

@@ -37,6 +37,7 @@
     "navigatingToSettings": "Navigation vers les paramètres...",
     "navigatingToJson": "Navigation vers le formateur JSON...",
     "navigatingToHome": "Navigation vers l'accueil...",
+    "navigatingToAiChatbot": "Navigation vers le chat IA...",
     "themeSetToDark": "Thème défini sur sombre",
     "themeSetToLight": "Thème défini sur clair",
     "commandNotFound": "Commande non trouvée : {{command}}. Tapez 'help' pour les commandes disponibles.",
@@ -50,8 +51,6 @@
       "pwd": "Afficher le répertoire courant",
       "goto": "Naviguer vers différentes pages",
       "theme": "Changer le thème (sombre|clair)",
-      "echo": "Afficher une ligne de texte",
-      "history": "Afficher l'historique des commandes",
       "exit": "Fermer le terminal",
       "noDescription": "Aucune description disponible"
     },
@@ -63,8 +62,6 @@
       "pwd": "{{command}} - Afficher le répertoire courant\nUtilisation : {{usage}}\n{{description}}",
       "goto": "{{command}} - Naviguer vers différentes pages\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
       "theme": "{{command}} - Changer le thème de couleur\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
-      "echo": "{{command}} - Afficher une ligne de texte\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
-      "history": "{{command}} - Afficher l'historique des commandes\nUtilisation : {{usage}}\n{{description}}",
       "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}"
     }
   },
@@ -113,7 +110,8 @@
       "importFile": "Importer un fichier",
       "format": "Formatter",
       "copy": "Copier",
-      "clear": "Effacer"
+      "clear": "Effacer",
+      "save": "Enregistrer JSON"
     },
     "quickExamples": {
       "title": "Exemples rapides"
@@ -155,7 +153,10 @@
       "formatError": "Erreur de formatage : {{error}}",
       "copySuccess": "JSON copié dans le presse-papiers !",
       "clearSuccess": "Tout le contenu effacé",
-      "noContent": "Aucun contenu de fichier reçu"
+      "noContent": "Aucun contenu de fichier reçu",
+      "saveSuccess": "Fichier JSON enregistré avec succès !",
+      "saveError": "Échec de l'enregistrement du fichier : {{error}}",
+      "saveEmpty": "Aucun contenu JSON à enregistrer"
     },
     "errors": {
       "error": "Erreur",

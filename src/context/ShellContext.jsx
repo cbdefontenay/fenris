@@ -121,8 +121,6 @@ export function ShellProvider({children}) {
             pwd: t('shell.descriptions.pwd'),
             goto: t('shell.descriptions.goto'),
             theme: t('shell.descriptions.theme'),
-            echo: t('shell.descriptions.echo'),
-            history: t('shell.descriptions.history'),
             exit: t('shell.descriptions.exit')
         };
         return descriptions[cmd] || t('shell.descriptions.noDescription');
@@ -147,7 +145,7 @@ export function ShellProvider({children}) {
     const processCommand = async (cmd) => {
         const trimmedCmd = cmd.trim().toLowerCase();
 
-        // Handle help with specific command
+        // Handle help with a specific command
         if (trimmedCmd.startsWith('help ')) {
             const specificCmd = trimmedCmd.substring(5).trim();
             return await cliHelpCommand(specificCmd);
@@ -180,6 +178,10 @@ export function ShellProvider({children}) {
                 navigate('/home');
                 setShowShell(false);
                 return t('shell.navigatingToHome');
+            case 'goto ai':
+                navigate('/ai-chatbot');
+                setShowShell(false);
+                return t('shell.navigatingToAiChatbot');
             case 'theme dark':
                 toggleTheme('dark');
                 return t('shell.themeSetToDark');

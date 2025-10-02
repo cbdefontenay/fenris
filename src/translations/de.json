@@ -37,6 +37,7 @@
     "navigatingToSettings": "Navigiere zu Einstellungen...",
     "navigatingToJson": "Navigiere zu JSON-Formatierer...",
     "navigatingToHome": "Navigiere zu Startseite...",
+    "navigatingToAiChatbot": "Navigiere zum KI-Chatbot...",
     "themeSetToDark": "Theme auf Dunkel gesetzt",
     "themeSetToLight": "Theme auf Hell gesetzt",
     "commandNotFound": "Befehl nicht gefunden: {{command}}. Geben Sie 'help' ein, um verfügbare Befehle anzuzeigen.",
@@ -50,8 +51,6 @@
       "pwd": "Aktuelles Verzeichnis anzeigen",
       "goto": "Zu verschiedenen Seiten navigieren",
       "theme": "Theme ändern (dunkel|hell)",
-      "echo": "Textzeile anzeigen",
-      "history": "Befehlsverlauf anzeigen",
       "exit": "Terminal schließen",
       "noDescription": "Keine Beschreibung verfügbar"
     },
@@ -63,8 +62,6 @@
       "pwd": "{{command}} - Aktuelles Verzeichnis anzeigen\nVerwendung: {{usage}}\n{{description}}",
       "goto": "{{command}} - Zu verschiedenen Seiten navigieren\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
       "theme": "{{command}} - Farbtheme ändern\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
-      "echo": "{{command}} - Textzeile anzeigen\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
-      "history": "{{command}} - Befehlsverlauf anzeigen\nVerwendung: {{usage}}\n{{description}}",
       "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}"
     }
   },
@@ -113,7 +110,8 @@
       "importFile": "Datei importieren",
       "format": "Formatieren",
       "copy": "Kopieren",
-      "clear": "Löschen"
+      "clear": "Löschen",
+      "save": "JSON speichern"
     },
     "quickExamples": {
       "title": "Schnellbeispiele"
@@ -155,7 +153,10 @@
       "formatError": "Formatierungsfehler: {{error}}",
       "copySuccess": "JSON in die Zwischenablage kopiert!",
       "clearSuccess": "Alle Inhalte gelöscht",
-      "noContent": "Kein Dateiinhalt empfangen"
+      "noContent": "Kein Dateiinhalt empfangen",
+      "saveSuccess": "JSON-Datei erfolgreich gespeichert!",
+      "saveError": "Fehler beim Speichern der Datei: {{error}}",
+      "saveEmpty": "Kein JSON-Inhalt zum Speichern"
     },
     "errors": {
       "error": "Fehler",
