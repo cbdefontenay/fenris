@@ -102,7 +102,8 @@
     "title": "JSON Formatter",
     "subtitle": "Fetch, import, and format JSON data",
     "input": {
-      "placeholder": "Enter JSON URL (e.g., https://api.example.com/data.json)"
+      "placeholder": "Enter JSON URL (e.g., https://api.example.com/data.json)",
+      "pastePlaceholder": "Paste your JSON here... (Ctrl+V to paste)"
     },
     "buttons": {
       "fetch": "Fetch",
@@ -111,20 +112,16 @@
       "format": "Format",
       "copy": "Copy",
       "save": "Save JSON",
-      "clear": "Clear"
+      "clear": "Clear",
+      "pasteJson": "Paste JSON",
+      "doneEditing": "Done Editing"
     },
     "quickExamples": {
-      "title": "Quick Examples"
+      "title": "Quick Example"
     },
     "examples": {
-      "samplePost": {
-        "name": "Sample Post"
-      },
       "marsApi": {
         "name": "Mars NASA API"
-      },
-      "agePrediction": {
-        "name": "Age Prediction"
       }
     },
     "documentInfo": {
@@ -156,7 +153,8 @@
       "noContent": "No file content received",
       "saveSuccess": "JSON file saved successfully!",
       "saveError": "Failed to save file: {{error}}",
-      "saveEmpty": "No JSON content to save"
+      "saveEmpty": "No JSON content to save",
+      "editSaved": "Edit saved"
     },
     "errors": {
       "error": "Error",

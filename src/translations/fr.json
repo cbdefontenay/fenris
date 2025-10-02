@@ -88,7 +88,8 @@
       "you": "Vous"
     },
     "input": {
-      "placeholder": "Tapez votre message ici... (Entrée pour envoyer, Maj+Entrée pour nouvelle ligne)"
+      "placeholder": "Tapez votre message ici... (Entrée pour envoyer, Maj+Entrée pour nouvelle ligne)",
+      "pastePlaceholder": "Collez votre JSON ici... (Ctrl+V pour coller)"
     },
     "usingModel": "Modèle utilisé",
     "errors": {
@@ -111,20 +112,16 @@
       "format": "Formatter",
       "copy": "Copier",
       "clear": "Effacer",
-      "save": "Enregistrer JSON"
+      "save": "Enregistrer JSON",
+      "pasteJson": "Coller JSON",
+      "doneEditing": "Terminer l'édition"
     },
     "quickExamples": {
-      "title": "Exemples rapides"
+      "title": "Exemple rapide"
     },
     "examples": {
-      "samplePost": {
-        "name": "Exemple de post"
-      },
       "marsApi": {
         "name": "API Mars NASA"
-      },
-      "agePrediction": {
-        "name": "Prédiction d'âge"
       }
     },
     "documentInfo": {
@@ -156,7 +153,8 @@
       "noContent": "Aucun contenu de fichier reçu",
       "saveSuccess": "Fichier JSON enregistré avec succès !",
       "saveError": "Échec de l'enregistrement du fichier : {{error}}",
-      "saveEmpty": "Aucun contenu JSON à enregistrer"
+      "saveEmpty": "Aucun contenu JSON à enregistrer",
+      "editSaved": "Édition sauvegardée"
     },
     "errors": {
       "error": "Erreur",
