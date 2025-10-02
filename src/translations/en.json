@@ -67,5 +67,100 @@
       "history": "{{command}} - Show command history\nUsage: {{usage}}\n{{description}}",
       "exit": "{{command}} - Close the terminal\nUsage: {{usage}}\n{{description}}"
     }
+  },
+  "aiChatbot": {
+    "title": "AI Chat",
+    "poweredBy": "Powered by Ollama",
+    "selectModel": "Select Model",
+    "savedAutomatically": "Saved automatically",
+    "messages": "Messages",
+    "clearChat": "Clear Chat",
+    "loadingModels": "Loading models...",
+    "startConversation": {
+      "title": "Start a conversation",
+      "description": "Ask anything to your AI assistant. Select a model and type your message below."
+    },
+    "status": {
+      "thinking": "AI is thinking...",
+      "ready": "Ready to chat",
+      "loadingModels": "Loading models..."
+    },
+    "messageLabels": {
+      "user": "U",
+      "ai": "AI",
+      "you": "You"
+    },
+    "input": {
+      "placeholder": "Type your message here... (Press Enter to send, Shift+Enter for new line)"
+    },
+    "usingModel": "Using model",
+    "errors": {
+      "failedToLoadModels": "Failed to load models",
+      "pleaseSelectModel": "Please select a model",
+      "pleaseSelectModelFirst": "Please select a model first",
+      "apiError": "Error: {{error}}"
+    }
+  },
+  "jsonFormatter": {
+    "title": "JSON Formatter",
+    "subtitle": "Fetch, import, and format JSON data",
+    "input": {
+      "placeholder": "Enter JSON URL (e.g., https://api.example.com/data.json)"
+    },
+    "buttons": {
+      "fetch": "Fetch",
+      "fetching": "Fetching...",
+      "importFile": "Import File",
+      "format": "Format",
+      "copy": "Copy",
+      "clear": "Clear"
+    },
+    "quickExamples": {
+      "title": "Quick Examples"
+    },
+    "examples": {
+      "samplePost": {
+        "name": "Sample Post"
+      },
+      "marsApi": {
+        "name": "Mars NASA API"
+      },
+      "agePrediction": {
+        "name": "Age Prediction"
+      }
+    },
+    "documentInfo": {
+      "title": "Document Info",
+      "length": "Length",
+      "lines": "Lines",
+      "status": "Status",
+      "chars": "chars",
+      "loaded": "Loaded",
+      "empty": "Empty"
+    },
+    "editor": {
+      "title": "JSON Editor"
+    },
+    "emptyState": {
+      "title": "No JSON Content",
+      "description": "Fetch JSON from a URL, import a file, or paste JSON content to get started."
+    },
+    "toast": {
+      "fetchSuccess": "JSON fetched and formatted successfully!",
+      "fetchFailed": "Failed to fetch JSON",
+      "importSuccess": "JSON file imported and formatted successfully!",
+      "importInvalid": "File imported but contains invalid JSON",
+      "importError": "Error importing file: {{error}}",
+      "formatSuccess": "JSON formatted successfully!",
+      "formatError": "Formatting error: {{error}}",
+      "copySuccess": "JSON copied to clipboard!",
+      "clearSuccess": "Cleared all content",
+      "noContent": "No file content received"
+    },
+    "errors": {
+      "error": "Error",
+      "formatError": "Formatting Error"
+    },
+    "rawContent": "Raw Content"
   }
 }

@@ -67,5 +67,100 @@
       "history": "{{command}} - Afficher l'historique des commandes\nUtilisation : {{usage}}\n{{description}}",
       "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}"
     }
+  },
+  "aiChatbot": {
+    "title": "Chat IA",
+    "poweredBy": "Propulsé par Ollama",
+    "selectModel": "Sélectionner le modèle",
+    "savedAutomatically": "Sauvegardé automatiquement",
+    "messages": "Messages",
+    "clearChat": "Effacer le chat",
+    "loadingModels": "Chargement des modèles...",
+    "startConversation": {
+      "title": "Démarrer une conversation",
+      "description": "Demandez n'importe quoi à votre assistant IA. Sélectionnez un modèle et tapez votre message ci-dessous."
+    },
+    "status": {
+      "thinking": "L'IA réfléchit...",
+      "ready": "Prêt à discuter",
+      "loadingModels": "Chargement des modèles..."
+    },
+    "messageLabels": {
+      "user": "U",
+      "ai": "IA",
+      "you": "Vous"
+    },
+    "input": {
+      "placeholder": "Tapez votre message ici... (Entrée pour envoyer, Maj+Entrée pour nouvelle ligne)"
+    },
+    "usingModel": "Modèle utilisé",
+    "errors": {
+      "failedToLoadModels": "Échec du chargement des modèles",
+      "pleaseSelectModel": "Veuillez sélectionner un modèle",
+      "pleaseSelectModelFirst": "Veuillez d'abord sélectionner un modèle",
+      "apiError": "Erreur : {{error}}"
+    }
+  },
+  "jsonFormatter": {
+    "title": "Formateur JSON",
+    "subtitle": "Récupérer, importer et formater des données JSON",
+    "input": {
+      "placeholder": "Entrez l'URL JSON (ex: https://api.example.com/data.json)"
+    },
+    "buttons": {
+      "fetch": "Récupérer",
+      "fetching": "Récupération...",
+      "importFile": "Importer un fichier",
+      "format": "Formatter",
+      "copy": "Copier",
+      "clear": "Effacer"
+    },
+    "quickExamples": {
+      "title": "Exemples rapides"
+    },
+    "examples": {
+      "samplePost": {
+        "name": "Exemple de post"
+      },
+      "marsApi": {
+        "name": "API Mars NASA"
+      },
+      "agePrediction": {
+        "name": "Prédiction d'âge"
+      }
+    },
+    "documentInfo": {
+      "title": "Info document",
+      "length": "Longueur",
+      "lines": "Lignes",
+      "status": "Statut",
+      "chars": "caractères",
+      "loaded": "Chargé",
+      "empty": "Vide"
+    },
+    "editor": {
+      "title": "Éditeur JSON"
+    },
+    "emptyState": {
+      "title": "Aucun contenu JSON",
+      "description": "Récupérez JSON depuis une URL, importez un fichier ou collez du contenu JSON pour commencer."
+    },
+    "toast": {
+      "fetchSuccess": "JSON récupéré et formaté avec succès !",
+      "fetchFailed": "Échec de la récupération du JSON",
+      "importSuccess": "Fichier JSON importé et formaté avec succès !",
+      "importInvalid": "Fichier importé mais contient du JSON invalide",
+      "importError": "Erreur lors de l'importation du fichier : {{error}}",
+      "formatSuccess": "JSON formaté avec succès !",
+      "formatError": "Erreur de formatage : {{error}}",
+      "copySuccess": "JSON copié dans le presse-papiers !",
+      "clearSuccess": "Tout le contenu effacé",
+      "noContent": "Aucun contenu de fichier reçu"
+    },
+    "errors": {
+      "error": "Erreur",
+      "formatError": "Erreur de formatage"
+    },
+    "rawContent": "Contenu brut"
   }
 }

@@ -67,5 +67,100 @@
       "history": "{{command}} - Befehlsverlauf anzeigen\nVerwendung: {{usage}}\n{{description}}",
       "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}"
     }
+  },
+  "aiChatbot": {
+    "title": "KI-Chat",
+    "poweredBy": "Unterstützt von Ollama",
+    "selectModel": "Modell auswählen",
+    "savedAutomatically": "Automatisch gespeichert",
+    "messages": "Nachrichten",
+    "clearChat": "Chat löschen",
+    "loadingModels": "Lade Modelle...",
+    "startConversation": {
+      "title": "Starten Sie eine Unterhaltung",
+      "description": "Fragen Sie alles an Ihren KI-Assistenten. Wählen Sie ein Modell aus und geben Sie Ihre Nachricht unten ein."
+    },
+    "status": {
+      "thinking": "KI denkt nach...",
+      "ready": "Bereit zum Chatten",
+      "loadingModels": "Lade Modelle..."
+    },
+    "messageLabels": {
+      "user": "B",
+      "ai": "KI",
+      "you": "Sie"
+    },
+    "input": {
+      "placeholder": "Geben Sie hier Ihre Nachricht ein... (Enter zum Senden, Shift+Enter für neue Zeile)"
+    },
+    "usingModel": "Verwendetes Modell",
+    "errors": {
+      "failedToLoadModels": "Modelle konnten nicht geladen werden",
+      "pleaseSelectModel": "Bitte wählen Sie ein Modell aus",
+      "pleaseSelectModelFirst": "Bitte wählen Sie zuerst ein Modell aus",
+      "apiError": "Fehler: {{error}}"
+    }
+  },
+  "jsonFormatter": {
+    "title": "JSON-Formatierer",
+    "subtitle": "JSON-Daten abrufen, importieren und formatieren",
+    "input": {
+      "placeholder": "JSON-URL eingeben (z.B. https://api.example.com/data.json)"
+    },
+    "buttons": {
+      "fetch": "Abrufen",
+      "fetching": "Wird abgerufen...",
+      "importFile": "Datei importieren",
+      "format": "Formatieren",
+      "copy": "Kopieren",
+      "clear": "Löschen"
+    },
+    "quickExamples": {
+      "title": "Schnellbeispiele"
+    },
+    "examples": {
+      "samplePost": {
+        "name": "Beispiel-Post"
+      },
+      "marsApi": {
+        "name": "Mars NASA API"
+      },
+      "agePrediction": {
+        "name": "Altersvorhersage"
+      }
+    },
+    "documentInfo": {
+      "title": "Dokumentinfo",
+      "length": "Länge",
+      "lines": "Zeilen",
+      "status": "Status",
+      "chars": "Zeichen",
+      "loaded": "Geladen",
+      "empty": "Leer"
+    },
+    "editor": {
+      "title": "JSON-Editor"
+    },
+    "emptyState": {
+      "title": "Kein JSON-Inhalt",
+      "description": "Rufen Sie JSON von einer URL ab, importieren Sie eine Datei oder fügen Sie JSON-Inhalt ein, um zu beginnen."
+    },
+    "toast": {
+      "fetchSuccess": "JSON erfolgreich abgerufen und formatiert!",
+      "fetchFailed": "JSON konnte nicht abgerufen werden",
+      "importSuccess": "JSON-Datei erfolgreich importiert und formatiert!",
+      "importInvalid": "Datei importiert, enthält aber ungültiges JSON",
+      "importError": "Fehler beim Importieren der Datei: {{error}}",
+      "formatSuccess": "JSON erfolgreich formatiert!",
+      "formatError": "Formatierungsfehler: {{error}}",
+      "copySuccess": "JSON in die Zwischenablage kopiert!",
+      "clearSuccess": "Alle Inhalte gelöscht",
+      "noContent": "Kein Dateiinhalt empfangen"
+    },
+    "errors": {
+      "error": "Fehler",
+      "formatError": "Formatierungsfehler"
+    },
+    "rawContent": "Roher Inhalt"
   }
 }

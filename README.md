@@ -11,7 +11,7 @@ There are already a lot of note-taking apps out there, so what will be different
 2. **Markdown** support. You'll be able to create notes in **Markdown** format, store them locally and export them.
 3. **JSON** formating support.
 4. **HTML** formating support.
-5. Instead of copy pasting your JSON data, you can request it directly by making a URL request to the JSOn output.
+5. Instead of copy pasting your JSON data, you can request it directly by making a URL request to the JSON output.
 6. And more...
 
 Overall, this will be an ***All-in*** app.

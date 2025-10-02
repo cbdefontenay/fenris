@@ -1,5 +1,6 @@
 import {invoke} from "@tauri-apps/api/core";
 import {useState, useRef, useEffect} from "react";
+import {useTranslation} from "react-i18next";
 
 export const AiChatbotComponent = () => {
     const [prompt, setPrompt] = useState("");
@@ -10,6 +11,7 @@ export const AiChatbotComponent = () => {
     const [availableModels, setAvailableModels] = useState([]);
     const [modelsLoaded, setModelsLoaded] = useState(false); // Track when models are loaded
     const messagesEndRef = useRef(null);
+    const {t} = useTranslation();
 
     // Load model from localStorage AFTER models are loaded
     useEffect(() => {
@@ -48,7 +50,7 @@ export const AiChatbotComponent = () => {
                 setModelsLoaded(true);
             } catch (err) {
                 console.error("Failed to load models:", err);
-                setError("Failed to load models");
+                setError(t('aiChatbot.errors.failedToLoadModels'));
                 const fallbackModels = ["llama2", "llama3", "mistral", "codellama"];
                 setAvailableModels(fallbackModels);
                 setModelsLoaded(true);
@@ -61,12 +63,12 @@ export const AiChatbotComponent = () => {
         };
 
         loadModels();
-    }, []);
+    }, [t]);
 
     const callOllama = async () => {
         if (!prompt.trim()) return;
         if (!model) {
-            setError("Please select a model");
+            setError(t('aiChatbot.errors.pleaseSelectModel'));
             return;
         }
 
@@ -95,7 +97,7 @@ export const AiChatbotComponent = () => {
             };
             setMessages(prev => [...prev, aiMessage]);
         } catch (err) {
-            setError(`Error: ${err}`);
+            setError(t('aiChatbot.errors.apiError', {error: err}));
             console.error("Ollama API error:", err);
         } finally {
             setLoading(false);
@@ -192,8 +194,8 @@ export const AiChatbotComponent = () => {
                         </svg>
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-(--on-surface)">AI Chat</h1>
-                        <p className="text-sm text-(--on-surface-variant)">Powered by Ollama</p>
+                        <h1 className="text-xl font-bold text-(--on-surface)">{t('aiChatbot.title')}</h1>
+                        <p className="text-sm text-(--on-surface-variant)">{t('aiChatbot.poweredBy')}</p>
                     </div>
                 </div>
 
@@ -201,8 +203,8 @@ export const AiChatbotComponent = () => {
                 <div className="space-y-4 flex-1">
                     <div className="form-control">
                         <label className="label">
-                            <span className="label-text font-semibold text-(--on-surface)">Select Model</span>
-                            <span className="label-text-alt text-(--on-surface-variant)">Saved automatically</span>
+                            <span className="label-text font-semibold text-(--on-surface)">{t('aiChatbot.selectModel')}</span>
+                            <span className="label-text-alt text-(--on-surface-variant)">{t('aiChatbot.savedAutomatically')}</span>
                         </label>
                         <select
                             className="select select-bordered w-full bg-(--surface-container-high) border-(--outline-variant) text-(--on-surface)"
@@ -211,7 +213,7 @@ export const AiChatbotComponent = () => {
                             disabled={!modelsLoaded}
                         >
                             {!modelsLoaded ? (
-                                <option value="">Loading models...</option>
+                                <option value="">{t('aiChatbot.loadingModels')}</option>
                             ) : (
                                 availableModels.map((modelOption) => (
                                     <option key={modelOption} value={modelOption}>
@@ -225,7 +227,7 @@ export const AiChatbotComponent = () => {
                     {/* Chat Info */}
                     <div className="stats shadow bg-(--surface-container-high)">
                         <div className="stat">
-                            <div className="stat-title text-(--on-surface-variant)">Messages</div>
+                            <div className="stat-title text-(--on-surface-variant)">{t('aiChatbot.messages')}</div>
                             <div className="stat-value text-(--on-surface)">{messages.length}</div>
                         </div>
                     </div>
@@ -240,7 +242,7 @@ export const AiChatbotComponent = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Clear Chat
+                        {t('aiChatbot.clearChat')}
                     </button>
                 </div>
 
@@ -250,7 +252,7 @@ export const AiChatbotComponent = () => {
                         className={`p-3 rounded-lg ${error ? 'bg-(--error-container) text-(--on-error-container)' : 'bg-(--primary-container) text-(--on-primary-container)'}`}>
                         <div>
                             <span className="text-sm">
-                                {error || (loading ? "AI is thinking..." : modelsLoaded ? "Ready to chat" : "Loading models...")}
+                                {error || (loading ? t('aiChatbot.status.thinking') : modelsLoaded ? t('aiChatbot.status.ready') : t('aiChatbot.status.loadingModels'))}
                             </span>
                         </div>
                     </div>
@@ -272,9 +274,9 @@ export const AiChatbotComponent = () => {
                                               d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-(--on-surface) mb-2">Start a conversation</h3>
+                                <h3 className="text-xl font-bold text-(--on-surface) mb-2">{t('aiChatbot.startConversation.title')}</h3>
                                 <p className="text-(--on-surface-variant)">
-                                    Ask anything to your AI assistant. Select a model and type your message below.
+                                    {t('aiChatbot.startConversation.description')}
                                 </p>
                             </div>
                         </div>
@@ -296,10 +298,10 @@ export const AiChatbotComponent = () => {
                                                     ? 'bg-(--primary-container) text-(--on-primary-container)'
                                                     : 'bg-(--secondary-container) text-(--on-secondary-container)'
                                             }`}>
-                                            {message.role === 'user' ? 'U' : 'AI'}
+                                            {message.role === 'user' ? t('aiChatbot.messageLabels.user') : t('aiChatbot.messageLabels.ai')}
                                         </div>
                                         <span className="text-sm opacity-70">
-                                            {message.role === 'user' ? 'You' : model}
+                                            {message.role === 'user' ? t('aiChatbot.messageLabels.you') : model}
                                         </span>
                                         <span className="text-xs opacity-50">
                                             {message.timestamp.toLocaleTimeString()}
@@ -323,7 +325,7 @@ export const AiChatbotComponent = () => {
                                 <div className="flex items-center gap-2 mb-2">
                                     <div
                                         className="w-6 h-6 rounded-full bg-(--secondary-container) text-(--on-secondary-container) flex items-center justify-center text-xs font-bold">
-                                        AI
+                                        {t('aiChatbot.messageLabels.ai')}
                                     </div>
                                     <span className="text-sm opacity-70">{model}</span>
                                 </div>
@@ -349,7 +351,7 @@ export const AiChatbotComponent = () => {
                                 onChange={(e) => setPrompt(e.target.value)}
                                 onKeyPress={handleKeyPress}
                                 className="w-full h-24 p-4 resize-none rounded-xl border border-(--outline-variant) bg-(--surface-container-high) text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent"
-                                placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                                placeholder={t('aiChatbot.input.placeholder')}
                                 disabled={loading || !model}
                             />
                         </div>
@@ -379,11 +381,11 @@ export const AiChatbotComponent = () => {
                     <div className="text-sm text-(--on-surface-variant) mt-2">
                         {model ? (
                             <>
-                                Using model: <span className="font-mono text-(--primary)">{model}</span>
-                                <span className="ml-2 text-xs opacity-70">(saved automatically)</span>
+                                {t('aiChatbot.usingModel')}: <span className="font-mono text-(--primary)">{model}</span>
+                                <span className="ml-2 text-xs opacity-70">({t('aiChatbot.savedAutomatically')})</span>
                             </>
                         ) : (
-                            <span className="text-(--error)">Please select a model first</span>
+                            <span className="text-(--error)">{t('aiChatbot.errors.pleaseSelectModelFirst')}</span>
                         )}
                     </div>
                 </div>
