@@ -306,7 +306,7 @@ export default function JsonFormatUrlComponent() {
                                                 onClick={() => loadStoredFile(fileName)}
                                                 className="cursor-pointer flex-1 text-left"
                                             >
-                                                <div className="text-sm font-medium text-(--on-surface) group-hover:text-(--primary) truncate">
+                                                <div className="text-sm font-medium text-(--on-surface) group-hover:text-(--tertiary) truncate">
                                                     {fileName}
                                                 </div>
                                             </button>
