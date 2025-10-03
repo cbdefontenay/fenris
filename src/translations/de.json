@@ -105,6 +105,14 @@
     "input": {
       "placeholder": "JSON-URL eingeben (z.B. https://api.example.com/data.json)"
     },
+    "storedFiles": {
+      "title": "Gespeicherte Dateien",
+      "empty": "Noch keine Dateien gespeichert"
+    },
+    "saveDialog": {
+      "title": "JSON-Datei Speichern",
+      "placeholder": "Dateinamen eingeben..."
+    },
     "buttons": {
       "fetch": "Abrufen",
       "fetching": "Wird abgerufen...",
@@ -114,7 +122,10 @@
       "clear": "Löschen",
       "save": "JSON speichern",
       "pasteJson": "JSON einfügen",
-      "doneEditing": "Bearbeitung beenden"
+      "doneEditing": "Bearbeitung beenden",
+      "saveAs": "Speichern Unter",
+      "delete": "Löschen",
+      "cancel": "Abbrechen"
     },
     "quickExamples": {
       "title": "Schnellbeispiel"
@@ -154,7 +165,11 @@
       "saveSuccess": "JSON-Datei erfolgreich gespeichert!",
       "saveError": "Fehler beim Speichern der Datei: {{error}}",
       "saveEmpty": "Kein JSON-Inhalt zum Speichern",
-      "editSaved": "Bearbeitung gespeichert"
+      "editSaved": "Bearbeitung gespeichert",
+      "fileLoaded": "Datei erfolgreich geladen",
+      "fileLoadError": "Fehler beim Laden der Datei: {{error}}",
+      "fileDeleted": "Datei erfolgreich gelöscht",
+      "fileDeleteError": "Fehler beim Löschen der Datei: {{error}}"
     },
     "errors": {
       "error": "Fehler",

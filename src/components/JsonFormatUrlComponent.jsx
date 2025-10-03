@@ -1,9 +1,9 @@
 import {invoke} from "@tauri-apps/api/core";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 import DaisyToast from "./DaisyToast.jsx";
 import {TiCloudStorageOutline} from "react-icons/ti";
-import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy} from "react-icons/fa";
+import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
 import {LuFileJson} from "react-icons/lu";
 import {VscGitFetch} from "react-icons/vsc";
 import {TfiImport} from "react-icons/tfi";
@@ -20,7 +20,24 @@ export default function JsonFormatUrlComponent() {
     const [toastVisible, setToastVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [storedFiles, setStoredFiles] = useState([]);
+    const [showStoredFiles, setShowStoredFiles] = useState(false);
+    const [saveFileName, setSaveFileName] = useState("");
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
     const {t} = useTranslation();
+
+    useEffect(() => {
+        loadStoredFiles();
+    }, []);
+
+    const loadStoredFiles = async () => {
+        try {
+            const files = await invoke("list_json_files");
+            setStoredFiles(files);
+        } catch (error) {
+            console.error("Failed to load stored files:", error);
+        }
+    };
 
     const handleFetch = async () => {
         if (!url) return;
@@ -50,9 +67,7 @@ export default function JsonFormatUrlComponent() {
 
     const chooseJsonFileFromSystem = async () => {
         try {
-            console.log("Starting file picker...");
             const fileContent = await invoke("pick_json_file");
-            console.log("File content received:", fileContent);
 
             if (fileContent) {
                 // Try to format the JSON content
@@ -63,7 +78,6 @@ export default function JsonFormatUrlComponent() {
                     setIsEditing(false);
                     showToast(t('jsonFormatter.toast.importSuccess'));
                 } catch (formatError) {
-                    console.log("Formatting error:", formatError);
                     // If formatting fails, show raw content with error
                     setResponse(`${t('jsonFormatter.errors.formatError')}: ${formatError}\n\n${t('jsonFormatter.rawContent')}:\n${fileContent}`);
                     setOutputLength(fileContent.length);
@@ -71,11 +85,9 @@ export default function JsonFormatUrlComponent() {
                     showToast(t('jsonFormatter.toast.importInvalid'));
                 }
             } else {
-                console.log("No file content received");
                 showToast(t('jsonFormatter.toast.noContent'));
             }
         } catch (error) {
-            console.error("File import error:", error);
             showToast(t('jsonFormatter.toast.importError', {error}));
         }
     };
@@ -100,13 +112,37 @@ export default function JsonFormatUrlComponent() {
             return;
         }
 
+        // If we have content but no filename, show the save dialog
+        if (!saveFileName) {
+            setShowSaveDialog(true);
+            return;
+        }
+
         try {
-            await invoke("save_json_as_file", {jsonString: response});
+            // Store the JSON content
+            await invoke("save_json_file", {
+                key: saveFileName,
+                value: response
+            });
+
+            // Save the store to persist the data
+            await invoke("save_json_files");
+
+            setSaveFileName("");
+            setShowSaveDialog(false);
+            await loadStoredFiles();
             showToast(t('jsonFormatter.toast.saveSuccess'));
         } catch (error) {
-            console.error("Save error:", error);
             showToast(t('jsonFormatter.toast.saveError', {error}));
         }
+    };
+
+    const handleSaveAs = () => {
+        if (!response.trim()) {
+            showToast(t('jsonFormatter.toast.saveEmpty'));
+            return;
+        }
+        setShowSaveDialog(true);
     };
 
     const handleCopy = async () => {
@@ -125,6 +161,7 @@ export default function JsonFormatUrlComponent() {
         setOutputLength(0);
         setUrl("");
         setIsEditing(false);
+        setSaveFileName("");
         showToast(t('jsonFormatter.toast.clearSuccess'));
     };
 
@@ -145,6 +182,38 @@ export default function JsonFormatUrlComponent() {
         showToast(t('jsonFormatter.toast.editSaved'));
     };
 
+    const loadStoredFile = async (fileName) => {
+        try {
+            const content = await invoke("get_json_file", {key: fileName});
+            setResponse(content);
+            setOutputLength(content.length);
+            setIsEditing(false);
+            setShowStoredFiles(false);
+            showToast(t('jsonFormatter.toast.fileLoaded'));
+        } catch (error) {
+            console.error("Failed to load file:", error);
+            showToast(t('jsonFormatter.toast.fileLoadError', {error}));
+        }
+    };
+
+    const deleteStoredFile = async (fileName, e) => {
+        e.stopPropagation(); // Prevent triggering the load action
+        try {
+            await invoke("delete_json_file", {key: fileName});
+            await loadStoredFiles(); // Refresh the list
+            showToast(t('jsonFormatter.toast.fileDeleted'));
+
+            // If the deleted file was currently displayed, clear the editor
+            if (response && saveFileName === fileName) {
+                setResponse("");
+                setSaveFileName("");
+            }
+        } catch (error) {
+            console.error("Failed to delete file:", error);
+            showToast(t('jsonFormatter.toast.fileDeleteError', {error}));
+        }
+    };
+
     const quickExamples = [
         {
             name: t('jsonFormatter.examples.marsApi.name'),
@@ -154,7 +223,7 @@ export default function JsonFormatUrlComponent() {
 
     return (
         <div className="ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
-            {/* Header - unchanged */}
+            {/* Header */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">
                     <div className="flex items-center gap-4 mb-3">
@@ -167,7 +236,7 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* Main Input Section - unchanged */}
+                    {/* Main Input Section */}
                     <div className="flex gap-3">
                         <div className="flex-1 relative">
                             <input
@@ -206,7 +275,56 @@ export default function JsonFormatUrlComponent() {
             <div className="flex-1 flex p-6 gap-6 overflow-hidden">
                 {/* Left Panel - Input/Quick Actions */}
                 <div className="w-80 flex flex-col gap-6">
-                    {/* Quick Examples - unchanged */}
+                    {/* Stored Files Dropdown */}
+                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-(--on-surface) flex items-center gap-2">
+                                <TiCloudStorageOutline/>
+                                {t('jsonFormatter.storedFiles.title')}
+                            </h3>
+                            <button
+                                onClick={() => setShowStoredFiles(!showStoredFiles)}
+                                className="cursor-pointer p-2 hover:bg-(--surface-container-high) rounded-lg transition-colors"
+                            >
+                                <FaChevronDown className={`transition-transform ${showStoredFiles ? 'rotate-180' : ''}`}/>
+                            </button>
+                        </div>
+
+                        {showStoredFiles && (
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {storedFiles.length === 0 ? (
+                                    <p className="text-(--on-surface-variant) text-sm text-center py-4">
+                                        {t('jsonFormatter.storedFiles.empty')}
+                                    </p>
+                                ) : (
+                                    storedFiles.map((fileName, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between p-3 bg-(--surface-container-high) hover:bg-(--surface-container-highest) rounded-lg transition-colors group"
+                                        >
+                                            <button
+                                                onClick={() => loadStoredFile(fileName)}
+                                                className="cursor-pointer flex-1 text-left"
+                                            >
+                                                <div className="text-sm font-medium text-(--on-surface) group-hover:text-(--primary) truncate">
+                                                    {fileName}
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={(e) => deleteStoredFile(fileName, e)}
+                                                className="cursor-pointer p-1 text-(--on-surface-variant) hover:text-(--error) transition-colors opacity-0 group-hover:opacity-100"
+                                                title={t('jsonFormatter.buttons.delete')}
+                                            >
+                                                <FaTrash size={14}/>
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Quick Examples */}
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
                             <FaCloudDownloadAlt/>
@@ -231,7 +349,7 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* Stats & Info - unchanged */}
+                    {/* Stats & Info */}
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4">{t('jsonFormatter.documentInfo.title')}</h3>
                         <div className="space-y-3">
@@ -266,7 +384,7 @@ export default function JsonFormatUrlComponent() {
                 {/* Right Panel - JSON Editor */}
                 <div
                     className="flex-1 flex flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
-                    {/* Editor Header - UPDATED with Paste button */}
+                    {/* Editor Header */}
                     <div
                         className="flex justify-between items-center p-4 border-b border-(--outline-variant) bg-(--surface-container-high)">
                         <div className="flex items-center gap-3">
@@ -275,6 +393,11 @@ export default function JsonFormatUrlComponent() {
                                 <CiTextAlignCenter/>
                                 {outputLength} {t('jsonFormatter.documentInfo.chars')}
                             </div>
+                            {saveFileName && (
+                                <span className="text-xs px-2 py-1 bg-(--primary-container) text-(--on-primary-container) rounded-full">
+                                    {saveFileName}
+                                </span>
+                            )}
                         </div>
                         <div className="flex gap-2">
                             {isEditing ? (
@@ -295,12 +418,12 @@ export default function JsonFormatUrlComponent() {
                                 </button>
                             )}
                             <button
-                                onClick={handleSaveJson}
+                                onClick={handleSaveAs}
                                 disabled={!response}
                                 className="cursor-pointer px-4 py-2 bg-(--tertiary-container) text-(--on-tertiary-container) rounded-lg hover:bg-(--tertiary) hover:text-(--on-tertiary) transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
                             >
                                 <TiCloudStorageOutline/>
-                                {t('jsonFormatter.buttons.save')}
+                                {t('jsonFormatter.buttons.saveAs')}
                             </button>
                             <button
                                 onClick={handleFormatJson}
@@ -329,7 +452,7 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* JSON Editor - UPDATED with edit mode */}
+                    {/* JSON Editor */}
                     <div className="flex-1 relative select-text">
                         {response || isEditing ? (
                             isEditing ? (
@@ -381,6 +504,45 @@ export default function JsonFormatUrlComponent() {
                     </div>
                 </div>
             </div>
+
+            {/* Save Dialog */}
+            {showSaveDialog && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-6 w-96">
+                        <h3 className="text-lg font-semibold text-(--on-surface) mb-4">
+                            {t('jsonFormatter.saveDialog.title')}
+                        </h3>
+                        <input
+                            type="text"
+                            value={saveFileName}
+                            onChange={(e) => setSaveFileName(e.target.value)}
+                            placeholder={t('jsonFormatter.saveDialog.placeholder')}
+                            className="w-full px-3 py-2 bg-(--surface-container-high) border border-(--outline-variant) rounded-lg text-(--on-surface) mb-4 focus:outline-none focus:ring-2 focus:ring-(--primary)"
+                        />
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => {
+                                    setShowSaveDialog(false);
+                                    setSaveFileName("");
+                                }}
+                                className="cursor-pointer px-4 py-2 bg-(--error) text-(--on-error) rounded-lg transition-colors"
+                            >
+                                {t('jsonFormatter.buttons.cancel')}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleSaveJson();
+                                    setShowSaveDialog(false);
+                                }}
+                                disabled={!saveFileName.trim()}
+                                className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-lg hover:bg-(--tertiary-fixed) hover:text-(--on-tertiary-fixed) transition-colors disabled:opacity-50"
+                            >
+                                {t('jsonFormatter.buttons.save')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toast */}
             {toastVisible && <DaisyToast message={toastMessage}/>}

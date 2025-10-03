@@ -105,6 +105,14 @@
     "input": {
       "placeholder": "Entrez l'URL JSON (ex: https://api.example.com/data.json)"
     },
+    "storedFiles": {
+      "title": "Fichiers Enregistrés",
+      "empty": "Aucun fichier enregistré pour l'instant"
+    },
+    "saveDialog": {
+      "title": "Enregistrer le Fichier JSON",
+      "placeholder": "Entrez le nom du fichier..."
+    },
     "buttons": {
       "fetch": "Récupérer",
       "fetching": "Récupération...",
@@ -114,7 +122,10 @@
       "clear": "Effacer",
       "save": "Enregistrer JSON",
       "pasteJson": "Coller JSON",
-      "doneEditing": "Terminer l'édition"
+      "doneEditing": "Terminer l'édition",
+      "saveAs": "Enregistrer Sous",
+      "delete": "Supprimer",
+      "cancel": "Annuler"
     },
     "quickExamples": {
       "title": "Exemple rapide"
@@ -154,7 +165,11 @@
       "saveSuccess": "Fichier JSON enregistré avec succès !",
       "saveError": "Échec de l'enregistrement du fichier : {{error}}",
       "saveEmpty": "Aucun contenu JSON à enregistrer",
-      "editSaved": "Édition sauvegardée"
+      "editSaved": "Édition sauvegardée",
+      "fileLoaded": "Fichier chargé avec succès",
+      "fileLoadError": "Échec du chargement du fichier : {{error}}",
+      "fileDeleted": "Fichier supprimé avec succès",
+      "fileDeleteError": "Échec de la suppression du fichier : {{error}}"
     },
     "errors": {
       "error": "Erreur",

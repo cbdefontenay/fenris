@@ -105,6 +105,14 @@
       "placeholder": "Enter JSON URL (e.g., https://api.example.com/data.json)",
       "pastePlaceholder": "Paste your JSON here... (Ctrl+V to paste)"
     },
+    "storedFiles": {
+      "title": "Stored Files",
+      "empty": "No files stored yet"
+    },
+    "saveDialog": {
+      "title": "Save JSON File",
+      "placeholder": "Enter file name..."
+    },
     "buttons": {
       "fetch": "Fetch",
       "fetching": "Fetching...",
@@ -114,7 +122,10 @@
       "save": "Save JSON",
       "clear": "Clear",
       "pasteJson": "Paste JSON",
-      "doneEditing": "Done Editing"
+      "doneEditing": "Done Editing",
+      "saveAs": "Save As",
+      "delete": "Delete",
+      "cancel": "Cancel"
     },
     "quickExamples": {
       "title": "Quick Example"
@@ -154,7 +165,11 @@
       "saveSuccess": "JSON file saved successfully!",
       "saveError": "Failed to save file: {{error}}",
       "saveEmpty": "No JSON content to save",
-      "editSaved": "Edit saved"
+      "editSaved": "Edit saved",
+      "fileLoaded": "File loaded successfully",
+      "fileLoadError": "Failed to load file: {{error}}",
+      "fileDeleted": "File deleted successfully",
+      "fileDeleteError": "Failed to delete file: {{error}}"
     },
     "errors": {
       "error": "Error",
