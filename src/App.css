@@ -126,6 +126,14 @@ html, body {
     margin-left: var(--navbar-margin);
 }
 
+.json-example {
+    display: block;
+}
+
+.json-stats{
+    display: block;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

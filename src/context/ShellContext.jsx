@@ -239,7 +239,6 @@ export function ShellProvider({children}) {
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '0px');
                 return "Navbar hidden";
-
             case 'navbar show':
                 const navbarToShow = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
 
@@ -248,6 +247,24 @@ export function ShellProvider({children}) {
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '5rem');
                 return "Navbar shown";
+            case 'hide json-example':
+                const sectionExampleToHide = document.querySelector('.example-class');
+                if (sectionExampleToHide) {
+                    sectionExampleToHide.style.display = 'none';
+                }
+                return "Quick example hidden";
+            case 'hide json-stats':
+                const hideStatsSection = document.querySelector('.json-stats');
+                if (hideStatsSection) {
+                    hideStatsSection.style.display = 'none';
+                }
+                return "Stats & Infos hidden";
+            case 'show json-stats':
+                const showStatsSection = document.querySelector('.json-stats');
+                if (showStatsSection) {
+                    showStatsSection.style.display = 'none';
+                }
+                return "Stats & Infos shown";
             case '':
                 return "";
             default:

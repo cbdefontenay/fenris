@@ -78,7 +78,6 @@ export default function JsonFormatUrlComponent() {
                     setIsEditing(false);
                     showToast(t('jsonFormatter.toast.importSuccess'));
                 } catch (formatError) {
-                    // If formatting fails, show raw content with error
                     setResponse(`${t('jsonFormatter.errors.formatError')}: ${formatError}\n\n${t('jsonFormatter.rawContent')}:\n${fileContent}`);
                     setOutputLength(fileContent.length);
                     setIsEditing(true);
@@ -325,7 +324,7 @@ export default function JsonFormatUrlComponent() {
                     </div>
 
                     {/* Quick Examples */}
-                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
+                    <div className="example-class bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
                             <FaCloudDownloadAlt/>
                             {t('jsonFormatter.quickExamples.title')}
@@ -350,7 +349,7 @@ export default function JsonFormatUrlComponent() {
                     </div>
 
                     {/* Stats & Info */}
-                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
+                    <div className="json-stats bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4">{t('jsonFormatter.documentInfo.title')}</h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
