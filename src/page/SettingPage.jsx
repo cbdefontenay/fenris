@@ -14,7 +14,7 @@ export default function SettingPage() {
     if (!mounted) return null;
 
     return (
-        <div className="ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
+        <div className="page-margin lg:ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
             <div className="border-b border-(--outline-variant) p-4">
                 <h1 className="text-2xl font-semibold">
                     {t("settings.header")}

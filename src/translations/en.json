@@ -52,6 +52,8 @@
       "goto": "Navigate to different pages",
       "theme": "Change theme (dark|light)",
       "exit": "Close the terminal",
+      "lang": "Change the language: \"lang fr\"",
+      "navbar": "Hide or show the navbar",
       "noDescription": "No description available"
     },
     "commands": {
@@ -62,6 +64,8 @@
       "pwd": "{{command}} - Print working directory\nUsage: {{usage}}\n{{description}}",
       "goto": "{{command}} - Navigate to different pages\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
       "theme": "{{command}} - Change color theme\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "lang": "{{command}} - Change the language\nUsage: {{usage}}\n{{description}}",
+      "navbar": "{{command}} - Hide or show the navbar\nUsage: {{usage}}\n{{description}}",
       "exit": "{{command}} - Close the terminal\nUsage: {{usage}}\n{{description}}"
     }
   },

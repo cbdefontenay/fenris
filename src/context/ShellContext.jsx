@@ -3,6 +3,8 @@ import {invoke} from "@tauri-apps/api/core";
 import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
+import i18next from "i18next";
+import NavBarComponent from "../components/NavBarComponent.jsx";
 
 const ShellContext = createContext();
 
@@ -12,7 +14,13 @@ export function ShellProvider({children}) {
     const [history, setHistory] = useState([]);
     const {theme, toggleTheme} = useTheme();
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const {t} = useTranslation();
+    const [currentLanguage, setCurrentLanguage] = useState(i18next.language);
+
+    const handleLanguageChange = (code) => {
+        setCurrentLanguage(code);
+        i18next.changeLanguage(code).then(r => "");
+    };
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -20,6 +28,11 @@ export function ShellProvider({children}) {
                 event.preventDefault();
                 setShowShell(true);
                 setCommand("");
+            }
+
+            if (event.ctrlKey && event.key === 'l') {
+                event.preventDefault();
+                handleClearTerminal(event);
             }
 
             if (event.key === 'Escape') {
@@ -34,7 +47,15 @@ export function ShellProvider({children}) {
         };
     }, []);
 
-    // Command explanations with translations
+    const handleClearTerminal = (input) => {
+        if (input.ctrlKey && input.key === 'l') {
+            setHistory([]);
+        } else if (input === "clear") {
+            setHistory([]);
+        }
+    }
+
+// Command explanations with translations
     const getCommandExplanation = (command) => {
         const explanations = {
             help: t('shell.commands.help', {
@@ -74,21 +95,21 @@ export function ShellProvider({children}) {
                 example: "theme dark",
                 description: "Switches between dark and light color themes."
             }),
-            echo: t('shell.commands.echo', {
-                command: "echo",
-                usage: "echo <text>",
-                example: "echo Hello World",
-                description: "Prints the specified text to the terminal."
+            lang: t('shell.commands.lang', {
+                command: "lang",
+                usage: "lang  fr|de|en",
+                description: "Change the app language."
             }),
-            history: t('shell.commands.history', {
-                command: "history",
-                usage: "history",
-                description: "Displays previously executed commands."
+            navbar: t('shell.commands.navbar', {
+                command: "navbar",
+                usage: "navbar  visible|invisible",
+                description: "Make the navbar visible or invisible."
             }),
             exit: t('shell.commands.exit', {
                 command: "exit",
                 usage: "exit",
                 description: "Closes the terminal window."
+
             })
         };
         return explanations[command] || t('shell.noHelpAvailable', {command});
@@ -111,7 +132,7 @@ export function ShellProvider({children}) {
         }
     }
 
-    // Helper function to get short descriptions
+// Helper function to get short descriptions
     const getCommandDescription = (cmd) => {
         const descriptions = {
             help: t('shell.descriptions.help'),
@@ -121,7 +142,9 @@ export function ShellProvider({children}) {
             pwd: t('shell.descriptions.pwd'),
             goto: t('shell.descriptions.goto'),
             theme: t('shell.descriptions.theme'),
-            exit: t('shell.descriptions.exit')
+            lang: t('shell.descriptions.lang'),
+            navbar: t('shell.descriptions.navbar'),
+            exit: t('shell.descriptions.exit'),
         };
         return descriptions[cmd] || t('shell.descriptions.noDescription');
     };
@@ -155,7 +178,7 @@ export function ShellProvider({children}) {
             case 'help':
                 return await cliHelpCommand();
             case 'clear':
-                setHistory([]);
+                handleClearTerminal();
                 return "";
             case 'date':
                 return await cliDateNow();
@@ -166,6 +189,27 @@ export function ShellProvider({children}) {
                 return t('shell.versionInfo');
             case 'pwd':
                 return await cliCurrentDir();
+            case 'lang fr':
+                const codeFr = "fr";
+                if (codeFr === "fr") {
+                    return handleLanguageChange(codeFr);
+                } else {
+                    return "Not a valid language.";
+                }
+            case 'lang en':
+                const codeEn = "en";
+                if (codeEn === "en") {
+                    return handleLanguageChange(codeEn);
+                } else {
+                    return "Not a valid language.";
+                }
+            case 'lang de':
+                const codeDe = "de";
+                if (codeDe === "de") {
+                    return handleLanguageChange(codeDe);
+                } else {
+                    return "Not a valid language.";
+                }
             case 'goto settings':
                 navigate('/settings');
                 setShowShell(false);
@@ -188,6 +232,22 @@ export function ShellProvider({children}) {
             case 'theme light':
                 toggleTheme('light');
                 return t('shell.themeSetToLight');
+            case 'navbar hide':
+                const navbarToHide = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
+                if (navbarToHide) {
+                    navbarToHide.style.display = 'none';
+                }
+                document.documentElement.style.setProperty('--navbar-margin', '0px');
+                return "Navbar hidden";
+
+            case 'navbar show':
+                const navbarToShow = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
+
+                if (navbarToShow) {
+                    navbarToShow.style.display = 'block';
+                }
+                document.documentElement.style.setProperty('--navbar-margin', '5rem');
+                return "Navbar shown";
             case '':
                 return "";
             default:

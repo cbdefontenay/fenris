@@ -222,7 +222,7 @@ export default function JsonFormatUrlComponent() {
     ];
 
     return (
-        <div className="ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
+        <div className="page-margin lg:ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
             {/* Header */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">

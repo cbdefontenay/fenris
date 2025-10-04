@@ -9,9 +9,10 @@ import {
     FiCode
 } from "react-icons/fi";
 
-export default function NavBarComponent() {
+export default function NavBarComponent({isVisible}) {
     const [isExpanded, setIsExpanded] = useState(false);
     const {t} = useTranslation();
+    const [isNavbarVisible, setIsNavbarVisible] = useState(isVisible);
 
     // Toggle sidebar on mobile
     const toggleSidebar = () => {
@@ -54,7 +55,7 @@ export default function NavBarComponent() {
 
             {/* Sidebar */}
             <aside
-                className={`
+                className={`sidebar
         fixed top-0 left-0 h-full z-40
         bg-(--surface-container-lowest) border-r border-(--outline-variant)
         transition-all duration-300 ease-in-out
@@ -62,7 +63,7 @@ export default function NavBarComponent() {
         ${isExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
             >
-                <nav className="h-full flex flex-col pt-6">
+                <nav className="navbar h-full flex flex-col pt-6">
                     <ul className="space-y-6 px-2">
                         {navItems.map((item) => (
                             <li key={item.path}>

@@ -39,7 +39,7 @@ export default function SidePanel() {
                 w-64 h-screen bg-(--surface-container) text-(--on-surface) border-r border-(--outline-variant)
                 transform transition-transform duration-300 ease-in-out
                 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                lg:ml-20
+                page-margin lg:ml-20
             `}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-(--outline-variant)">

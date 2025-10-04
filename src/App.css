@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui";
 @plugin "@tailwindcss/typography";
 
@@ -108,6 +109,10 @@ html.dark {
     --surface-container-highest: rgb(48 54 52);
 }
 
+:root {
+    --navbar-margin: 5rem;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -115,6 +120,10 @@ html, body {
     background-color: var(--background);
     color: var(--on-background);
     user-select: none;
+}
+
+.page-margin {
+    margin-left: var(--navbar-margin);
 }
 
 ::-webkit-scrollbar {

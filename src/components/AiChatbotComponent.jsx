@@ -4,7 +4,7 @@ import {useTranslation} from "react-i18next";
 
 export const AiChatbotComponent = () => {
     const [prompt, setPrompt] = useState("");
-    const [model, setModel] = useState(""); // Start empty
+    const [model, setModel] = useState("");
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -182,7 +182,7 @@ export const AiChatbotComponent = () => {
     };
 
     return (
-        <div className="flex h-screen bg-(--background) ml-20">
+        <div className="page-margin flex h-screen bg-(--background) lg:ml-20">
             {/* Sidebar */}
             <div className="w-80 bg-(--surface-container) border-r border-(--outline-variant) p-6 flex flex-col">
                 <div className="flex items-center gap-3 mb-8">

@@ -52,6 +52,8 @@
       "goto": "Naviguer vers différentes pages",
       "theme": "Changer le thème (sombre|clair)",
       "exit": "Fermer le terminal",
+      "lang": "Change la langue : \"lang de\"",
+      "navbar": "Rend la barre de naviguation visible ou invisible",
       "noDescription": "Aucune description disponible"
     },
     "commands": {
@@ -62,7 +64,9 @@
       "pwd": "{{command}} - Afficher le répertoire courant\nUtilisation : {{usage}}\n{{description}}",
       "goto": "{{command}} - Naviguer vers différentes pages\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
       "theme": "{{command}} - Changer le thème de couleur\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
-      "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}"
+      "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}",
+      "lang": "{{command}} - Change la langue\nUtilisation: {{usage}}\n{{description}}",
+      "navbar": "{{command}} - Rend la barre de naviguation visible ou invisible\nUtilisation: {{usage}}\n{{description}}"
     }
   },
   "aiChatbot": {

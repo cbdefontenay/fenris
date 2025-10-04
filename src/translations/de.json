@@ -52,6 +52,8 @@
       "goto": "Zu verschiedenen Seiten navigieren",
       "theme": "Theme ändern (dunkel|hell)",
       "exit": "Terminal schließen",
+      "lang": "Ändert die Spracher der App: \"lang en\"",
+      "navbar": "Mach die Navbar unsichtbar oder sichtbar",
       "noDescription": "Keine Beschreibung verfügbar"
     },
     "commands": {
@@ -62,7 +64,9 @@
       "pwd": "{{command}} - Aktuelles Verzeichnis anzeigen\nVerwendung: {{usage}}\n{{description}}",
       "goto": "{{command}} - Zu verschiedenen Seiten navigieren\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
       "theme": "{{command}} - Farbtheme ändern\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
-      "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}"
+      "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}",
+      "lang": "{{command}} - Ändert die Sprache der App\nVerwendung: {{usage}}\n{{description}}",
+      "navbar": "{{command}} - Mach die Navbar unsichtbar oder sichtbar\nVerwendung: {{usage}}\n{{description}}"
     }
   },
   "aiChatbot": {

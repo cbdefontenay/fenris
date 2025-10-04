@@ -8,7 +8,7 @@ pub fn cli_help_command(explanation: Option<String>) -> String {
     if let Some(cmd) = explanation {
         cmd
     } else {
-        "help,clear,date,version,pwd,goto,theme,echo,history,exit".to_string()
+        "help,clear,date,version,pwd,goto,theme,lang,exit".to_string()
     }
 }
 
