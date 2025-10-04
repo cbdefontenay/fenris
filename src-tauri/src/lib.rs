@@ -1,4 +1,4 @@
-use crate::cli::{cli_date_now, cli_help_command, cli_show_dir};
+use crate::cli::{cli_date_now, cli_design, cli_help_command, cli_show_dir};
 use crate::json::{
     delete_json_file, fetch_json, format_json, get_json_file, list_json_files, save_json_file,
 };
@@ -22,6 +22,7 @@ pub fn run() {
             cli_help_command,
             cli_date_now,
             cli_show_dir,
+            cli_design,
             fetch_json,
             format_json,
             ollama_api_call,

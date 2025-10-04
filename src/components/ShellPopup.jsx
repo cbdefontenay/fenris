@@ -1,4 +1,6 @@
 import {useShell} from "../context/ShellContext.jsx";
+import {useEffect, useState} from "react";
+import {invoke} from "@tauri-apps/api/core";
 
 export default function ShellPopup() {
     const {
@@ -9,6 +11,15 @@ export default function ShellPopup() {
         history,
         handleCommandSubmit
     } = useShell();
+    const [shellName, setShellName] = useState("$");
+
+    useEffect(() => {
+        if (showShell) {
+            invoke("cli_design").then((result) => {
+                setShellName(result);
+            });
+        }
+    }, [showShell]);
 
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -60,7 +71,7 @@ export default function ShellPopup() {
                 <form onSubmit={handleCommandSubmit} className="border-t border-(--outline-variant)">
                     <div className="flex items-center px-4 py-2 bg-(--surface-container-low)">
                         <span className="text-(--tertiary) font-mono mr-2">
-                            $
+                            {shellName}
                         </span>
                         <input
                             type="text"
