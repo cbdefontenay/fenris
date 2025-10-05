@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 import DaisyToast from "./DaisyToast.jsx";
 import {TiCloudStorageOutline} from "react-icons/ti";
-import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
+import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown, FaSearch} from "react-icons/fa";
 import {LuFileJson} from "react-icons/lu";
 import {VscGitFetch} from "react-icons/vsc";
 import {TfiImport} from "react-icons/tfi";
@@ -24,11 +24,23 @@ export default function JsonFormatUrlComponent() {
     const [showStoredFiles, setShowStoredFiles] = useState(false);
     const [saveFileName, setSaveFileName] = useState("");
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchCount, setSearchCount] = useState(0);
     const {t} = useTranslation();
 
     useEffect(() => {
         loadStoredFiles();
     }, []);
+
+    useEffect(() => {
+        if (searchTerm && response) {
+            performSearch();
+        } else {
+            setSearchResults([]);
+            setSearchCount(0);
+        }
+    }, [searchTerm, response]);
 
     const loadStoredFiles = async () => {
         try {
@@ -39,10 +51,71 @@ export default function JsonFormatUrlComponent() {
         }
     };
 
+    const performSearch = () => {
+        if (!response || !searchTerm.trim()) {
+            setSearchResults([]);
+            setSearchCount(0);
+            return;
+        }
+
+        try {
+            const lines = response.split('\n');
+            const results = [];
+            let count = 0;
+
+            lines.forEach((line, lineIndex) => {
+                const matches = [];
+                let match;
+                const regex = new RegExp(searchTerm, 'gi');
+
+                while ((match = regex.exec(line)) !== null) {
+                    matches.push({
+                        start: match.index,
+                        end: match.index + match[0].length,
+                        text: match[0]
+                    });
+                    count++;
+                }
+
+                if (matches.length > 0) {
+                    results.push({
+                        lineNumber: lineIndex + 1,
+                        line: line,
+                        matches: matches
+                    });
+                }
+            });
+
+            setSearchResults(results);
+            setSearchCount(count);
+        } catch (error) {
+            console.error("Search error:", error);
+            setSearchResults([]);
+            setSearchCount(0);
+        }
+    };
+
+    const highlightSearchResults = (text, matches) => {
+        if (!matches || matches.length === 0) return text;
+
+        let highlightedText = "";
+        let lastIndex = 0;
+
+        matches.forEach(match => {
+            highlightedText += text.substring(lastIndex, match.start);
+            highlightedText += `<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">${text.substring(match.start, match.end)}</mark>`;
+            lastIndex = match.end;
+        });
+
+        highlightedText += text.substring(lastIndex);
+        return highlightedText;
+    };
+
     const handleFetch = async () => {
         if (!url) return;
 
         setLoading(true);
+        setSearchTerm(""); // Reset search when fetching new data
 
         try {
             const result = await invoke("fetch_json", {url});
@@ -76,6 +149,7 @@ export default function JsonFormatUrlComponent() {
                     setResponse(formattedJson);
                     setOutputLength(formattedJson.length);
                     setIsEditing(false);
+                    setSearchTerm(""); // Reset search when importing new file
                     showToast(t('jsonFormatter.toast.importSuccess'));
                 } catch (formatError) {
                     setResponse(`${t('jsonFormatter.errors.formatError')}: ${formatError}\n\n${t('jsonFormatter.rawContent')}:\n${fileContent}`);
@@ -111,21 +185,16 @@ export default function JsonFormatUrlComponent() {
             return;
         }
 
-        // If we have content but no filename, show the save dialog
         if (!saveFileName) {
             setShowSaveDialog(true);
             return;
         }
 
         try {
-            // Store the JSON content
             await invoke("save_json_file", {
                 key: saveFileName,
                 value: response
             });
-
-            // Save the store to persist the data
-            await invoke("save_json_files");
 
             setSaveFileName("");
             setShowSaveDialog(false);
@@ -161,6 +230,9 @@ export default function JsonFormatUrlComponent() {
         setUrl("");
         setIsEditing(false);
         setSaveFileName("");
+        setSearchTerm("");
+        setSearchResults([]);
+        setSearchCount(0);
         showToast(t('jsonFormatter.toast.clearSuccess'));
     };
 
@@ -188,6 +260,7 @@ export default function JsonFormatUrlComponent() {
             setOutputLength(content.length);
             setIsEditing(false);
             setShowStoredFiles(false);
+            setSearchTerm(""); // Reset search when loading stored file
             showToast(t('jsonFormatter.toast.fileLoaded'));
         } catch (error) {
             console.error("Failed to load file:", error);
@@ -206,6 +279,7 @@ export default function JsonFormatUrlComponent() {
             if (response && saveFileName === fileName) {
                 setResponse("");
                 setSaveFileName("");
+                setSearchTerm("");
             }
         } catch (error) {
             console.error("Failed to delete file:", error);
@@ -274,6 +348,32 @@ export default function JsonFormatUrlComponent() {
             <div className="flex-1 flex p-6 gap-6 overflow-hidden">
                 {/* Left Panel - Input/Quick Actions */}
                 <div className="w-80 flex flex-col gap-6">
+                    {/* Search Bar */}
+                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
+                        <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
+                            <FaSearch/>
+                            {t('jsonFormatter.search.title')}
+                        </h3>
+                        <div className="space-y-3">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder={t('jsonFormatter.search.placeholder')}
+                                    className="w-full px-4 py-2 pl-10 bg-(--surface-container-high) border border-(--outline-variant) rounded-lg text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent"
+                                    disabled={!response}
+                                />
+                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-(--on-surface-variant)" />
+                            </div>
+                            {searchCount > 0 && (
+                                <div className="text-sm text-(--on-surface-variant)">
+                                    {t('jsonFormatter.search.results', {count: searchCount})}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Stored Files Dropdown */}
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <div className="flex justify-between items-center mb-4">
@@ -376,6 +476,14 @@ export default function JsonFormatUrlComponent() {
                                     {response ? t('jsonFormatter.documentInfo.loaded') : t('jsonFormatter.documentInfo.empty')}
                                 </span>
                             </div>
+                            {searchCount > 0 && (
+                                <div className="flex justify-between items-center pt-2 border-t border-(--outline-variant)">
+                                    <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.matches')}</span>
+                                    <span className="font-mono text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
+                                        {searchCount}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -395,6 +503,11 @@ export default function JsonFormatUrlComponent() {
                             {saveFileName && (
                                 <span className="text-xs px-2 py-1 bg-(--primary-container) text-(--on-primary-container) rounded-full">
                                     {saveFileName}
+                                </span>
+                            )}
+                            {searchCount > 0 && (
+                                <span className="text-xs px-2 py-1 bg-(--secondary-container) text-(--on-secondary-container) rounded-full">
+                                    {searchCount} {t('jsonFormatter.search.matches')}
                                 </span>
                             )}
                         </div>
@@ -463,10 +576,29 @@ export default function JsonFormatUrlComponent() {
                                     autoFocus
                                 />
                             ) : (
-                                <pre
-                                    className="absolute inset-0 p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm overflow-auto whitespace-pre-wrap leading-relaxed">
-                                    {response}
-                                </pre>
+                                <div className="absolute inset-0 overflow-auto">
+                                    <pre className="p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                                        {searchTerm ? (
+                                            <>
+                                                {searchResults.map((result, index) => (
+                                                    <div key={index} className="mb-2">
+                                                        <div className="text-xs text-(--on-surface-variant) mb-1">
+                                                            Ligne {result.lineNumber}:
+                                                        </div>
+                                                        <div
+                                                            className="pl-4 border-l-2 border-(--primary)"
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: highlightSearchResults(result.line, result.matches)
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            response
+                                        )}
+                                    </pre>
+                                </div>
                             )
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center">

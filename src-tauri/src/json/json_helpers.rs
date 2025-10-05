@@ -39,11 +39,13 @@ pub fn format_json(json_string: String) -> Result<String, String> {
 #[command]
 pub fn save_json_file(app: AppHandle, key: String, value: String) -> Result<(), String> {
     let store = app.store("store.json").map_err(|e| e.to_string())?;
-
-    // Parse the value to ensure it is valid JSON before storing
     let parsed_value: Value = from_str(&value).map_err(|e| format!("Invalid JSON: {}", e))?;
 
     store.set(key, parsed_value);
+
+    store
+        .save()
+        .map_err(|e| format!("Failed to save store: {}", e))?;
     Ok(())
 }
 

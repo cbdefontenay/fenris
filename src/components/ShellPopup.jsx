@@ -11,12 +11,14 @@ export default function ShellPopup() {
         history,
         handleCommandSubmit
     } = useShell();
-    const [shellName, setShellName] = useState("$");
+    const [shellName, setShellName] = useState("");
 
     useEffect(() => {
         if (showShell) {
             invoke("cli_design").then((result) => {
                 setShellName(result);
+            }).catch(() => {
+                setShellName("user@fenris:~$");
             });
         }
     }, [showShell]);
@@ -27,66 +29,95 @@ export default function ShellPopup() {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            setShowShell(false);
+        }
+    };
+
     if (!showShell) return null;
 
     return (
         <div
-            className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 font-mono"
             onClick={handleOverlayClick}
+            onKeyDown={handleKeyDown}
         >
             <div
-                className="bg-(--surface-container-high) rounded-lg w-3/4 max-w-2xl h-96 flex flex-col border border-(--outline-variant)"
+                className="bg-black rounded-lg w-4/5 max-w-4xl h-2/4 flex flex-col border border-gray-800 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
-                <div className="flex justify-between items-center px-4 py-2 bg-(--tertiary) rounded-t-lg">
-                    <span className="text-(--on-tertiary) font-medium">Terminal</span>
-                    <button
-                        onClick={() => setShowShell(false)}
-                        className="cursor-pointer text-(--on-tertiary) hover:text-(--tertiary-container) text-lg transition-colors"
-                    >
-                        ×
-                    </button>
+                {/* Terminal Header Bar */}
+                <div className="flex justify-between items-center px-4 py-2 bg-gray-900 rounded-t-lg border-b border-gray-700">
+                    <div className="flex items-center gap-2">
+                        <div className="flex gap-1.5">
+                            <div className="w-3 h-3 bg-red-500 rounded-full hover:bg-red-400 cursor-pointer"
+                                 onClick={() => setShowShell(false)}></div>
+                            </div>
+                        <span className="text-gray-300 text-sm ml-2">Terminal</span>
+                    </div>
+                    <div className="text-gray-400 text-sm">
+                        {shellName}
+                    </div>
                 </div>
 
-                {/* Output Area */}
-                <div
-                    className="flex-1 p-4 font-mono text-sm text-(--tertiary) overflow-y-auto bg-(--surface-container-lowest) whitespace-pre-wrap">
-                    <div className="text-(--on-surface-variant)">
-                        Welcome to Shell. Type 'help' for available commands.
+                {/* Terminal Content */}
+                <div className="flex-1 p-4 text-sm overflow-y-auto bg-black">
+                    {/* Welcome Message */}
+                    <div className="text-green-400 mb-4">
+                        Welcome to the Fenris Terminal
                     </div>
+                    <div className="text-blue-400 mb-6">
+                        Type 'help' for available commands, 'clear' to clear screen.
+                    </div>
+
+                    {/* Command History */}
                     {history.map((item, index) => (
-                        <div key={index} className="mt-2">
-                            <div className="text-(--tertiary) font-semibold">$ {item.command}</div>
+                        <div key={index} className="mb-3">
+                            {/* Command Input Line */}
+                            <div className="flex items-start">
+                                <span className="text-green-400 font-bold mr-2 flex-shrink-0">
+                                   {shellName}
+                                </span>
+                                <span className="text-gray-100">{item.command}</span>
+                            </div>
+
+                            {/* Command Output */}
                             {item.output && (
-                                <div className="text-(--on-surface) italic whitespace-pre-wrap">
+                                <div className="text-gray-300 mt-1 ml-6 whitespace-pre-wrap">
                                     {item.output}
                                 </div>
                             )}
                         </div>
                     ))}
-                </div>
 
-                {/* Input Area */}
-                <form onSubmit={handleCommandSubmit} className="border-t border-(--outline-variant)">
-                    <div className="flex items-center px-4 py-2 bg-(--surface-container-low)">
-                        <span className="text-(--tertiary) font-mono mr-2">
+                    {/* Current Input Line */}
+                    <div className="flex items-start">
+                        <span className="text-green-400 font-bold mr-2 flex-shrink-0">
                             {shellName}
                         </span>
-                        <input
-                            type="text"
-                            value={command}
-                            onChange={(e) => setCommand(e.target.value)}
-                            className="flex-1 bg-transparent text-(--on-surface) font-mono outline-none border-none placeholder-(--on-surface-variant)"
-                            placeholder="Type a command..."
-                            autoFocus
-                        />
+                        <form onSubmit={handleCommandSubmit} className="flex-1">
+                            <input
+                                type="text"
+                                value={command}
+                                onChange={(e) => setCommand(e.target.value)}
+                                className="w-full bg-transparent text-gray-100 outline-none border-none caret-green-400"
+                                placeholder="Type a command..."
+                                autoFocus
+                                spellCheck="false"
+                                autoComplete="off"
+                                autoCapitalize="off"
+                            />
+                        </form>
                     </div>
-                </form>
+                </div>
 
-                {/* Footer Hint */}
-                <div className="px-4 py-1 bg-(--inverse-primary) text-xs text-(--on-inverse-primary) rounded-b-lg">
-                    Press Ctrl+T to open, Esc to close
+                {/* Status Bar */}
+                <div className="px-4 py-1 bg-gray-900 text-xs text-gray-400 border-t border-gray-700 flex justify-between">
+                    <div>Fenris</div>
+                    <div className="flex gap-4">
+                        <span>×{history.length}</span>
+                    </div>
                 </div>
             </div>
         </div>
