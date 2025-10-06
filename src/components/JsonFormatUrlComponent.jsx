@@ -89,12 +89,10 @@ export default function JsonFormatUrlComponent() {
         sortedMatches.forEach(match => {
             // Add text before the match
             highlightedText += text.substring(lastIndex, match.start);
-            // Add highlighted match
             highlightedText += `<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">${text.substring(match.start, match.end)}</mark>`;
             lastIndex = match.end;
         });
 
-        // Add remaining text after last match
         highlightedText += text.substring(lastIndex);
         return highlightedText;
     };
@@ -290,7 +288,7 @@ export default function JsonFormatUrlComponent() {
     ];
 
     return (
-        <div className="page-margin lg:ml-20 flex flex-col h-full bg-(--background) text-(--on-background)">
+        <div className="page-margin lg:ml-20 flex flex-col md:h-full bg-(--background) text-(--on-background)">
             {/* Header */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">
@@ -424,7 +422,7 @@ export default function JsonFormatUrlComponent() {
                     </div>
 
                     {/* Quick Examples */}
-                    <div className="example-class bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
+                    <div className="example-class hidden bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
                             <FaCloudDownloadAlt/>
                             {t('jsonFormatter.quickExamples.title')}
@@ -490,7 +488,7 @@ export default function JsonFormatUrlComponent() {
 
                 {/* Right Panel - JSON Editor */}
                 <div
-                    className="flex-1 flex flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
+                    className="flex-1 flex h-[710px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
                     {/* Editor Header */}
                     <div
                         className="flex justify-between items-center p-4 border-b border-(--outline-variant) bg-(--surface-container-high)">

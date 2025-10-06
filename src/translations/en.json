@@ -109,6 +109,16 @@
       "placeholder": "Enter JSON URL (e.g., https://api.example.com/data.json)",
       "pastePlaceholder": "Paste your JSON here... (Ctrl+V to paste)"
     },
+    "search": {
+      "title": "Search JSON",
+      "placeholder": "Search in JSON...",
+      "searching": "Searching...",
+      "results": "Found {{count}} matches",
+      "matches": "Matches",
+      "showingMatches": "Showing {{count}} of {{total}} matches",
+      "noMatches": "No matches found",
+      "error": "Search failed"
+    },
     "storedFiles": {
       "title": "Stored Files",
       "empty": "No files stored yet"

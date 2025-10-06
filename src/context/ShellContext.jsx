@@ -232,14 +232,14 @@ export function ShellProvider({children}) {
             case 'theme light':
                 toggleTheme('light');
                 return t('shell.themeSetToLight');
-            case 'navbar hide':
+            case 'hide navbar':
                 const navbarToHide = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
                 if (navbarToHide) {
                     navbarToHide.style.display = 'none';
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '0px');
                 return "Navbar hidden";
-            case 'navbar show':
+            case 'show navbar':
                 const navbarToShow = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
 
                 if (navbarToShow) {
@@ -249,6 +249,7 @@ export function ShellProvider({children}) {
                 return "Navbar shown";
             case 'hide json-example':
                 const sectionExampleToHide = document.querySelector('.example-class');
+                document.querySelector('.page-margin');
                 if (sectionExampleToHide) {
                     sectionExampleToHide.style.display = 'none';
                 }
@@ -259,6 +260,12 @@ export function ShellProvider({children}) {
                     hideStatsSection.style.display = 'none';
                 }
                 return "Stats & Infos hidden";
+            case 'show json-example':
+                const showExamplesSection = document.querySelector('.example-class');
+                if (showExamplesSection) {
+                    showExamplesSection.style.display = 'block';
+                }
+                return "Stats & Infos shown";
             case 'show json-stats':
                 const showStatsSection = document.querySelector('.json-stats');
                 if (showStatsSection) {

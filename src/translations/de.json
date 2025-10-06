@@ -109,6 +109,16 @@
     "input": {
       "placeholder": "JSON-URL eingeben (z.B. https://api.example.com/data.json)"
     },
+    "search": {
+      "title": "JSON durchsuchen",
+      "placeholder": "In JSON-Inhalt suchen...",
+      "searching": "Suche läuft...",
+      "results": "{{count}} Treffer gefunden",
+      "matches": "Treffer",
+      "showingMatches": "Zeige {{count}} von {{total}} Treffern",
+      "noMatches": "Keine Treffer gefunden",
+      "error": "Suche fehlgeschlagen"
+    },
     "storedFiles": {
       "title": "Gespeicherte Dateien",
       "empty": "Noch keine Dateien gespeichert"
