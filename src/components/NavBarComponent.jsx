@@ -5,40 +5,38 @@ import {
     FiHome,
     FiSettings,
     FiMenu,
-    FiCpu,
-    FiCode
+    FiCpu
 } from "react-icons/fi";
+import {TbJson} from "react-icons/tb";
 
 export default function NavBarComponent({isVisible}) {
     const [isExpanded, setIsExpanded] = useState(false);
     const {t} = useTranslation();
-    const [isNavbarVisible, setIsNavbarVisible] = useState(isVisible);
 
     // Toggle sidebar on mobile
     const toggleSidebar = () => {
         setIsExpanded(!isExpanded);
     };
 
-    // Navigation items
     const navItems = [
         {
             nameKey: t("navbar.home"),
-            icon: <FiHome size={24} />,
+            icon: <FiHome className="text-(--tertiary)" size={24} />,
             path: "/home",
         },
         {
             nameKey: t("navbar.json"),
-            icon: <FiCode size={24} />,
+            icon: <TbJson  className="text-(--tertiary)" size={24} />,
             path: "/json",
         },
         {
             nameKey: t("navbar.aiChatbot"),
-            icon: <FiCpu size={24} />,
+            icon: <FiCpu className="text-(--tertiary)" size={24} />,
             path: "/ai-chatbot",
         },
         {
             nameKey: t("navbar.settings"),
-            icon: <FiSettings size={24} />,
+            icon: <FiSettings className="text-(--tertiary)" size={24} />,
             path: "/settings",
         },
     ];

@@ -1,37 +1,48 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
+import {FaFolder, FaRegFolder} from "react-icons/fa";
+import Database from "@tauri-apps/plugin-sql";
 
 export default function SidePanel() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [folders, setFolders] = useState([]); // Changed from folder to folders for clarity
+    const [isFolderWindowOpen, setIsFolderWindowOpen] = useState(false);
+
     const handleAddFolder = () => {
-        console.log("Add folder clicked - functionality to be implemented");
+        setIsFolderWindowOpen(true);
     };
 
-    // Mobile toggle button for small screens
-    const MobileToggleButton = () => (
-        <button
-            onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-(--primary) text-(--on-primary) shadow-lg"
-        >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
-    );
+    const getAllFolders = async () => {
+        try {
+            const db = await Database.load("sqlite:fenris_notes.db");
+            const dbFolders = await db.select("SELECT * FROM folders");
+            setFolders(dbFolders);
+        } catch (e) {
+            setShowError(true);
+            setErrorMessage(`An error occurred. Impossible to load folders: ${e.message}`);
+        }
+    }
 
-    // Mobile overlay
-    const MobileOverlay = () => (
-        <div
-            className={`lg:hidden fixed inset-0 bg-(--scrim) bg-opacity-50 z-40 transition-opacity duration-300 ${
-                isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
-            onClick={() => setIsMobileOpen(false)}
-        />
-    );
+    useEffect(() => {
+        getAllFolders();
+    }, []);
+
+    // Refresh folders when popup closes
+    useEffect(() => {
+        if (!isFolderWindowOpen) {
+            getAllFolders();
+        }
+    }, [isFolderWindowOpen]);
 
     return (
         <>
-            <MobileToggleButton/>
-            <MobileOverlay/>
+            {isFolderWindowOpen && (
+                <AddFolderPopupComponent
+                    isPopupClosed={() => setIsFolderWindowOpen(false)}
+                />
+            )}
 
             {/* Side Panel */}
             <div className={`
@@ -47,23 +58,10 @@ export default function SidePanel() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleAddFolder}
-                            className="p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
+                            className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
                             title="Add new folder"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                            </svg>
-                        </button>
-                        {/* Close button for mobile */}
-                        <button
-                            onClick={() => setIsMobileOpen(false)}
-                            className="lg:hidden p-2 rounded-lg text-(--on-surface-variant) hover:bg-(--surface-container-high) transition-colors"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                      d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
+                            <FaFolder className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -76,38 +74,37 @@ export default function SidePanel() {
                             Folders
                         </h3>
 
-                        {/* Placeholder folder items */}
+                        {/* Folder items */}
                         <div className="space-y-2">
-                            <div
-                                className="flex items-center p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
-                                <svg className="w-5 h-5 mr-3 text-(--primary)" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                </svg>
-                                <span className="text-(--on-surface)">Documents</span>
-                            </div>
-
-                            <div
-                                className="flex items-center p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
-                                <svg className="w-5 h-5 mr-3 text-(--primary)" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                </svg>
-                                <span className="text-(--on-surface)">Projects</span>
-                            </div>
-
-                            <div
-                                className="flex items-center p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
-                                <svg className="w-5 h-5 mr-3 text-(--primary)" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                </svg>
-                                <span className="text-(--on-surface)">Archive</span>
-                            </div>
+                            {folders.map((folder) => (
+                                <div
+                                    key={folder.id} // Use folder.id as key
+                                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer"
+                                >
+                                    <FaRegFolder className="text-(--primary) flex-shrink-0" />
+                                    <span className="text-(--on-surface) truncate">{folder.name}</span>
+                                </div>
+                            ))}
                         </div>
+
+                        {/* Show empty state if no folders */}
+                        {folders.length === 0 && !showError && (
+                            <div className="text-center py-8">
+                                <FaRegFolder className="w-12 h-12 mx-auto text-(--on-surface-variant) mb-3 opacity-50" />
+                                <p className="text-(--on-surface-variant) text-sm">No folders yet</p>
+                                <p className="text-(--on-surface-variant) text-xs mt-1">Click the folder button to create one</p>
+                            </div>
+                        )}
+
+                        {/* Error Display */}
+                        {showError && (
+                            <div className="mt-4 p-3 bg-(--error-container) border border-(--error) rounded-lg">
+                                <p className="text-(--on-error-container) text-sm flex items-center">
+                                    <span className="w-2 h-2 bg-(--error) rounded-full mr-2"></span>
+                                    {errorMessage}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Notes Section */}
@@ -118,36 +115,20 @@ export default function SidePanel() {
 
                         {/* Placeholder note items */}
                         <div className="space-y-2">
-                            <div
-                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Meeting Notes</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated 2 hours ago</div>
                             </div>
 
-                            <div
-                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Project Ideas</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated yesterday</div>
                             </div>
 
-                            <div
-                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Shopping List</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated 3 days ago</div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Empty State - Will be hidden when real data is added */}
-                    <div className="flex-1 flex items-center justify-center p-8">
-                        <div className="text-center">
-                            <svg className="w-12 h-12 mx-auto text-(--on-surface-variant) mb-3" fill="none"
-                                 stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
-                                      d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                            </svg>
-                            <p className="text-(--on-surface-variant) text-sm">No folders yet</p>
-                            <p className="text-(--on-surface-variant) text-xs mt-1">Click the + button to create one</p>
                         </div>
                     </div>
                 </div>

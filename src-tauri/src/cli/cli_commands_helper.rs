@@ -19,6 +19,12 @@ pub fn cli_date_now() -> String {
 }
 
 #[command]
+pub fn cli_date_without_hours() -> String {
+    let now: DateTime<Utc> = Utc::now();
+    now.format("%d-%m-%Y").to_string()
+}
+
+#[command]
 pub fn cli_show_dir() -> PathBuf {
     let path = current_dir().unwrap();
     path

@@ -275,7 +275,6 @@ export default function JsonFormatUrlComponent() {
                 setSearchCount(0);
             }
         } catch (error) {
-            console.error("Failed to delete file:", error);
             showToast(t('jsonFormatter.toast.fileDeleteError', {error}));
         }
     };

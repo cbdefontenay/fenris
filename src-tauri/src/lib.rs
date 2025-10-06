@@ -1,6 +1,10 @@
-use crate::cli::{cli_date_now, cli_design, cli_help_command, cli_show_dir};
-use crate::json::{delete_json_file, fetch_json, format_json, get_json_file, list_json_files, perform_search, save_json_file};
+use crate::cli::{cli_date_now, cli_date_without_hours, cli_design, cli_help_command, cli_show_dir};
+use crate::json::{
+    delete_json_file, fetch_json, format_json, get_json_file, list_json_files, perform_search,
+    save_json_file,
+};
 use crate::ollama::{list_of_models, ollama_api_call};
+use crate::sqlite::{migrations};
 use crate::ui_helpers::{pick_json_file, save_json_as_file};
 use tauri::{generate_context, Builder};
 use tauri_plugin_dialog::init;
@@ -8,12 +12,18 @@ use tauri_plugin_dialog::init;
 mod cli;
 mod json;
 mod ollama;
+mod sqlite;
 mod ui_helpers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:fenris_notes.db", migrations())
+                .build(),
+        )
         .plugin(init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
@@ -31,7 +41,8 @@ pub fn run() {
             list_json_files,
             get_json_file,
             delete_json_file,
-            perform_search
+            perform_search,
+            cli_date_without_hours
         ])
         .run(generate_context!())
         .expect("error while running tauri application");
