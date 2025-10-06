@@ -1,7 +1,5 @@
 use crate::cli::{cli_date_now, cli_design, cli_help_command, cli_show_dir};
-use crate::json::{
-    delete_json_file, fetch_json, format_json, get_json_file, list_json_files, save_json_file,
-};
+use crate::json::{delete_json_file, fetch_json, format_json, get_json_file, list_json_files, perform_search, save_json_file};
 use crate::ollama::{list_of_models, ollama_api_call};
 use crate::ui_helpers::{pick_json_file, save_json_as_file};
 use tauri::{generate_context, Builder};
@@ -32,7 +30,8 @@ pub fn run() {
             save_json_file,
             list_json_files,
             get_json_file,
-            delete_json_file
+            delete_json_file,
+            perform_search
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

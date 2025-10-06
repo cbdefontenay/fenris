@@ -27,6 +27,7 @@ export default function JsonFormatUrlComponent() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [searchCount, setSearchCount] = useState(0);
+    const [searchLoading, setSearchLoading] = useState(false);
     const {t} = useTranslation();
 
     useEffect(() => {
@@ -51,62 +52,49 @@ export default function JsonFormatUrlComponent() {
         }
     };
 
-    const performSearch = () => {
+    const performSearch = async () => {
         if (!response || !searchTerm.trim()) {
             setSearchResults([]);
             setSearchCount(0);
             return;
         }
 
+        setSearchLoading(true);
         try {
-            const lines = response.split('\n');
-            const results = [];
-            let count = 0;
-
-            lines.forEach((line, lineIndex) => {
-                const matches = [];
-                let match;
-                const regex = new RegExp(searchTerm, 'gi');
-
-                while ((match = regex.exec(line)) !== null) {
-                    matches.push({
-                        start: match.index,
-                        end: match.index + match[0].length,
-                        text: match[0]
-                    });
-                    count++;
-                }
-
-                if (matches.length > 0) {
-                    results.push({
-                        lineNumber: lineIndex + 1,
-                        line: line,
-                        matches: matches
-                    });
-                }
+            const result = await invoke("perform_search", {
+                jsonResponse: response,
+                searchTerm: searchTerm
             });
 
-            setSearchResults(results);
-            setSearchCount(count);
+            setSearchResults(result.matches || []);
+            setSearchCount(result.count || 0);
         } catch (error) {
-            console.error("Search error:", error);
             setSearchResults([]);
             setSearchCount(0);
+            showToast(t('jsonFormatter.search.error'));
+        } finally {
+            setSearchLoading(false);
         }
     };
 
     const highlightSearchResults = (text, matches) => {
         if (!matches || matches.length === 0) return text;
 
+        // Sort matches by start position to process in order
+        const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
+
         let highlightedText = "";
         let lastIndex = 0;
 
-        matches.forEach(match => {
+        sortedMatches.forEach(match => {
+            // Add text before the match
             highlightedText += text.substring(lastIndex, match.start);
+            // Add highlighted match
             highlightedText += `<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">${text.substring(match.start, match.end)}</mark>`;
             lastIndex = match.end;
         });
 
+        // Add remaining text after last match
         highlightedText += text.substring(lastIndex);
         return highlightedText;
     };
@@ -116,6 +104,8 @@ export default function JsonFormatUrlComponent() {
 
         setLoading(true);
         setSearchTerm(""); // Reset search when fetching new data
+        setSearchResults([]);
+        setSearchCount(0);
 
         try {
             const result = await invoke("fetch_json", {url});
@@ -150,6 +140,8 @@ export default function JsonFormatUrlComponent() {
                     setOutputLength(formattedJson.length);
                     setIsEditing(false);
                     setSearchTerm(""); // Reset search when importing new file
+                    setSearchResults([]);
+                    setSearchCount(0);
                     showToast(t('jsonFormatter.toast.importSuccess'));
                 } catch (formatError) {
                     setResponse(`${t('jsonFormatter.errors.formatError')}: ${formatError}\n\n${t('jsonFormatter.rawContent')}:\n${fileContent}`);
@@ -261,6 +253,8 @@ export default function JsonFormatUrlComponent() {
             setIsEditing(false);
             setShowStoredFiles(false);
             setSearchTerm(""); // Reset search when loading stored file
+            setSearchResults([]);
+            setSearchCount(0);
             showToast(t('jsonFormatter.toast.fileLoaded'));
         } catch (error) {
             console.error("Failed to load file:", error);
@@ -269,17 +263,18 @@ export default function JsonFormatUrlComponent() {
     };
 
     const deleteStoredFile = async (fileName, e) => {
-        e.stopPropagation(); // Prevent triggering the load action
+        e.stopPropagation();
         try {
             await invoke("delete_json_file", {key: fileName});
-            await loadStoredFiles(); // Refresh the list
+            await loadStoredFiles();
             showToast(t('jsonFormatter.toast.fileDeleted'));
 
-            // If the deleted file was currently displayed, clear the editor
             if (response && saveFileName === fileName) {
                 setResponse("");
                 setSaveFileName("");
                 setSearchTerm("");
+                setSearchResults([]);
+                setSearchCount(0);
             }
         } catch (error) {
             console.error("Failed to delete file:", error);
@@ -295,7 +290,7 @@ export default function JsonFormatUrlComponent() {
     ];
 
     return (
-        <div className="page-margin lg:ml-20 flex flex-col h-screen bg-(--background) text-(--on-background)">
+        <div className="page-margin lg:ml-20 flex flex-col h-full bg-(--background) text-(--on-background)">
             {/* Header */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">
@@ -366,7 +361,12 @@ export default function JsonFormatUrlComponent() {
                                 />
                                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-(--on-surface-variant)" />
                             </div>
-                            {searchCount > 0 && (
+                            {searchLoading && (
+                                <div className="text-sm text-(--on-surface-variant)">
+                                    {t('jsonFormatter.search.searching')}
+                                </div>
+                            )}
+                            {searchCount > 0 && !searchLoading && (
                                 <div className="text-sm text-(--on-surface-variant)">
                                     {t('jsonFormatter.search.results', {count: searchCount})}
                                 </div>
@@ -578,15 +578,21 @@ export default function JsonFormatUrlComponent() {
                             ) : (
                                 <div className="absolute inset-0 overflow-auto">
                                     <pre className="p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                                        {searchTerm ? (
+                                        {searchTerm && searchResults.length > 0 ? (
                                             <>
+                                                <div className="text-sm text-(--on-surface-variant) mb-4 border-b border-(--outline-variant) pb-2">
+                                                    {t('jsonFormatter.search.showingMatches', {count: searchResults.length, total: searchCount})}
+                                                </div>
                                                 {searchResults.map((result, index) => (
-                                                    <div key={index} className="mb-2">
-                                                        <div className="text-xs text-(--on-surface-variant) mb-1">
-                                                            Ligne {result.lineNumber}:
+                                                    <div key={index} className="mb-4 p-3 bg-(--surface-container) rounded-lg border border-(--outline-variant)">
+                                                        <div className="text-xs text-(--on-surface-variant) mb-2 flex items-center gap-2">
+                                                            <span>Line {result.line_number}:</span>
+                                                            <span className="text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
+                                                                {result.matches.length} match{result.matches.length > 1 ? 'es' : ''}
+                                                            </span>
                                                         </div>
                                                         <div
-                                                            className="pl-4 border-l-2 border-(--primary)"
+                                                            className="pl-4 border-l-2 border-(--primary) font-mono text-sm"
                                                             dangerouslySetInnerHTML={{
                                                                 __html: highlightSearchResults(result.line, result.matches)
                                                             }}
@@ -594,6 +600,11 @@ export default function JsonFormatUrlComponent() {
                                                     </div>
                                                 ))}
                                             </>
+                                        ) : searchTerm && searchResults.length === 0 ? (
+                                            <div className="text-center text-(--on-surface-variant) py-8">
+                                                <FaSearch className="mx-auto mb-2 text-2xl opacity-50" />
+                                                <p>{t('jsonFormatter.search.noMatches')}</p>
+                                            </div>
                                         ) : (
                                             response
                                         )}
