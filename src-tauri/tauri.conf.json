@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Fenris",
-        "width": 2000,
-        "height": 1000
+        "width": 1500,
+        "height": 900
       }
     ],
     "security": {
