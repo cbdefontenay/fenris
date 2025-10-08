@@ -52,8 +52,11 @@
       "goto": "Navigate to different pages",
       "theme": "Change theme (dark|light)",
       "exit": "Close the terminal",
-      "lang": "Change the language: \"lang fr\"",
+      "lang": "Change the application language",
       "navbar": "Hide or show the navbar",
+      "addfolder": "Create a new folder",
+      "deletefolder": "Delete an existing folder",
+      "updatefolder": "Update a folder's name",
       "noDescription": "No description available"
     },
     "commands": {
@@ -66,7 +69,37 @@
       "theme": "{{command}} - Change color theme\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
       "lang": "{{command}} - Change the language\nUsage: {{usage}}\n{{description}}",
       "navbar": "{{command}} - Hide or show the navbar\nUsage: {{usage}}\n{{description}}",
-      "exit": "{{command}} - Close the terminal\nUsage: {{usage}}\n{{description}}"
+      "exit": "{{command}} - Close the terminal\nUsage: {{usage}}\n{{description}}",
+      "addfolder": "{{command}} - Create a new folder\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "deletefolder": "{{command}} - Delete a folder\nUsage: {{usage}}\nExample: {{example}}\n{{description}}",
+      "updatefolder": "{{command}} - Update folder name\nUsage: {{usage}}\nExample: {{example}}\n{{description}}"
+    },
+    "errors": {
+      "addFolder": {
+        "missingName": "Error: Please provide a folder name. Usage: add folder <name>",
+        "generic": "Error adding folder: {{error}}"
+      },
+      "deleteFolder": {
+        "missingName": "Error: Please provide a folder name. Usage: delete folder <name>",
+        "generic": "Error deleting folder: {{error}}"
+      },
+      "updateFolder": {
+        "invalidSyntax": "Error: Invalid syntax. Use: update folder \"current name\" \"new name\" or update folder currentname newname",
+        "missingNames": "Error: Both current folder name and new folder name are required.",
+        "generic": "Error updating folder: {{error}}"
+      }
+    },
+    "success": {
+      "addFolder": "Folder \"{{name}}\" added successfully",
+      "deleteFolder": "Folder \"{{name}}\" deleted successfully",
+      "updateFolder": "Folder \"{{oldName}}\" updated to \"{{newName}}\" successfully",
+      "languageChanged": "Language changed to {{language}}",
+      "navbarHidden": "Navbar hidden",
+      "navbarShown": "Navbar shown",
+      "jsonExampleHidden": "JSON example section hidden",
+      "jsonStatsHidden": "JSON stats section hidden",
+      "jsonExampleShown": "JSON example section shown",
+      "jsonStatsShown": "JSON stats section shown"
     }
   },
   "aiChatbot": {

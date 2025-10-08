@@ -37,7 +37,7 @@
     "navigatingToSettings": "Navigation vers les paramètres...",
     "navigatingToJson": "Navigation vers le formateur JSON...",
     "navigatingToHome": "Navigation vers l'accueil...",
-    "navigatingToAiChatbot": "Navigation vers le chat IA...",
+    "navigatingToAiChatbot": "Navigation vers le chatbot IA...",
     "themeSetToDark": "Thème défini sur sombre",
     "themeSetToLight": "Thème défini sur clair",
     "commandNotFound": "Commande non trouvée : {{command}}. Tapez 'help' pour les commandes disponibles.",
@@ -48,25 +48,58 @@
       "clear": "Effacer l'écran du terminal",
       "date": "Afficher la date et l'heure actuelles",
       "version": "Afficher les informations de version",
-      "pwd": "Afficher le répertoire courant",
+      "pwd": "Afficher le répertoire de travail",
       "goto": "Naviguer vers différentes pages",
       "theme": "Changer le thème (sombre|clair)",
       "exit": "Fermer le terminal",
-      "lang": "Change la langue : \"lang de\"",
-      "navbar": "Rend la barre de naviguation visible ou invisible",
+      "lang": "Changer la langue de l'application",
+      "navbar": "Masquer ou afficher la barre de navigation",
+      "addolder": "Créer un nouveau dossier",
+      "deletefolder": "Supprimer un dossier existant",
+      "updatefolder": "Modifier le nom d'un dossier",
       "noDescription": "Aucune description disponible"
     },
     "commands": {
       "help": "{{command}} - Afficher les informations d'aide\nUtilisation : {{usage}}\n{{description}}",
       "clear": "{{command}} - Effacer l'écran du terminal\nUtilisation : {{usage}}\n{{description}}",
       "date": "{{command}} - Afficher la date et l'heure actuelles\nUtilisation : {{usage}}\n{{description}}",
-      "version": "{{command}} - Afficher les informations de version du système\nUtilisation : {{usage}}\n{{description}}",
-      "pwd": "{{command}} - Afficher le répertoire courant\nUtilisation : {{usage}}\n{{description}}",
+      "version": "{{command}} - Afficher les informations de version\nUtilisation : {{usage}}\n{{description}}",
+      "pwd": "{{command}} - Afficher le répertoire de travail\nUtilisation : {{usage}}\n{{description}}",
       "goto": "{{command}} - Naviguer vers différentes pages\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
-      "theme": "{{command}} - Changer le thème de couleur\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "theme": "{{command}} - Changer le thème couleur\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "lang": "{{command}} - Changer la langue\nUtilisation : {{usage}}\n{{description}}",
+      "navbar": "{{command}} - Masquer ou afficher la barre de navigation\nUtilisation : {{usage}}\n{{description}}",
       "exit": "{{command}} - Fermer le terminal\nUtilisation : {{usage}}\n{{description}}",
-      "lang": "{{command}} - Change la langue\nUtilisation: {{usage}}\n{{description}}",
-      "navbar": "{{command}} - Rend la barre de naviguation visible ou invisible\nUtilisation: {{usage}}\n{{description}}"
+      "addfolder": "{{command}} - Créer un nouveau dossier\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "deletefolder": "{{command}} - Supprimer un dossier\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}",
+      "updatefolder": "{{command}} - Modifier le nom d'un dossier\nUtilisation : {{usage}}\nExemple : {{example}}\n{{description}}"
+    },
+    "errors": {
+      "addFolder": {
+        "missingName": "Erreur : Veuillez fournir un nom de dossier. Utilisation : add folder <nom>",
+        "generic": "Erreur lors de l'ajout du dossier : {{error}}"
+      },
+      "deleteFolder": {
+        "missingName": "Erreur : Veuillez fournir un nom de dossier. Utilisation : delete folder <nom>",
+        "generic": "Erreur lors de la suppression du dossier : {{error}}"
+      },
+      "updateFolder": {
+        "invalidSyntax": "Erreur : Syntaxe invalide. Utilisez : update folder \"nom actuel\" \"nouveau nom\" ou update folder nomactuel nouveaunom",
+        "missingNames": "Erreur : Le nom actuel du dossier et le nouveau nom sont requis.",
+        "generic": "Erreur lors de la modification du dossier : {{error}}"
+      }
+    },
+    "success": {
+      "addFolder": "Dossier \"{{name}}\" ajouté avec succès",
+      "deleteFolder": "Dossier \"{{name}}\" supprimé avec succès",
+      "updateFolder": "Dossier \"{{oldName}}\" modifié en \"{{newName}}\" avec succès",
+      "languageChanged": "Langue changée en {{language}}",
+      "navbarHidden": "Barre de navigation masquée",
+      "navbarShown": "Barre de navigation affichée",
+      "jsonExampleHidden": "Section d'exemple JSON masquée",
+      "jsonStatsHidden": "Section des statistiques JSON masquée",
+      "jsonExampleShown": "Section d'exemple JSON affichée",
+      "jsonStatsShown": "Section des statistiques JSON affichée"
     }
   },
   "aiChatbot": {

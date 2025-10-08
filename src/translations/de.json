@@ -32,41 +32,74 @@
     }
   },
   "shell": {
-    "availableCommands": "Verfügbare Befehle:\n\n{{commands}}\n\nGeben Sie 'help <befehl>' ein, um mehr Informationen zu einem bestimmten Befehl zu erhalten.",
+    "availableCommands": "Verfügbare Befehle:\n\n{{commands}}\n\nGeben Sie 'help <befehl>' ein für weitere Informationen zu einem bestimmten Befehl.",
     "versionInfo": "Shell v1.0.0",
     "navigatingToSettings": "Navigiere zu Einstellungen...",
     "navigatingToJson": "Navigiere zu JSON-Formatierer...",
     "navigatingToHome": "Navigiere zu Startseite...",
-    "navigatingToAiChatbot": "Navigiere zum KI-Chatbot...",
+    "navigatingToAiChatbot": "Navigiere zu KI-Chatbot...",
     "themeSetToDark": "Theme auf Dunkel gesetzt",
     "themeSetToLight": "Theme auf Hell gesetzt",
-    "commandNotFound": "Befehl nicht gefunden: {{command}}. Geben Sie 'help' ein, um verfügbare Befehle anzuzeigen.",
+    "commandNotFound": "Befehl nicht gefunden: {{command}}. Geben Sie 'help' ein für verfügbare Befehle.",
     "noHelpAvailable": "Keine Hilfe verfügbar für Befehl: {{command}}",
     "error": "Fehler: {{error}}",
     "descriptions": {
       "help": "Hilfeinformationen anzeigen",
-      "clear": "Terminalbildschirm löschen",
+      "clear": "Terminal-Bildschirm löschen",
       "date": "Aktuelles Datum und Uhrzeit anzeigen",
       "version": "Versionsinformationen anzeigen",
-      "pwd": "Aktuelles Verzeichnis anzeigen",
+      "pwd": "Aktuelles Arbeitsverzeichnis anzeigen",
       "goto": "Zu verschiedenen Seiten navigieren",
       "theme": "Theme ändern (dunkel|hell)",
       "exit": "Terminal schließen",
-      "lang": "Ändert die Spracher der App: \"lang en\"",
-      "navbar": "Mach die Navbar unsichtbar oder sichtbar",
+      "lang": "Anwendungssprache ändern",
+      "navbar": "Navigationsleiste ein- oder ausblenden",
+      "addfolder": "Neuen Ordner erstellen",
+      "deletefolder": "Vorhandenen Ordner löschen",
+      "updatefolder": "Ordnernamen aktualisieren",
       "noDescription": "Keine Beschreibung verfügbar"
     },
     "commands": {
       "help": "{{command}} - Hilfeinformationen anzeigen\nVerwendung: {{usage}}\n{{description}}",
-      "clear": "{{command}} - Terminalbildschirm löschen\nVerwendung: {{usage}}\n{{description}}",
+      "clear": "{{command}} - Terminal-Bildschirm löschen\nVerwendung: {{usage}}\n{{description}}",
       "date": "{{command}} - Aktuelles Datum und Uhrzeit anzeigen\nVerwendung: {{usage}}\n{{description}}",
-      "version": "{{command}} - Systemversionsinformationen anzeigen\nVerwendung: {{usage}}\n{{description}}",
-      "pwd": "{{command}} - Aktuelles Verzeichnis anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "version": "{{command}} - Versionsinformationen anzeigen\nVerwendung: {{usage}}\n{{description}}",
+      "pwd": "{{command}} - Aktuelles Arbeitsverzeichnis anzeigen\nVerwendung: {{usage}}\n{{description}}",
       "goto": "{{command}} - Zu verschiedenen Seiten navigieren\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
       "theme": "{{command}} - Farbtheme ändern\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "lang": "{{command}} - Sprache ändern\nVerwendung: {{usage}}\n{{description}}",
+      "navbar": "{{command}} - Navigationsleiste ein- oder ausblenden\nVerwendung: {{usage}}\n{{description}}",
       "exit": "{{command}} - Terminal schließen\nVerwendung: {{usage}}\n{{description}}",
-      "lang": "{{command}} - Ändert die Sprache der App\nVerwendung: {{usage}}\n{{description}}",
-      "navbar": "{{command}} - Mach die Navbar unsichtbar oder sichtbar\nVerwendung: {{usage}}\n{{description}}"
+      "addfolder": "{{command}} - Neuen Ordner erstellen\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "deletefolder": "{{command}} - Ordner löschen\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}",
+      "updatefolder": "{{command}} - Ordnernamen aktualisieren\nVerwendung: {{usage}}\nBeispiel: {{example}}\n{{description}}"
+    },
+    "errors": {
+      "addFolder": {
+        "missingName": "Fehler: Bitte geben Sie einen Ordnernamen an. Verwendung: add folder <name>",
+        "generic": "Fehler beim Hinzufügen des Ordners: {{error}}"
+      },
+      "deleteFolder": {
+        "missingName": "Fehler: Bitte geben Sie einen Ordnernamen an. Verwendung: delete folder <name>",
+        "generic": "Fehler beim Löschen des Ordners: {{error}}"
+      },
+      "updateFolder": {
+        "invalidSyntax": "Fehler: Ungültige Syntax. Verwenden Sie: update folder \"aktueller name\" \"neuer name\" oder update folder aktuellername neuername",
+        "missingNames": "Fehler: Sowohl der aktuelle als auch der neue Ordnername sind erforderlich.",
+        "generic": "Fehler beim Aktualisieren des Ordners: {{error}}"
+      }
+    },
+    "success": {
+      "addFolder": "Ordner \"{{name}}\" erfolgreich hinzugefügt",
+      "deleteFolder": "Ordner \"{{name}}\" erfolgreich gelöscht",
+      "updateFolder": "Ordner \"{{oldName}}\" erfolgreich zu \"{{newName}}\" geändert",
+      "languageChanged": "Sprache zu {{language}} geändert",
+      "navbarHidden": "Navigationsleiste ausgeblendet",
+      "navbarShown": "Navigationsleiste eingeblendet",
+      "jsonExampleHidden": "JSON-Beispielabschnitt ausgeblendet",
+      "jsonStatsHidden": "JSON-Statistikabschnitt ausgeblendet",
+      "jsonExampleShown": "JSON-Beispielabschnitt eingeblendet",
+      "jsonStatsShown": "JSON-Statistikabschnitt eingeblendet"
     }
   },
   "aiChatbot": {

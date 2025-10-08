@@ -8,7 +8,7 @@ pub fn cli_help_command(explanation: Option<String>) -> String {
     if let Some(cmd) = explanation {
         cmd
     } else {
-        "help,clear,date,version,pwd,goto json|ai|home|settings,theme dark|light,lang en|de|fr,navbar hide|show,hide json-example|json-stats,exit".to_string()
+        "help,date,version,pwd,goto,theme dark|light,lang en|fr|de,hide|show navbar,show json-example,add folder,delete folder,update folder,exit".to_string()
     }
 }
 

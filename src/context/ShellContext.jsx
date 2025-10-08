@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
 import i18next from "i18next";
-import NavBarComponent from "../components/NavBarComponent.jsx";
+import {deleteFolder, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
 
 const ShellContext = createContext();
 
@@ -55,61 +55,78 @@ export function ShellProvider({children}) {
         }
     }
 
-// Command explanations with translations
+    // Command explanations with translations
     const getCommandExplanation = (command) => {
         const explanations = {
             help: t('shell.commands.help', {
                 command: "help",
                 usage: "help [command]",
-                description: "Displays available commands or detailed help for a specific command."
+                description: t('shell.descriptions.help')
             }),
             clear: t('shell.commands.clear', {
                 command: "clear",
                 usage: "clear",
-                description: "Clears all previous command output from the terminal."
+                description: t('shell.descriptions.clear')
             }),
             date: t('shell.commands.date', {
                 command: "date",
                 usage: "date",
-                description: "Displays the current system date and time."
+                description: t('shell.descriptions.date')
             }),
             version: t('shell.commands.version', {
                 command: "version",
                 usage: "version",
-                description: "Shows the current application version and build information."
+                description: t('shell.descriptions.version')
             }),
             pwd: t('shell.commands.pwd', {
                 command: "pwd",
                 usage: "pwd",
-                description: "Shows the current directory path."
+                description: t('shell.descriptions.pwd')
             }),
             goto: t('shell.commands.goto', {
                 command: "goto",
                 usage: "goto <page>",
                 example: "goto settings",
-                description: "Navigates to the specified application page."
+                description: t('shell.descriptions.goto')
             }),
             theme: t('shell.commands.theme', {
                 command: "theme",
                 usage: "theme <dark|light>",
                 example: "theme dark",
-                description: "Switches between dark and light color themes."
+                description: t('shell.descriptions.theme')
             }),
             lang: t('shell.commands.lang', {
                 command: "lang",
-                usage: "lang  fr|de|en",
-                description: "Change the app language."
+                usage: "lang <fr|de|en>",
+                description: t('shell.descriptions.lang')
             }),
             navbar: t('shell.commands.navbar', {
                 command: "navbar",
-                usage: "navbar  visible|invisible",
-                description: "Make the navbar visible or invisible."
+                usage: "navbar <show|hide>",
+                description: t('shell.descriptions.navbar')
             }),
             exit: t('shell.commands.exit', {
                 command: "exit",
                 usage: "exit",
-                description: "Closes the terminal window."
-
+                description: t('shell.descriptions.exit')
+            }),
+            addfolder: t('shell.commands.addfolder', {
+                command: "add folder",
+                usage: "add folder <name>",
+                example: 'add folder "My Folder"',
+                description: t('shell.descriptions.addfolder')
+            }),
+            deletefolder: t('shell.commands.deletefolder', {
+                command: "delete folder",
+                usage: "delete folder <name>",
+                example: 'delete folder "My Folder"',
+                description: t('shell.descriptions.deletefolder')
+            }),
+            updatefolder: t('shell.commands.updatefolder', {
+                command: "update folder",
+                usage: "update folder <current-name> <new-name>",
+                example: 'update folder "Old Name" "New Name"',
+                description: t('shell.descriptions.updatefolder')
             })
         };
         return explanations[command] || t('shell.noHelpAvailable', {command});
@@ -132,7 +149,7 @@ export function ShellProvider({children}) {
         }
     }
 
-// Helper function to get short descriptions
+    // Helper function to get short descriptions
     const getCommandDescription = (cmd) => {
         const descriptions = {
             help: t('shell.descriptions.help'),
@@ -145,6 +162,9 @@ export function ShellProvider({children}) {
             lang: t('shell.descriptions.lang'),
             navbar: t('shell.descriptions.navbar'),
             exit: t('shell.descriptions.exit'),
+            'add folder': t('shell.descriptions.addfolder'),
+            'delete folder': t('shell.descriptions.deletefolder'),
+            'update folder': t('shell.descriptions.updatefolder')
         };
         return descriptions[cmd] || t('shell.descriptions.noDescription');
     };
@@ -174,6 +194,64 @@ export function ShellProvider({children}) {
             return await cliHelpCommand(specificCmd);
         }
 
+        if (trimmedCmd.startsWith('add folder ')) {
+            const folderName = cmd.substring(11).trim();
+            if (!folderName) {
+                return t('shell.errors.addFolder.missingName');
+            }
+            try {
+                await saveFolder(folderName);
+                return t('shell.success.addFolder', {name: folderName});
+            } catch (error) {
+                return t('shell.errors.addFolder.generic', {error: error.message});
+            }
+        }
+
+        if (trimmedCmd.startsWith('delete folder ')) {
+            const folderName = cmd.substring(14).trim();
+            if (!folderName) {
+                return t('shell.errors.deleteFolder.missingName');
+            }
+            try {
+                await deleteFolder(folderName);
+                return t('shell.success.deleteFolder', {name: folderName});
+            } catch (error) {
+                return t('shell.errors.deleteFolder.generic', {error: error.message});
+            }
+        }
+
+        if (trimmedCmd.startsWith('update folder ')) {
+            const args = cmd.substring(13).trim();
+
+            const match = args.match(/^("([^"]+)"|'([^']+)'|(\S+))\s+("([^"]+)"|'([^']+)'|(\S+))$/);
+
+            if (!match) {
+                return t('shell.errors.updateFolder.invalidSyntax');
+            }
+
+            const currentFolderName = match[2] || match[3] || match[4];
+            const newFolderName = match[6] || match[7] || match[8];
+
+            if (!currentFolderName || !newFolderName) {
+                return t('shell.errors.updateFolder.missingNames');
+            }
+
+            try {
+                const result = await updateFolderByName(currentFolderName, newFolderName);
+
+                if (result.success) {
+                    return t('shell.success.updateFolder', {
+                        oldName: currentFolderName,
+                        newName: newFolderName
+                    });
+                } else {
+                    return t('shell.errors.updateFolder.generic', {error: result.error});
+                }
+            } catch (error) {
+                return t('shell.errors.updateFolder.generic', {error: error.message});
+            }
+        }
+
         switch (trimmedCmd) {
             case 'help':
                 return await cliHelpCommand();
@@ -190,26 +268,14 @@ export function ShellProvider({children}) {
             case 'pwd':
                 return await cliCurrentDir();
             case 'lang fr':
-                const codeFr = "fr";
-                if (codeFr === "fr") {
-                    return handleLanguageChange(codeFr);
-                } else {
-                    return "Not a valid language.";
-                }
+                handleLanguageChange('fr');
+                return t('shell.success.languageChanged', {language: 'French'});
             case 'lang en':
-                const codeEn = "en";
-                if (codeEn === "en") {
-                    return handleLanguageChange(codeEn);
-                } else {
-                    return "Not a valid language.";
-                }
+                handleLanguageChange('en');
+                return t('shell.success.languageChanged', {language: 'English'});
             case 'lang de':
-                const codeDe = "de";
-                if (codeDe === "de") {
-                    return handleLanguageChange(codeDe);
-                } else {
-                    return "Not a valid language.";
-                }
+                handleLanguageChange('de');
+                return t('shell.success.languageChanged', {language: 'German'});
             case 'goto settings':
                 navigate('/settings');
                 setShowShell(false);
@@ -233,45 +299,51 @@ export function ShellProvider({children}) {
                 toggleTheme('light');
                 return t('shell.themeSetToLight');
             case 'hide navbar':
+            case 'navbar hide':
                 const navbarToHide = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
                 if (navbarToHide) {
                     navbarToHide.style.display = 'none';
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '0px');
-                return "Navbar hidden";
+                return t('shell.success.navbarHidden');
             case 'show navbar':
+            case 'navbar show':
                 const navbarToShow = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
-
                 if (navbarToShow) {
                     navbarToShow.style.display = 'block';
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '5rem');
-                return "Navbar shown";
+                return t('shell.success.navbarShown');
             case 'hide json-example':
                 const sectionExampleToHide = document.querySelector('.example-class');
-                document.querySelector('.page-margin');
                 if (sectionExampleToHide) {
                     sectionExampleToHide.style.display = 'none';
                 }
-                return "Quick example hidden";
+                return t('shell.success.jsonExampleHidden');
             case 'hide json-stats':
                 const hideStatsSection = document.querySelector('.json-stats');
                 if (hideStatsSection) {
                     hideStatsSection.style.display = 'none';
                 }
-                return "Stats & Infos hidden";
+                return t('shell.success.jsonStatsHidden');
             case 'show json-example':
                 const showExamplesSection = document.querySelector('.example-class');
                 if (showExamplesSection) {
                     showExamplesSection.style.display = 'block';
                 }
-                return "Stats & Infos shown";
+                return t('shell.success.jsonExampleShown');
             case 'show json-stats':
                 const showStatsSection = document.querySelector('.json-stats');
                 if (showStatsSection) {
-                    showStatsSection.style.display = 'none';
+                    showStatsSection.style.display = 'block';
                 }
-                return "Stats & Infos shown";
+                return t('shell.success.jsonStatsShown');
+            case 'add folder':
+                return t('shell.errors.addFolder.missingName');
+            case 'delete folder':
+                return t('shell.errors.deleteFolder.missingName');
+            case 'update folder':
+                return t('shell.errors.updateFolder.missingNames');
             case '':
                 return "";
             default:

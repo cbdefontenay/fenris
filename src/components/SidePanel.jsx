@@ -2,13 +2,16 @@ import {useEffect, useState} from 'react';
 import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
 import {FaFolder, FaRegFolder} from "react-icons/fa";
 import Database from "@tauri-apps/plugin-sql";
+import {IoMdRefresh} from "react-icons/io";
+import FolderItemsMenuComponent from "./FolderItemsMenuComponent.jsx";
 
 export default function SidePanel() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [folders, setFolders] = useState([]); // Changed from folder to folders for clarity
+    const [folders, setFolders] = useState([]);
     const [isFolderWindowOpen, setIsFolderWindowOpen] = useState(false);
+    const [isAnyMenuOpen, setIsAnyMenuOpen] = useState(false);
 
     const handleAddFolder = () => {
         setIsFolderWindowOpen(true);
@@ -24,6 +27,14 @@ export default function SidePanel() {
             setErrorMessage(`An error occurred. Impossible to load folders: ${e.message}`);
         }
     }
+
+    const refreshFolders = () => {
+        getAllFolders();
+    }
+
+    const handleMenuToggle = (isOpen) => {
+        setIsAnyMenuOpen(isOpen);
+    };
 
     useEffect(() => {
         getAllFolders();
@@ -61,7 +72,7 @@ export default function SidePanel() {
                             className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
                             title="Add new folder"
                         >
-                            <FaFolder className="w-5 h-5" />
+                            <FaFolder className="w-5 h-5"/>
                         </button>
                     </div>
                 </div>
@@ -70,29 +81,34 @@ export default function SidePanel() {
                 <div className="flex-1 overflow-y-auto scrollbar-thin">
                     {/* Folders Section */}
                     <div className="p-4">
-                        <h3 className="text-sm font-medium text-(--on-surface-variant) uppercase tracking-wide mb-3">
-                            Folders
-                        </h3>
+                        <div className="flex flex-row justify-between">
+                            <h3 className="text-sm font-medium text-(--on-surface-variant) uppercase tracking-wide mb-3">
+                                Folders
+                            </h3>
+
+                            <IoMdRefresh className="cursor-pointer text-(--secondary)" onClick={refreshFolders}/>
+                        </div>
 
                         {/* Folder items */}
                         <div className="space-y-2">
                             {folders.map((folder) => (
-                                <div
-                                    key={folder.id} // Use folder.id as key
-                                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer"
-                                >
-                                    <FaRegFolder className="text-(--primary) flex-shrink-0" />
-                                    <span className="text-(--on-surface) truncate">{folder.name}</span>
-                                </div>
+                                <FolderItemsMenuComponent
+                                    key={folder.id}
+                                    folder={folder}
+                                    isAnyMenuOpen={isAnyMenuOpen}
+                                    onMenuToggle={handleMenuToggle}
+                                    onFolderUpdate={getAllFolders}
+                                />
                             ))}
                         </div>
 
                         {/* Show empty state if no folders */}
                         {folders.length === 0 && !showError && (
                             <div className="text-center py-8">
-                                <FaRegFolder className="w-12 h-12 mx-auto text-(--on-surface-variant) mb-3 opacity-50" />
+                                <FaRegFolder className="w-12 h-12 mx-auto text-(--on-surface-variant) mb-3 opacity-50"/>
                                 <p className="text-(--on-surface-variant) text-sm">No folders yet</p>
-                                <p className="text-(--on-surface-variant) text-xs mt-1">Click the folder button to create one</p>
+                                <p className="text-(--on-surface-variant) text-xs mt-1">Click the folder button to
+                                    create one</p>
                             </div>
                         )}
 
@@ -115,17 +131,20 @@ export default function SidePanel() {
 
                         {/* Placeholder note items */}
                         <div className="space-y-2">
-                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div
+                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Meeting Notes</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated 2 hours ago</div>
                             </div>
 
-                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div
+                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Project Ideas</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated yesterday</div>
                             </div>
 
-                            <div className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
+                            <div
+                                className="p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
                                 <div className="text-(--on-surface) font-medium text-sm">Shopping List</div>
                                 <div className="text-(--on-surface-variant) text-xs">Updated 3 days ago</div>
                             </div>
@@ -136,7 +155,7 @@ export default function SidePanel() {
                 {/* Footer */}
                 <div className="p-4 border-t border-(--outline-variant) bg-(--surface-container-low)">
                     <div className="text-xs text-(--on-surface-variant) text-center">
-                        {new Date().toLocaleDateString('en-US', {
+                        {new Date().toLocaleDateString('de-DE', {
                             weekday: 'short',
                             year: 'numeric',
                             month: 'short',
