@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react';
 import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
-import {FaFolder, FaRegFolder, FaChevronDown, FaChevronRight} from "react-icons/fa";
+import {FaFolder, FaRegFolder, FaChevronDown, FaChevronRight, FaRegFolderOpen} from "react-icons/fa";
 import Database from "@tauri-apps/plugin-sql";
 import {IoMdRefresh} from "react-icons/io";
 import FolderItemsMenuComponent from "./FolderItemsMenuComponent.jsx";
 import AddNotePopupComponent from "./AddNotePopupComponent.jsx";
 import {MdOutlineEditNote} from "react-icons/md";
-import SingleNoteItemsMenuComponent from "./SingleNoteItemsMenuComponent.jsx"; // You'll need to create this
+import SingleNoteItemsMenuComponent from "./SingleNoteItemsMenuComponent.jsx";
 
 export default function SidePanel() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -18,8 +18,6 @@ export default function SidePanel() {
     const [isFolderWindowOpen, setIsFolderWindowOpen] = useState(false);
     const [isNoteWindowOpen, setIsNoteWindowOpen] = useState(false);
     const [isAnyMenuOpen, setIsAnyMenuOpen] = useState(false);
-
-    // Accordion states
     const [isSingleNotesOpen, setIsSingleNotesOpen] = useState(false);
     const [isFoldersOpen, setIsFoldersOpen] = useState(false);
 
@@ -149,29 +147,28 @@ export default function SidePanel() {
                 page-margin lg:ml-20
             `}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-(--outline-variant)">
-                    <h2 className="text-lg font-semibold text-(--on-surface)">Workspace</h2>
-                    <div className="flex flex-row items-center gap-2">
+                <div className="flex justify-around p-4 border-b border-(--outline-variant) w-full">
+                    <div className="flex flex-row gap-10">
                         <button
                             onClick={handleAddNote}
                             className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
                             title="Add new note"
                         >
-                            <MdOutlineEditNote className="w-5 h-5"/>
+                            <MdOutlineEditNote className="" size={20}/>
                         </button>
                         <button
                             onClick={handleAddFolder}
                             className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
                             title="Add new folder"
                         >
-                            <FaFolder className="w-5 h-5"/>
+                            <FaRegFolderOpen className="" size={20}/>
                         </button>
                         <button
                             onClick={refreshAll}
                             className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200"
                             title="Refresh"
                         >
-                            <IoMdRefresh className="w-4 h-4 text-(--on-surface-variant)"/>
+                            <IoMdRefresh className="text-(--on-surface-variant)" size={20}/>
                         </button>
                     </div>
                 </div>
@@ -182,20 +179,20 @@ export default function SidePanel() {
                     <div className="border-b border-(--outline-variant)">
                         <button
                             onClick={() => setIsSingleNotesOpen(!isSingleNotesOpen)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-(--surface-container-high) transition-colors duration-200"
+                            className="cursor-pointer w-full flex items-center justify-between p-4 hover:bg-(--surface-container-high) transition-colors duration-200"
                         >
                             <div className="flex items-center gap-3">
-                                <MdOutlineEditNote className="w-4 h-4 text-(--secondary)"/>
+                                <MdOutlineEditNote className="text-(--tertiary)" size={24}/>
                                 <span className="text-sm font-medium text-(--on-surface)">Single Notes</span>
                                 <span
-                                    className="text-xs bg-(--secondary-container) text-(--on-secondary-container) px-2 py-1 rounded-full">
+                                    className="text-xs bg-(--tertiary-fixed) text-(--on-tertiary-fixed) px-2 py-1 rounded-full">
                                     {singleNotes.length}
                                 </span>
                             </div>
                             {isSingleNotesOpen ? (
-                                <FaChevronDown className="w-3 h-3 text-(--on-surface-variant)"/>
+                                <FaChevronDown className="text-(--tertiary)"/>
                             ) : (
-                                <FaChevronRight className="w-3 h-3 text-(--on-surface-variant)"/>
+                                <FaChevronRight className="text-(--tertiary)"/>
                             )}
                         </button>
 
@@ -217,9 +214,9 @@ export default function SidePanel() {
                                 {singleNotes.length === 0 && !showError && (
                                     <div className="text-center py-6">
                                         <MdOutlineEditNote
-                                            className="w-8 h-8 mx-auto text-(--on-surface-variant) mb-2 opacity-50"/>
-                                        <p className="text-(--on-surface-variant) text-sm">No single notes yet</p>
-                                        <p className="text-(--on-surface-variant) text-xs mt-1">Create your first
+                                            className="mx-auto text-(--tertiary) mb-2 opacity-50" size={35}/>
+                                        <p className="text-(--tertiary) text-sm">No single notes yet</p>
+                                        <p className="text-(--tertiary) italic text-xs mt-1">Create your first
                                             note</p>
                                     </div>
                                 )}
@@ -231,10 +228,10 @@ export default function SidePanel() {
                     <div className="border-b border-(--outline-variant)">
                         <button
                             onClick={() => setIsFoldersOpen(!isFoldersOpen)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-(--surface-container-high) transition-colors duration-200"
+                            className="cursor-pointer w-full flex items-center justify-between p-4 hover:bg-(--surface-container-highest) transition-colors duration-200"
                         >
                             <div className="flex items-center gap-3">
-                                <FaFolder className="w-4 h-4 text-(--primary)"/>
+                                <FaFolder className="text-(--primary)" size={20}/>
                                 <span className="text-sm font-medium text-(--on-surface)">Folders</span>
                                 <span
                                     className="text-xs bg-(--primary-container) text-(--on-primary-container) px-2 py-1 rounded-full">
@@ -242,9 +239,9 @@ export default function SidePanel() {
                                 </span>
                             </div>
                             {isFoldersOpen ? (
-                                <FaChevronDown className="w-3 h-3 text-(--on-surface-variant)"/>
+                                <FaChevronDown className="text-(--primary)"/>
                             ) : (
-                                <FaChevronRight className="w-3 h-3 text-(--on-surface-variant)"/>
+                                <FaChevronRight className="text-(--primary)"/>
                             )}
                         </button>
 
@@ -266,9 +263,10 @@ export default function SidePanel() {
                                 {folders.length === 0 && !showError && (
                                     <div className="text-center py-6">
                                         <FaRegFolder
-                                            className="w-8 h-8 mx-auto text-(--on-surface-variant) mb-2 opacity-50"/>
-                                        <p className="text-(--on-surface-variant) text-sm">No folders yet</p>
-                                        <p className="text-(--on-surface-variant) text-xs mt-1">Create your first
+                                            size={35}
+                                            className="mx-auto text-(--primary) mb-2 opacity-50"/>
+                                        <p className="text-(--primary) text-sm">No folders yet</p>
+                                        <p className="text-(--primary) italic text-xs mt-1">Create your first
                                             folder</p>
                                     </div>
                                 )}
@@ -284,55 +282,6 @@ export default function SidePanel() {
                                 )}
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* Recent Items Section - Always at bottom, not scrollable */}
-                <div className="border-t border-(--outline-variant) bg-(--surface-container-low)">
-                    <div className="p-4">
-                        <h3 className="text-sm font-medium text-(--on-surface-variant) uppercase tracking-wide mb-3">
-                            Recently Updated
-                        </h3>
-                        <div className="space-y-2">
-                            {recentItems.map((item, index) => (
-                                <div
-                                    key={`${item.type}-${item.id}`}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer group"
-                                >
-                                    {getItemIcon(item.type)}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-(--on-surface) text-sm font-medium truncate">
-                                            {item.name}
-                                        </div>
-                                        <div className="text-(--on-surface-variant) text-xs">
-                                            {formatRelativeTime(item.date_modified)}
-                                        </div>
-                                    </div>
-                                    <div
-                                        className="text-xs text-(--on-surface-variant) px-2 py-1 rounded bg-(--surface-container-high) capitalize">
-                                        {item.type}
-                                    </div>
-                                </div>
-                            ))}
-
-                            {recentItems.length === 0 && (
-                                <div className="text-center py-4">
-                                    <p className="text-(--on-surface-variant) text-sm">No recent activity</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t border-(--outline-variant) bg-(--surface-container-low)">
-                    <div className="text-xs text-(--on-surface-variant) text-center">
-                        {new Date().toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })}
                     </div>
                 </div>
             </div>

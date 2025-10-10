@@ -1,9 +1,27 @@
-import {useState} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import {MdOutlineEditNote} from "react-icons/md";
 import {FaEllipsisV} from "react-icons/fa";
+import Database from "@tauri-apps/plugin-sql";
+import {invoke} from "@tauri-apps/api/core";
 
 export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate}) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUpdateNotePopupOpen, setIsUpdateNotePopupOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [newSingleNoteName, setNewSingleNoteName] = useState(note.title || "Fenris");
+    const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+    const buttonRef = useRef(null);
+    const menuRef = useRef(null);
+    const inputRef = useRef(null);
+
+    // Show toast function
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        setTimeout(() => {
+            setToast({ show: false, message: '', type: '' });
+        }, 3000);
+    };
 
     const handleMenuToggle = () => {
         const newState = !isMenuOpen;
@@ -11,54 +29,263 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         onMenuToggle(newState);
     };
 
-    const handleEdit = () => {
-        console.log('Edit note:', note.id);
-        handleMenuToggle();
+    useEffect(() => {
+        function handleClickOutsideNoteMenu(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target) &&
+                buttonRef.current && !buttonRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+                onMenuToggle(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutsideNoteMenu);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutsideNoteMenu);
+        };
+    }, [onMenuToggle]);
+
+    useEffect(() => {
+        if (isAnyMenuOpen && !isMenuOpen) {
+            setIsMenuOpen(false);
+        }
+    }, [isAnyMenuOpen, isMenuOpen]);
+
+    // Focus input when popup opens
+    useEffect(() => {
+        if (isUpdateNotePopupOpen && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [isUpdateNotePopupOpen]);
+
+    const handleEditClick = () => {
+        setIsUpdateNotePopupOpen(true);
+        setNewSingleNoteName(note.title);
+        setIsMenuOpen(false);
     };
 
-    const handleDelete = () => {
-        console.log('Delete note:', note.id);
-        handleMenuToggle();
+    const handleUpdateSingleNote = async () => {
+        if (newSingleNoteName.trim() === '') {
+            showToast('Note name cannot be empty', 'error');
+            return;
+        }
+
+        if (newSingleNoteName.trim() === note.title) {
+            setIsUpdateNotePopupOpen(false);
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const db = await Database.load("sqlite:fenris_app_notes.db");
+
+            const updateResultCommand = await invoke("update_single_note", {
+                newNoteName: newSingleNoteName.trim(),
+                noteId: note.id
+            });
+
+            await db.execute(updateResultCommand);
+
+            showToast('Note updated successfully');
+
+            if (onNoteUpdate) {
+                onNoteUpdate();
+            }
+
+            setIsUpdateNotePopupOpen(false);
+
+        } catch (e) {
+            showToast(`Error updating note: ${e.message}`, 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        const confirmationDialog = await invoke("delete_single_note_dialog", {
+            message: `Are you sure you want to delete the note "${note.title}"?`,
+            title: "Delete Note",
+            confirmation: "Delete",
+            cancellation: "Cancel",
+            folderName: note.title
+        });
+
+        if (!confirmationDialog) {
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const db = await Database.load("sqlite:fenris_app_notes.db");
+
+            const resultCommand = await invoke("delete_single_note", {
+                noteId: note.id
+            });
+
+            await db.execute(resultCommand);
+
+            showToast('Note deleted successfully');
+
+            if (onNoteUpdate) {
+                onNoteUpdate();
+            }
+
+        } catch (e) {
+            showToast(`Error deleting note: ${e.message}`, 'error');
+        } finally {
+            setIsLoading(false);
+            handleMenuToggle();
+        }
+    };
+
+    const handleCancelUpdate = () => {
+        setIsUpdateNotePopupOpen(false);
+        setNewSingleNoteName(note.title);
+    };
+
+    const handleInputChange = (e) => {
+        setNewSingleNoteName(e.target.value);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleUpdateSingleNote();
+        }
+        if (e.key === 'Escape') {
+            handleCancelUpdate();
+        }
+    };
+
+    // Calculate menu position
+    const getMenuPosition = () => {
+        if (!buttonRef.current) return {top: 0, left: 0};
+
+        const rect = buttonRef.current.getBoundingClientRect();
+        return {
+            top: rect.bottom + window.scrollY,
+            left: rect.right + window.scrollX - 130
+        };
     };
 
     return (
-        <div
-            className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-                <MdOutlineEditNote className="w-4 h-4 text-(--secondary) flex-shrink-0"/>
-                <span className="text-(--on-surface) text-sm font-medium truncate">
-                    {note.title}
-                </span>
-                {note.tag && (
-                    <span
-                        className="text-xs text-(--primary) bg-(--primary-container) px-2 py-0.5 rounded-full flex-shrink-0">
-                        #{note.tag}
-                    </span>
-                )}
-            </div>
-
-            <div className="relative">
-                <button
-                    onClick={handleMenuToggle}
-                    className="cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-colors opacity-0 group-hover:opacity-100">
-                    <FaEllipsisV className="w-3 h-3 text-(--on-surface-variant)"/>
-                </button>
-                {isMenuOpen && (
-                    <div
-                        className="absolute right-0 top-6 z-10 bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-lg py-1 min-w-32">
-                        <button
-                            onClick={handleEdit}
-                            className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm">
-                            Edit
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            className="cursor-pointer w-full text-left px-3 py-2 text-(--error) hover:bg-(--error-container) text-sm">
-                            Delete
-                        </button>
+        <>
+            {/* Update Note Name Popup */}
+            {isUpdateNotePopupOpen && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
+                        <h2 className="text-lg font-semibold mb-4">
+                            Update Note Name
+                        </h2>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
+                                New Note Name:
+                            </label>
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={newSingleNoteName}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary) transition-colors"
+                                disabled={isLoading}
+                                placeholder="Enter note name..."
+                            />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={handleCancelUpdate}
+                                disabled={isLoading}
+                                className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpdateSingleNote}
+                                disabled={isLoading || !newSingleNoteName.trim()}
+                                className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-md hover:bg-(--secondary) transition-colors disabled:opacity-50 flex items-center space-x-2"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <div className="animate-spin h-4 w-4 border-2 border-(--on-tertiary) border-t-transparent rounded-full"></div>
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    'Save'
+                                )}
+                            </button>
+                        </div>
                     </div>
-                )}
+                </div>
+            )}
+
+            {/* Simple Toast */}
+            {toast.show && (
+                <div className={`fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg border transition-all duration-300 ${
+                    toast.type === 'error'
+                        ? 'bg-(--error-container) text-(--on-error-container) border-(--error)'
+                        : 'bg-(--secondary-container) text-(--on-secondary-container) border-(--secondary)'
+                }`}>
+                    {toast.message}
+                </div>
+            )}
+
+            {/* Note Item */}
+            <div className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <MdOutlineEditNote className="w-4 h-4 text-(--secondary) flex-shrink-0"/>
+                    <span className="text-(--on-surface) text-sm font-medium truncate">
+                        {note.title}
+                    </span>
+                    {note.tag && (
+                        <span
+                            className="text-xs text-(--primary) bg-(--primary-container) px-2 py-0.5 rounded-full flex-shrink-0">
+                            #{note.tag}
+                        </span>
+                    )}
+                </div>
+
+                <div className="relative">
+                    <button
+                        ref={buttonRef}
+                        onClick={handleMenuToggle}
+                        className="cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-colors opacity-0 group-hover:opacity-100"
+                        disabled={isLoading}
+                    >
+                        <FaEllipsisV className="w-3 h-3 text-(--on-surface-variant)"/>
+                    </button>
+
+                    {/* Fixed positioned menu */}
+                    {isMenuOpen && (
+                        <div
+                            ref={menuRef}
+                            style={{
+                                position: 'fixed',
+                                top: `${getMenuPosition().top}px`,
+                                left: `${getMenuPosition().left}px`,
+                                zIndex: 1000
+                            }}
+                            className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-lg py-1 min-w-32"
+                        >
+                            <button
+                                onClick={handleEditClick}
+                                className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
+                                disabled={isLoading}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="cursor-pointer w-full text-left px-3 py-2 text-(--error) hover:bg-(--error-container) text-sm"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 }

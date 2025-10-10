@@ -1,11 +1,15 @@
-use crate::cli::{cli_date_now, cli_date_without_hours, cli_design, cli_help_command, cli_show_dir};
+use crate::cli::{
+    cli_date_now, cli_date_without_hours, cli_design, cli_help_command, cli_show_dir,
+};
 use crate::json::{
     delete_json_file, fetch_json, format_json, get_json_file, list_json_files, perform_search,
     save_json_file,
 };
 use crate::ollama::{list_of_models, ollama_api_call};
-use crate::sqlite::{sqlite_migrations};
-use crate::ui_helpers::{delete_folder_dialog, pick_json_file, save_json_as_file};
+use crate::sqlite::{delete_folder_and_note_sqlite, delete_folder_by_name_sqlite, delete_folder_sqlite, delete_single_note, save_folder_sqlite, sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite, update_single_note};
+use crate::ui_helpers::{
+    delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
+};
 use tauri::{generate_context, Builder};
 use tauri_plugin_dialog::init;
 
@@ -41,9 +45,19 @@ pub fn run() {
             list_json_files,
             get_json_file,
             delete_json_file,
+            delete_single_note_dialog,
             perform_search,
             cli_date_without_hours,
-            delete_folder_dialog
+            delete_folder_dialog,
+            delete_single_note,
+            update_single_note,
+            save_folder_sqlite,
+            delete_folder_sqlite,
+            delete_folder_and_note_sqlite,
+            update_folder_sqlite,
+            update_folder_by_name_sqlite,
+            update_folder_by_id_sqlite,
+            delete_folder_by_name_sqlite
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

@@ -43,6 +43,16 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         }
     }, [isUpdateFolderNameMenuOpen]);
 
+    const getMenuPosition = () => {
+        if (!buttonRef.current) return {top: 0, left: 0};
+
+        const rect = buttonRef.current.getBoundingClientRect();
+        return {
+            top: rect.bottom + window.scrollY,
+            left: rect.right + window.scrollX - 192
+        };
+    };
+
     const handleMenuToggle = () => {
         const newState = !isMenuOpen;
         setIsMenuOpen(newState);
@@ -51,7 +61,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     const updateFolderNameHandler = () => {
         setIsUpdateFolderNameOpen(true);
-        setError(''); // Clear any previous errors
+        setError('');
         setIsMenuOpen(false);
     }
 
@@ -82,7 +92,6 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                 setError(result.error || 'Failed to update folder name');
             }
         } catch (error) {
-            console.error('Error updating folder:', error);
             setError('Error updating folder name: ' + error.message);
         } finally {
             setIsLoading(false);
@@ -227,55 +236,59 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
             )}
 
             <div
-                className="relative w-full flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors cursor-pointer">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
                     <FaRegFolder className="text-(--primary) flex-shrink-0"/>
-                    <span className="text-(--on-surface) truncate">
+                    <span className="text-(--on-surface) text-sm font-medium truncate">
                         {folder.name}
                     </span>
                 </div>
 
-                <button
-                    ref={buttonRef}
-                    className="cursor-pointer"
-                    onClick={handleMenuToggle}
-                >
-                    <RxDotsVertical className="text-(--primary) flex-shrink-0 ml-2"/>
-                </button>
-
-                {isMenuOpen && (
-                    <div
-                        ref={menuRef}
-                        className="absolute right-0 top-full z-50 bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl min-w-48 max-w-64 mt-1"
+                <div className="relative">
+                    <button
+                        ref={buttonRef}
+                        onClick={handleMenuToggle}
+                        className="cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-colors"
+                        title="Folder options"
                     >
-                        <div className="p-2">
+                        <RxDotsVertical className="w-3 h-3 text-(--on-surface-variant)"/>
+                    </button>
+
+                    {/* Fixed positioned menu */}
+                    {isMenuOpen && (
+                        <div
+                            ref={menuRef}
+                            style={{
+                                position: 'fixed',
+                                top: `${getMenuPosition().top}px`,
+                                left: `${getMenuPosition().left}px`,
+                                zIndex: 1000
+                            }}
+                            className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl py-1 min-w-32"
+                        >
                             <button
-                                className="cursor-pointer w-full flex items-center px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) rounded-md transition-colors text-sm text-left"
+                                className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
                                 onClick={() => {/* Add note logic */
                                 }}
                             >
                                 Add note
                             </button>
-
                             <button
-                                className="cursor-pointer w-full flex items-center px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) rounded-md transition-colors text-sm text-left"
+                                className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
                                 onClick={updateFolderNameHandler}
                             >
                                 Change folder's name
                             </button>
-
-                            <div className="border-t border-(--outline-variant) my-1"/>
-
                             <button
-                                className="cursor-pointer w-full flex items-center px-3 py-2 text-(--error) hover:bg-(--error-container) rounded-md transition-colors text-sm text-left"
+                                className="cursor-pointer w-full text-left px-3 py-2 text-(--error) hover:bg-(--error-container) text-sm"
                                 onClick={handleDeleteFolder}
                                 disabled={isLoading}
                             >
                                 {isLoading ? 'Deleting...' : 'Delete Folder'}
                             </button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </>
     );

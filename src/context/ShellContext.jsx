@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
 import i18next from "i18next";
-import {deleteFolder, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
+import {deleteFolder, deleteFolderByName, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
 
 const ShellContext = createContext();
 
@@ -200,8 +200,12 @@ export function ShellProvider({children}) {
                 return t('shell.errors.addFolder.missingName');
             }
             try {
-                await saveFolder(folderName);
-                return t('shell.success.addFolder', {name: folderName});
+                const result = await saveFolder(folderName);
+                if (result.success) {
+                    return t('shell.success.addFolder', {name: folderName});
+                } else {
+                    return t('shell.errors.addFolder.generic', {error: result.error});
+                }
             } catch (error) {
                 return t('shell.errors.addFolder.generic', {error: error.message});
             }
@@ -213,8 +217,12 @@ export function ShellProvider({children}) {
                 return t('shell.errors.deleteFolder.missingName');
             }
             try {
-                await deleteFolder(folderName);
-                return t('shell.success.deleteFolder', {name: folderName});
+                const result = await deleteFolderByName(folderName);
+                if (result.success) {
+                    return t('shell.success.deleteFolder', {name: folderName});
+                } else {
+                    return t('shell.errors.deleteFolder.generic', {error: result.error});
+                }
             } catch (error) {
                 return t('shell.errors.deleteFolder.generic', {error: error.message});
             }
