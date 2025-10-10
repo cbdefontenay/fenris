@@ -1,9 +1,10 @@
 import {invoke} from "@tauri-apps/api/core";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {useTranslation} from "react-i18next";
 import DaisyToast from "./DaisyToast.jsx";
+import SearchJsonComponent from "./SearchJsonComponent.jsx"; // Add this import
 import {TiCloudStorageOutline} from "react-icons/ti";
-import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown, FaSearch} from "react-icons/fa";
+import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
 import {LuFileJson} from "react-icons/lu";
 import {VscGitFetch} from "react-icons/vsc";
 import {TfiImport} from "react-icons/tfi";
@@ -28,20 +29,30 @@ export default function JsonFormatUrlComponent() {
     const [searchResults, setSearchResults] = useState([]);
     const [searchCount, setSearchCount] = useState(0);
     const [searchLoading, setSearchLoading] = useState(false);
+    const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+
     const {t} = useTranslation();
+    const editorRef = useRef(null);
 
     useEffect(() => {
         loadStoredFiles();
     }, []);
 
     useEffect(() => {
-        if (searchTerm && response) {
+        if (searchTerm && response && !isEditing) {
             performSearch();
         } else {
             setSearchResults([]);
             setSearchCount(0);
+            setCurrentMatchIndex(0);
         }
-    }, [searchTerm, response]);
+    }, [searchTerm, response, isEditing]);
+
+    useEffect(() => {
+        if (searchResults.length > 0 && currentMatchIndex < searchResults.length) {
+            scrollToMatch(currentMatchIndex);
+        }
+    }, [currentMatchIndex, searchResults]);
 
     const loadStoredFiles = async () => {
         try {
@@ -53,9 +64,10 @@ export default function JsonFormatUrlComponent() {
     };
 
     const performSearch = async () => {
-        if (!response || !searchTerm.trim()) {
+        if (!response || !searchTerm.trim() || isEditing) {
             setSearchResults([]);
             setSearchCount(0);
+            setCurrentMatchIndex(0);
             return;
         }
 
@@ -68,40 +80,105 @@ export default function JsonFormatUrlComponent() {
 
             setSearchResults(result.matches || []);
             setSearchCount(result.count || 0);
+            setCurrentMatchIndex(0); // Reset to first match
         } catch (error) {
             setSearchResults([]);
             setSearchCount(0);
+            setCurrentMatchIndex(0);
             showToast(t('jsonFormatter.search.error'));
         } finally {
             setSearchLoading(false);
         }
     };
 
-    const highlightSearchResults = (text, matches) => {
-        if (!matches || matches.length === 0) return text;
+    const scrollToMatch = (matchIndex) => {
+        if (!editorRef.current || searchResults.length === 0) return;
 
-        // Sort matches by start position to process in order
-        const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
+        const element = document.getElementById(`match-${matchIndex}`);
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
 
-        let highlightedText = "";
-        let lastIndex = 0;
+            // Add temporary highlight for the current match
+            element.classList.add('bg-(--primary-container)');
+            setTimeout(() => {
+                element.classList.remove('bg-(--primary-container)');
+            }, 2000);
+        }
+    };
 
-        sortedMatches.forEach(match => {
-            // Add text before the match
-            highlightedText += text.substring(lastIndex, match.start);
-            highlightedText += `<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">${text.substring(match.start, match.end)}</mark>`;
-            lastIndex = match.end;
+    const handleNavigateMatch = (newIndex) => {
+        setCurrentMatchIndex(newIndex);
+    };
+
+    const highlightJsonWithMatches = (jsonText, matches, currentMatchIdx) => {
+        if (!matches || matches.length === 0) return jsonText;
+
+        // Flatten all matches from all lines
+        const allMatches = [];
+        matches.forEach((searchMatch) => {
+            searchMatch.matches.forEach((match) => {
+                allMatches.push({
+                    ...match,
+                    lineNumber: searchMatch.line_number,
+                    line: searchMatch.line
+                });
+            });
         });
 
-        highlightedText += text.substring(lastIndex);
-        return highlightedText;
+        // Sort matches by their position in the document
+        const sortedMatches = [...allMatches].sort((a, b) => {
+            if (a.lineNumber !== b.lineNumber) {
+                return a.lineNumber - b.lineNumber;
+            }
+            return a.start - b.start;
+        });
+
+        let result = "";
+        const lines = jsonText.split('\n');
+        let matchIndex = 0;
+
+        lines.forEach((line, lineIndex) => {
+            const lineNumber = lineIndex + 1;
+            const lineMatches = sortedMatches.filter(m => m.lineNumber === lineNumber);
+
+            if (lineMatches.length > 0) {
+                let highlightedLine = "";
+                let lastIndex = 0;
+
+                lineMatches.forEach((match, matchInLineIndex) => {
+                    const globalMatchIndex = matchIndex + matchInLineIndex;
+
+                    highlightedLine += line.substring(lastIndex, match.start);
+
+                    const isCurrentMatch = globalMatchIndex === currentMatchIdx;
+                    const highlightClass = isCurrentMatch
+                        ? 'bg-(--tertiary) text-(--on-tertiary) ring-2 ring-(--tertiary)'
+                        : 'bg-yellow-200 text-yellow-900';
+
+                    highlightedLine += `<span id="match-${globalMatchIndex}" class="${highlightClass} px-0.5 rounded mx-0.5 transition-all duration-200">${line.substring(match.start, match.end)}</span>`;
+                    lastIndex = match.end;
+                });
+
+                // Add remaining text after last match
+                highlightedLine += line.substring(lastIndex);
+                result += highlightedLine + '\n';
+                matchIndex += lineMatches.length;
+            } else {
+                result += line + '\n';
+            }
+        });
+
+        return result;
     };
 
     const handleFetch = async () => {
         if (!url) return;
 
         setLoading(true);
-        setSearchTerm(""); // Reset search when fetching new data
+        setSearchTerm("");
         setSearchResults([]);
         setSearchCount(0);
 
@@ -131,7 +208,6 @@ export default function JsonFormatUrlComponent() {
             const fileContent = await invoke("pick_json_file");
 
             if (fileContent) {
-                // Try to format the JSON content
                 try {
                     const formattedJson = await invoke("format_json", {jsonString: fileContent});
                     setResponse(formattedJson);
@@ -140,6 +216,7 @@ export default function JsonFormatUrlComponent() {
                     setSearchTerm(""); // Reset search when importing new file
                     setSearchResults([]);
                     setSearchCount(0);
+                    setCurrentMatchIndex(0);
                     showToast(t('jsonFormatter.toast.importSuccess'));
                 } catch (formatError) {
                     setResponse(`${t('jsonFormatter.errors.formatError')}: ${formatError}\n\n${t('jsonFormatter.rawContent')}:\n${fileContent}`);
@@ -163,6 +240,10 @@ export default function JsonFormatUrlComponent() {
             setResponse(formatted);
             setOutputLength(formatted.length);
             setIsEditing(false);
+            setSearchTerm("");
+            setSearchResults([]);
+            setSearchCount(0);
+            setCurrentMatchIndex(0);
             showToast(t('jsonFormatter.toast.formatSuccess'));
         } catch (error) {
             showToast(t('jsonFormatter.toast.formatError', {error}));
@@ -223,13 +304,18 @@ export default function JsonFormatUrlComponent() {
         setSearchTerm("");
         setSearchResults([]);
         setSearchCount(0);
+        setCurrentMatchIndex(0);
         showToast(t('jsonFormatter.toast.clearSuccess'));
     };
 
     const handlePasteJson = () => {
         setIsEditing(true);
+        setSearchTerm("");
+        setSearchResults([]);
+        setSearchCount(0);
+        setCurrentMatchIndex(0);
         if (!response) {
-            setResponse(""); // Clear any existing content for fresh paste
+            setResponse("");
         }
     };
 
@@ -253,6 +339,7 @@ export default function JsonFormatUrlComponent() {
             setSearchTerm(""); // Reset search when loading stored file
             setSearchResults([]);
             setSearchCount(0);
+            setCurrentMatchIndex(0);
             showToast(t('jsonFormatter.toast.fileLoaded'));
         } catch (error) {
             console.error("Failed to load file:", error);
@@ -288,7 +375,7 @@ export default function JsonFormatUrlComponent() {
 
     return (
         <div className="page-margin lg:ml-20 flex flex-col md:h-full bg-(--background) text-(--on-background)">
-            {/* Header */}
+            {/* Header - unchanged */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">
                     <div className="flex items-center gap-4 mb-3">
@@ -301,7 +388,7 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* Main Input Section */}
+                    {/* Main Input Section - unchanged */}
                     <div className="flex gap-3">
                         <div className="flex-1 relative">
                             <input
@@ -340,38 +427,20 @@ export default function JsonFormatUrlComponent() {
             <div className="flex-1 flex p-6 gap-6 overflow-hidden">
                 {/* Left Panel - Input/Quick Actions */}
                 <div className="w-80 flex flex-col gap-6">
-                    {/* Search Bar */}
-                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
-                        <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
-                            <FaSearch/>
-                            {t('jsonFormatter.search.title')}
-                        </h3>
-                        <div className="space-y-3">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder={t('jsonFormatter.search.placeholder')}
-                                    className="w-full px-4 py-2 pl-10 bg-(--surface-container-high) border border-(--outline-variant) rounded-lg text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent"
-                                    disabled={!response}
-                                />
-                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-(--on-surface-variant)" />
-                            </div>
-                            {searchLoading && (
-                                <div className="text-sm text-(--on-surface-variant)">
-                                    {t('jsonFormatter.search.searching')}
-                                </div>
-                            )}
-                            {searchCount > 0 && !searchLoading && (
-                                <div className="text-sm text-(--on-surface-variant)">
-                                    {t('jsonFormatter.search.results', {count: searchCount})}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    {/* Search Component */}
+                    <SearchJsonComponent
+                        jsonContent={response}
+                        onSearchChange={performSearch}
+                        searchTerm={searchTerm}
+                        onSearchTermChange={setSearchTerm}
+                        searchResults={searchResults}
+                        searchCount={searchCount}
+                        searchLoading={searchLoading}
+                        currentMatchIndex={currentMatchIndex}
+                        onNavigateMatch={handleNavigateMatch}
+                    />
 
-                    {/* Stored Files Dropdown */}
+                    {/* Stored Files Dropdown - unchanged */}
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-(--on-surface) flex items-center gap-2">
@@ -420,51 +489,22 @@ export default function JsonFormatUrlComponent() {
                         )}
                     </div>
 
-                    {/* Quick Examples */}
-                    <div className="example-class hidden bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
-                        <h3 className="text-lg font-semibold text-(--on-surface) mb-4 flex items-center gap-2">
-                            <FaCloudDownloadAlt/>
-                            {t('jsonFormatter.quickExamples.title')}
-                        </h3>
-                        <div className="space-y-2">
-                            {quickExamples.map((example, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setUrl(example.url)}
-                                    className="cursor-pointer w-full text-left p-3 bg-(--surface-container-high) hover:bg-(--surface-container-highest) rounded-lg transition-colors group"
-                                >
-                                    <div
-                                        className="text-sm font-medium text-(--on-surface) group-hover:text-(--primary)">
-                                        {example.name}
-                                    </div>
-                                    <div className="text-xs text-(--on-surface-variant) truncate mt-1">
-                                        {example.url}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Stats & Info */}
+                    {/* Stats & Info - updated to show current match */}
                     <div className="json-stats bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4">{t('jsonFormatter.documentInfo.title')}</h3>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span
-                                    className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.length')}</span>
-                                <span
-                                    className="font-mono text-(--on-surface)">{outputLength} {t('jsonFormatter.documentInfo.chars')}</span>
+                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.length')}</span>
+                                <span className="font-mono text-(--on-surface)">{outputLength} {t('jsonFormatter.documentInfo.chars')}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span
-                                    className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.lines')}</span>
+                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.lines')}</span>
                                 <span className="font-mono text-(--on-surface)">
                                     {response ? response.split('\n').length : 0}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span
-                                    className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.status')}</span>
+                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.status')}</span>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
                                     response
                                         ? 'bg-(--success-container) text-(--on-success-container)'
@@ -474,12 +514,20 @@ export default function JsonFormatUrlComponent() {
                                 </span>
                             </div>
                             {searchCount > 0 && (
-                                <div className="flex justify-between items-center pt-2 border-t border-(--outline-variant)">
-                                    <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.matches')}</span>
-                                    <span className="font-mono text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
-                                        {searchCount}
-                                    </span>
-                                </div>
+                                <>
+                                    <div className="flex justify-between items-center pt-2 border-t border-(--outline-variant)">
+                                        <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.matches')}</span>
+                                        <span className="font-mono text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
+                                            {searchCount}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.currentMatch')}</span>
+                                        <span className="font-mono text-(--secondary) bg-(--secondary-container) px-2 py-1 rounded">
+                                            {currentMatchIndex + 1}
+                                        </span>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
@@ -487,8 +535,8 @@ export default function JsonFormatUrlComponent() {
 
                 {/* Right Panel - JSON Editor */}
                 <div
-                    className="flex-1 flex h-[710px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
-                    {/* Editor Header */}
+                    className="flex-1 flex md:h-[710px] lg:h-[810px] xl:h-[920px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
+                    {/* Editor Header - updated to show current match */}
                     <div
                         className="flex justify-between items-center p-4 border-b border-(--outline-variant) bg-(--surface-container-high)">
                         <div className="flex items-center gap-3">
@@ -504,7 +552,7 @@ export default function JsonFormatUrlComponent() {
                             )}
                             {searchCount > 0 && (
                                 <span className="text-xs px-2 py-1 bg-(--secondary-container) text-(--on-secondary-container) rounded-full">
-                                    {searchCount} {t('jsonFormatter.search.matches')}
+                                    {currentMatchIndex + 1}/{searchCount} {t('jsonFormatter.search.matches')}
                                 </span>
                             )}
                         </div>
@@ -561,8 +609,8 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* JSON Editor */}
-                    <div className="flex-1 relative select-text">
+                    {/* JSON Editor - updated for highlighting */}
+                    <div className="flex-1 relative select-text" ref={editorRef}>
                         {response || isEditing ? (
                             isEditing ? (
                                 <textarea
@@ -576,36 +624,13 @@ export default function JsonFormatUrlComponent() {
                                 <div className="absolute inset-0 overflow-auto">
                                     <pre className="p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm whitespace-pre-wrap leading-relaxed">
                                         {searchTerm && searchResults.length > 0 ? (
-                                            <>
-                                                <div className="text-sm text-(--on-surface-variant) mb-4 border-b border-(--outline-variant) pb-2">
-                                                    {t('jsonFormatter.search.showingMatches', {count: searchResults.length, total: searchCount})}
-                                                </div>
-                                                {searchResults.map((result, index) => (
-                                                    <div key={index} className="mb-4 p-3 bg-(--surface-container) rounded-lg border border-(--outline-variant)">
-                                                        <div className="text-xs text-(--on-surface-variant) mb-2 flex items-center gap-2">
-                                                            <span>Line {result.line_number}:</span>
-                                                            <span className="text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
-                                                                {result.matches.length} match{result.matches.length > 1 ? 'es' : ''}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="pl-4 border-l-2 border-(--primary) font-mono text-sm"
-                                                            dangerouslySetInnerHTML={{
-                                                                __html: highlightSearchResults(result.line, result.matches)
-                                                            }}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </>
-                                        ) : searchTerm && searchResults.length === 0 ? (
-                                            <div className="text-center text-(--on-surface-variant) py-8">
-                                                <FaSearch className="mx-auto mb-2 text-2xl opacity-50" />
-                                                <p>{t('jsonFormatter.search.noMatches')}</p>
-                                            </div>
+                                            <div dangerouslySetInnerHTML={{
+                                                __html: highlightJsonWithMatches(response, searchResults, currentMatchIndex)
+                                            }} />
                                         ) : (
                                             response
                                         )}
-                                    </pre>
+                                   </pre>
                                 </div>
                             )
                         ) : (
@@ -644,7 +669,7 @@ export default function JsonFormatUrlComponent() {
                 </div>
             </div>
 
-            {/* Save Dialog */}
+            {/* Save Dialog - unchanged */}
             {showSaveDialog && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-6 w-96">

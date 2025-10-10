@@ -150,7 +150,10 @@
       "matches": "Treffer",
       "showingMatches": "Zeige {{count}} von {{total}} Treffern",
       "noMatches": "Keine Treffer gefunden",
-      "error": "Suche fehlgeschlagen"
+      "error": "Suche fehlgeschlagen",
+      "previous": "Vorherige Übereinstimmung",
+      "next": "Nächste Übereinstimmung",
+      "currentMatch": "Aktuelle Übereinstimmung"
     },
     "storedFiles": {
       "title": "Gespeicherte Dateien",

@@ -4,7 +4,7 @@ import Database from "@tauri-apps/plugin-sql";
 export async function saveFolder(folderName) {
     try {
         const dateNow = await invoke("cli_date_without_hours");
-        const db = await Database.load("sqlite:fenris_notes.db");
+        const db = await Database.load("sqlite:fenris_app_notes.db");
 
         await db.execute("INSERT INTO folders (name, date_created) VALUES ($1, $2)", [
             folderName.trim(), dateNow
@@ -16,7 +16,7 @@ export async function saveFolder(folderName) {
 
 export async function deleteFolder(folderId) {
     try {
-        const db = await Database.load("sqlite:fenris_notes.db");
+        const db = await Database.load("sqlite:fenris_app_notes.db");
 
         await db.execute("DELETE FROM note WHERE folder_id = $1", [folderId]);
 
@@ -30,7 +30,7 @@ export async function deleteFolder(folderId) {
 
 export async function updateFolderName(newFolderName, folderId) {
     try {
-        const db = await Database.load("sqlite:fenris_notes.db");
+        const db = await Database.load("sqlite:fenris_app_notes.db");
 
         await db.execute(
             "UPDATE folders SET name = $1 WHERE id = $2",
@@ -44,7 +44,7 @@ export async function updateFolderName(newFolderName, folderId) {
 
 export async function updateFolderByName(currentFolderName, newFolderName) {
     try {
-        const db = await Database.load("sqlite:fenris_notes.db");
+        const db = await Database.load("sqlite:fenris_app_notes.db");
 
         // First find the folder by name
         const folders = await db.select("SELECT id FROM folders WHERE name = $1", [currentFolderName.trim()]);

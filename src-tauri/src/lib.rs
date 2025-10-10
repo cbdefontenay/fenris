@@ -4,7 +4,7 @@ use crate::json::{
     save_json_file,
 };
 use crate::ollama::{list_of_models, ollama_api_call};
-use crate::sqlite::{migrations};
+use crate::sqlite::{sqlite_migrations};
 use crate::ui_helpers::{delete_folder_dialog, pick_json_file, save_json_as_file};
 use tauri::{generate_context, Builder};
 use tauri_plugin_dialog::init;
@@ -21,7 +21,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:fenris_notes.db", migrations())
+                .add_migrations("sqlite:fenris_app_notes.db", sqlite_migrations())
                 .build(),
         )
         .plugin(init())

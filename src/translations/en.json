@@ -150,7 +150,10 @@
       "matches": "Matches",
       "showingMatches": "Showing {{count}} of {{total}} matches",
       "noMatches": "No matches found",
-      "error": "Search failed"
+      "error": "Search failed",
+      "previous": "Previous match",
+      "next": "Next match",
+      "currentMatch": "Current match"
     },
     "storedFiles": {
       "title": "Stored Files",

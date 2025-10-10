@@ -1,19 +1,20 @@
 import {RiCloseLargeFill} from "react-icons/ri";
-import {FaFolder, FaSpinner} from "react-icons/fa";
+import {FaSpinner} from "react-icons/fa";
 import Database from '@tauri-apps/plugin-sql';
 import {useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
+import {MdOutlineEditNote} from "react-icons/md";
 
-export default function AddFolderPopupComponent({isPopupClosed}) {
+export default function AddNotePopupComponent({isPopupClosed}) {
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [folderName, setFolderName] = useState("");
+    const [noteName, setNoteName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    async function saveFolder() {
-        if (!folderName.trim()) {
+    async function saveNote() {
+        if (!noteName.trim()) {
             setShowError(true);
-            setErrorMessage("Please enter a folder name");
+            setErrorMessage("Please enter a note name");
             return;
         }
 
@@ -22,16 +23,23 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
             const dateNow = await invoke("cli_date_without_hours");
             const db = await Database.load("sqlite:fenris_app_notes.db");
 
-            await db.execute("INSERT INTO folders (name, date_created) VALUES ($1, $2)", [
-                folderName.trim(), dateNow
-            ]);
+            // Fixed: Include all required fields
+            await db.execute(
+                "INSERT INTO single_notes (title, content, date_created, date_modified) VALUES ($1, $2, $3, $4)",
+                [
+                    noteName.trim(),
+                    "", // Empty content as default
+                    dateNow,
+                    dateNow // Set both created and modified to same date initially
+                ]
+            );
 
             isPopupClosed();
         } catch (e) {
             setShowError(true);
             setErrorMessage(e.message.includes("UNIQUE")
-                ? "A folder with this name already exists"
-                : `Failed to create folder: ${e.message}`
+                ? "A note with this name already exists"
+                : `Failed to create note: ${e.message}`
             );
         } finally {
             setIsLoading(false);
@@ -39,13 +47,13 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
     }
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !isLoading && folderName.trim()) {
-            saveFolder();
+        if (e.key === 'Enter' && !isLoading && noteName.trim()) {
+            saveNote().then(r => `${r}`);
         }
     };
 
     const handleInputChange = (e) => {
-        setFolderName(e.target.value);
+        setNoteName(e.target.value);
         if (showError) setShowError(false);
     };
 
@@ -73,7 +81,7 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-(--outline-variant)">
-                    <h2 className="text-xl font-semibold text-(--on-surface)">Create New Folder</h2>
+                    <h2 className="text-xl font-semibold text-(--on-surface)">Create New Note</h2>
                     <button
                         className="cursor-pointer p-2 rounded-full hover:bg-(--surface-container-high) transition-colors duration-200"
                         onClick={isPopupClosed}
@@ -88,17 +96,17 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
                     {/* Input Group */}
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-(--on-surface-variant) block">
-                            Folder Name
+                            Note Name
                         </label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <FaFolder className="text-(--primary) text-lg"/>
+                                <MdOutlineEditNote className="text-(--primary) text-lg"/>
                             </div>
                             <input
-                                value={folderName}
+                                value={noteName}
                                 onChange={handleInputChange}
                                 onKeyPress={handleKeyPress}
-                                placeholder="Enter folder name..."
+                                placeholder="Enter note name..."
                                 className="w-full pl-10 pr-4 py-3 border border-(--outline) rounded-xl bg-(--surface-container-low) text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent transition-all duration-200"
                                 disabled={isLoading}
                                 autoFocus
@@ -128,8 +136,8 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
                         Cancel
                     </button>
                     <button
-                        onClick={saveFolder}
-                        disabled={isLoading || !folderName.trim()}
+                        onClick={saveNote}
+                        disabled={isLoading || !noteName.trim()}
                         className="cursor-pointer px-6 py-2.5 bg-(--primary) text-(--on-primary) hover:bg-(--surface-container-highest) hover:text-(--on-surface-container) rounded-xl transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                     >
                         {isLoading ? (
@@ -138,7 +146,7 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
                                 Creating...
                             </>
                         ) : (
-                            "Create Folder"
+                            "Create Note"
                         )}
                     </button>
                 </div>

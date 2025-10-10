@@ -150,7 +150,10 @@
       "matches": "Correspondances",
       "showingMatches": "Affichage de {{count}} sur {{total}} correspondances",
       "noMatches": "Aucune correspondance trouvée",
-      "error": "Échec de la recherche"
+      "error": "Échec de la recherche",
+      "previous": "Correspondance précédente",
+      "next": "Correspondance suivante",
+      "currentMatch": "Correspondance actuelle"
     },
     "storedFiles": {
       "title": "Fichiers Enregistrés",
