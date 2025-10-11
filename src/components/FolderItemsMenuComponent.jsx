@@ -10,6 +10,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     const [newFolderName, setNewFolderName] = useState(folder.name || '');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isAddNotePopupOpen, setIsAddNotePopupOpen] = useState(false);
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
     const inputRef = useRef(null);

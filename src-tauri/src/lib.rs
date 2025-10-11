@@ -6,7 +6,7 @@ use crate::json::{
     save_json_file,
 };
 use crate::ollama::{list_of_models, ollama_api_call};
-use crate::sqlite::{delete_folder_and_note_sqlite, delete_folder_by_name_sqlite, delete_folder_sqlite, delete_single_note, save_folder_sqlite, sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite, update_single_note};
+use crate::sqlite::{delete_folder_and_note_sqlite, delete_folder_by_name_sqlite, delete_folder_sqlite, delete_single_note, get_all_folders, get_all_single_note, get_notes_by_folder_sqlite, save_folder_sqlite, save_note_to_folder_sqlite, sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite, update_single_note};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
 };
@@ -57,7 +57,11 @@ pub fn run() {
             update_folder_sqlite,
             update_folder_by_name_sqlite,
             update_folder_by_id_sqlite,
-            delete_folder_by_name_sqlite
+            delete_folder_by_name_sqlite,
+            get_all_folders,
+            get_all_single_note,
+            save_note_to_folder_sqlite,
+            get_notes_by_folder_sqlite
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

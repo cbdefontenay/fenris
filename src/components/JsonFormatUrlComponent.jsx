@@ -2,7 +2,7 @@ import {invoke} from "@tauri-apps/api/core";
 import {useState, useEffect, useRef} from "react";
 import {useTranslation} from "react-i18next";
 import DaisyToast from "./DaisyToast.jsx";
-import SearchJsonComponent from "./SearchJsonComponent.jsx"; // Add this import
+import SearchJsonComponent from "./SearchJsonComponent.jsx";
 import {TiCloudStorageOutline} from "react-icons/ti";
 import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
 import {LuFileJson} from "react-icons/lu";
@@ -366,16 +366,9 @@ export default function JsonFormatUrlComponent() {
         }
     };
 
-    const quickExamples = [
-        {
-            name: t('jsonFormatter.examples.marsApi.name'),
-            url: "https://eyes.nasa.gov/apps/solar-system/descriptions/mars.json"
-        },
-    ];
-
     return (
         <div className="page-margin lg:ml-20 flex flex-col md:h-full bg-(--background) text-(--on-background)">
-            {/* Header - unchanged */}
+            {/* Header */}
             <div className="border-b border-(--outline-variant) bg-(--surface-container)">
                 <div className="px-8 py-6">
                     <div className="flex items-center gap-4 mb-3">
@@ -388,7 +381,7 @@ export default function JsonFormatUrlComponent() {
                         </div>
                     </div>
 
-                    {/* Main Input Section - unchanged */}
+                    {/* Main Input Section  */}
                     <div className="flex gap-3">
                         <div className="flex-1 relative">
                             <input
@@ -440,7 +433,7 @@ export default function JsonFormatUrlComponent() {
                         onNavigateMatch={handleNavigateMatch}
                     />
 
-                    {/* Stored Files Dropdown - unchanged */}
+                    {/* Stored Files Dropdown  */}
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold text-(--on-surface) flex items-center gap-2">
@@ -489,7 +482,7 @@ export default function JsonFormatUrlComponent() {
                         )}
                     </div>
 
-                    {/* Stats & Info - updated to show current match */}
+                    {/* Stats & Info */}
                     <div className="json-stats bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
                         <h3 className="text-lg font-semibold text-(--on-surface) mb-4">{t('jsonFormatter.documentInfo.title')}</h3>
                         <div className="space-y-3">
@@ -535,8 +528,8 @@ export default function JsonFormatUrlComponent() {
 
                 {/* Right Panel - JSON Editor */}
                 <div
-                    className="flex-1 flex md:h-[710px] lg:h-[810px] xl:h-[920px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
-                    {/* Editor Header - updated to show current match */}
+                    className="flex-1 flex md:h-[710px] lg:h-[710px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
+                    {/* Editor Header */}
                     <div
                         className="flex justify-between items-center p-4 border-b border-(--outline-variant) bg-(--surface-container-high)">
                         <div className="flex items-center gap-3">
@@ -669,7 +662,7 @@ export default function JsonFormatUrlComponent() {
                 </div>
             </div>
 
-            {/* Save Dialog - unchanged */}
+            {/* Save Dialog  */}
             {showSaveDialog && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                     <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-6 w-96">

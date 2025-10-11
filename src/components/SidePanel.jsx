@@ -7,6 +7,7 @@ import FolderItemsMenuComponent from "./FolderItemsMenuComponent.jsx";
 import AddNotePopupComponent from "./AddNotePopupComponent.jsx";
 import {MdOutlineEditNote} from "react-icons/md";
 import SingleNoteItemsMenuComponent from "./SingleNoteItemsMenuComponent.jsx";
+import {invoke} from "@tauri-apps/api/core";
 
 export default function SidePanel() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -32,7 +33,8 @@ export default function SidePanel() {
     const getAllFolders = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const dbFolders = await db.select("SELECT * FROM folders ORDER BY date_created DESC");
+            const getAllFolderCommandFromRust = await invoke("get_all_folders")
+            const dbFolders = await db.select(getAllFolderCommandFromRust);
             setFolders(dbFolders);
         } catch (e) {
             setShowError(true);
@@ -43,7 +45,8 @@ export default function SidePanel() {
     const getAllSingleNotes = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const dbNotes = await db.select("SELECT * FROM single_notes ORDER BY date_created DESC");
+            const getAllFSingleNoteCommandFromRust = await invoke("get_all_single_note")
+            const dbNotes = await db.select(getAllFSingleNoteCommandFromRust);
             setSingleNotes(dbNotes);
         } catch (e) {
             setShowError(true);
@@ -54,7 +57,7 @@ export default function SidePanel() {
     const getRecentItems = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            // Get recent items from both folders and single_notes, limited to 5
+            // Get recent items from both folders and single_notes, limited to 3
             const recentFolders = await db.select(`
                 SELECT id, name, date_modified, 'folder' as type
                 FROM folders
@@ -87,38 +90,10 @@ export default function SidePanel() {
         setIsAnyMenuOpen(isOpen);
     };
 
-    // Format date to relative time (like "2 hours ago")
-    const formatRelativeTime = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMs = now - date;
-        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-        if (diffInHours < 1) {
-            const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-            return `${diffInMinutes}m ago`;
-        } else if (diffInHours < 24) {
-            return `${diffInHours}h ago`;
-        } else if (diffInDays === 1) {
-            return 'Yesterday';
-        } else if (diffInDays < 7) {
-            return `${diffInDays}d ago`;
-        } else {
-            return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-        }
-    };
-
-    const getItemIcon = (type) => {
-        return type === 'folder' ? <FaFolder className="w-3 h-3 text-(--primary)"/> :
-            <MdOutlineEditNote className="w-3 h-3 text-(--secondary)"/>;
-    };
-
     useEffect(() => {
         refreshAll();
     }, []);
 
-    // Refresh data when popups close
     useEffect(() => {
         if (!isFolderWindowOpen && !isNoteWindowOpen) {
             refreshAll();

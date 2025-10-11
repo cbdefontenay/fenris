@@ -322,24 +322,12 @@ export function ShellProvider({children}) {
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '5rem');
                 return t('shell.success.navbarShown');
-            case 'hide json-example':
-                const sectionExampleToHide = document.querySelector('.example-class');
-                if (sectionExampleToHide) {
-                    sectionExampleToHide.style.display = 'none';
-                }
-                return t('shell.success.jsonExampleHidden');
             case 'hide json-stats':
                 const hideStatsSection = document.querySelector('.json-stats');
                 if (hideStatsSection) {
                     hideStatsSection.style.display = 'none';
                 }
                 return t('shell.success.jsonStatsHidden');
-            case 'show json-example':
-                const showExamplesSection = document.querySelector('.example-class');
-                if (showExamplesSection) {
-                    showExamplesSection.style.display = 'block';
-                }
-                return t('shell.success.jsonExampleShown');
             case 'show json-stats':
                 const showStatsSection = document.querySelector('.json-stats');
                 if (showStatsSection) {
