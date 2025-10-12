@@ -1,15 +1,15 @@
-import {useEffect, useState} from 'react';
-import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
-import {FaFolder, FaRegFolder, FaChevronDown, FaChevronRight, FaRegFolderOpen} from "react-icons/fa";
-import Database from "@tauri-apps/plugin-sql";
-import {IoMdRefresh} from "react-icons/io";
+import {FaChevronDown, FaChevronRight, FaFolder, FaRegFolder, FaRegFolderOpen} from "react-icons/fa";
 import FolderItemsMenuComponent from "./FolderItemsMenuComponent.jsx";
-import AddNotePopupComponent from "./AddNotePopupComponent.jsx";
 import {MdOutlineEditNote} from "react-icons/md";
 import SingleNoteItemsMenuComponent from "./SingleNoteItemsMenuComponent.jsx";
+import {IoMdRefresh} from "react-icons/io";
+import AddNotePopupComponent from "./AddNotePopupComponent.jsx";
+import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
+import {useEffect, useState} from "react";
+import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
 
-export default function SidePanel() {
+export default function SidePanel({ onNoteSelect }) {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -181,6 +181,7 @@ export default function SidePanel() {
                                             isAnyMenuOpen={isAnyMenuOpen}
                                             onMenuToggle={handleMenuToggle}
                                             onNoteUpdate={getAllSingleNotes}
+                                            onNoteSelect={onNoteSelect} // Add this line
                                         />
                                     ))}
                                 </div>
@@ -230,6 +231,7 @@ export default function SidePanel() {
                                             isAnyMenuOpen={isAnyMenuOpen}
                                             onMenuToggle={handleMenuToggle}
                                             onFolderUpdate={getAllFolders}
+                                            onNoteSelect={onNoteSelect}
                                         />
                                     ))}
                                 </div>

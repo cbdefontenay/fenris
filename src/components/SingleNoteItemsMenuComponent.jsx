@@ -4,7 +4,7 @@ import {FaEllipsisV} from "react-icons/fa";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
 
-export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate}) {
+export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate, onNoteSelect, isSelected}) { // Add onNoteSelect and isSelected props
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateNotePopupOpen, setIsUpdateNotePopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +15,12 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     const menuRef = useRef(null);
     const inputRef = useRef(null);
 
+    const handleNoteClick = () => {
+        if (onNoteSelect) {
+            onNoteSelect(note);
+        }
+    };
+
     // Show toast function
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -23,7 +29,8 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }, 3000);
     };
 
-    const handleMenuToggle = () => {
+    const handleMenuToggle = (e) => {
+        e.stopPropagation(); // Prevent triggering note selection when clicking menu
         const newState = !isMenuOpen;
         setIsMenuOpen(newState);
         onMenuToggle(newState);
@@ -58,7 +65,8 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }
     }, [isUpdateNotePopupOpen]);
 
-    const handleEditClick = () => {
+    const handleEditClick = (e) => {
+        e.stopPropagation(); // Prevent triggering note selection
         setIsUpdateNotePopupOpen(true);
         setNewSingleNoteName(note.title);
         setIsMenuOpen(false);
@@ -102,7 +110,8 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (e) => {
+        e.stopPropagation(); // Prevent triggering note selection
         const confirmationDialog = await invoke("delete_single_note_dialog", {
             message: `Are you sure you want to delete the note "${note.title}"?`,
             title: "Delete Note",
@@ -231,16 +240,29 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                 </div>
             )}
 
-            {/* Note Item */}
-            <div className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
+            {/* Note Item - Updated with click handler and active state */}
+            <div
+                className={`group flex items-center justify-between p-2 rounded-lg transition-colors duration-200 cursor-pointer ${
+                    isSelected
+                        ? 'bg-(--primary-container) text-(--on-primary-container)'
+                        : 'hover:bg-(--surface-container-high)'
+                }`}
+                onClick={handleNoteClick}
+            >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <MdOutlineEditNote className="w-4 h-4 text-(--secondary) flex-shrink-0"/>
-                    <span className="text-(--on-surface) text-sm font-medium truncate">
+                    <MdOutlineEditNote className={`w-4 h-4 flex-shrink-0 ${
+                        isSelected ? 'text-(--on-primary-container)' : 'text-(--secondary)'
+                    }`}/>
+                    <span className="text-sm font-medium truncate">
                         {note.title}
                     </span>
                     {note.tag && (
                         <span
-                            className="text-xs text-(--primary) bg-(--primary-container) px-2 py-0.5 rounded-full flex-shrink-0">
+                            className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                isSelected
+                                    ? 'text-(--on-primary-container) bg-(--primary-fixed)'
+                                    : 'text-(--primary) bg-(--primary-container)'
+                            }`}>
                             #{note.tag}
                         </span>
                     )}
@@ -250,10 +272,16 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                     <button
                         ref={buttonRef}
                         onClick={handleMenuToggle}
-                        className="cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-colors opacity-0 group-hover:opacity-100"
+                        className={`cursor-pointer p-1 rounded transition-colors ${
+                            isSelected
+                                ? 'hover:bg-(--primary-fixed) opacity-100'
+                                : 'hover:bg-(--surface-container-highest) opacity-0 group-hover:opacity-100'
+                        }`}
                         disabled={isLoading}
                     >
-                        <FaEllipsisV className="w-3 h-3 text-(--on-surface-variant)"/>
+                        <FaEllipsisV className={`w-3 h-3 ${
+                            isSelected ? 'text-(--on-primary-container)' : 'text-(--on-surface-variant)'
+                        }`}/>
                     </button>
 
                     {/* Fixed positioned menu */}
