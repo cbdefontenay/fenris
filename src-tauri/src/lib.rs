@@ -6,10 +6,18 @@ use crate::json::{
     save_json_file,
 };
 use crate::ollama::{list_of_models, ollama_api_call};
-use crate::sqlite::{create_single_note, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite, delete_folder_sqlite, delete_single_note, get_all_folders, get_all_single_note, get_notes_by_folder_sqlite, save_folder_sqlite, save_note_to_folder_sqlite, sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite, update_single_note};
+use crate::sqlite::{
+    create_single_note, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite,
+    delete_folder_sqlite, delete_single_note, get_all_folders, get_all_single_note,
+    get_notes_by_folder_sqlite, save_folder_sqlite, save_note_to_folder_sqlite, sqlite_migrations,
+    update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite,
+    update_single_note,
+};
+use crate::state::{calculate, get_folder_state, get_note_state, reset_folder_state, reset_note_state, set_folder_name, set_note_name, validate_folder_name, validate_note_name, Counter, FolderManager, FolderState, NoteManager, NoteState};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
 };
+use std::sync::Mutex;
 use tauri::{generate_context, Builder};
 use tauri_plugin_dialog::init;
 
@@ -17,11 +25,21 @@ mod cli;
 mod json;
 mod ollama;
 mod sqlite;
+mod state;
 mod ui_helpers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     Builder::default()
+        .manage(Counter {
+            count: Mutex::new(0),
+        })
+        .manage(FolderManager {
+            state: Mutex::new(FolderState::default()),
+        })
+        .manage(NoteManager {
+            state: Mutex::new(NoteState::default()),
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
@@ -62,7 +80,16 @@ pub fn run() {
             get_all_single_note,
             save_note_to_folder_sqlite,
             get_notes_by_folder_sqlite,
-            create_single_note
+            create_single_note,
+            calculate,
+            validate_folder_name,
+            set_folder_name,
+            reset_folder_state,
+            get_folder_state,
+            set_note_name,
+            validate_note_name,
+            reset_note_state,
+            get_note_state
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

@@ -1,68 +1,114 @@
 import {RiCloseLargeFill} from "react-icons/ri";
 import {FaSpinner} from "react-icons/fa";
 import Database from '@tauri-apps/plugin-sql';
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import {MdOutlineEditNote} from "react-icons/md";
 import {useTranslation} from 'react-i18next';
 
 export default function AddNotePopupComponent({isPopupClosed}) {
     const {t} = useTranslation();
-    const [showError, setShowError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [noteName, setNoteName] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [noteState, setNoteState] = useState({
+        noteName: "",
+        isLoading: false,
+        showError: false,
+        errorMessage: ""
+    });
+
+    // Load initial state from Rust
+    useEffect(() => {
+        loadNoteState();
+    }, []);
+
+    async function loadNoteState() {
+        try {
+            const state = await invoke("get_note_state");
+            setNoteState(prev => ({
+                ...prev,
+                noteName: state.note_name,
+                showError: state.show_error,
+                errorMessage: state.error_message
+            }));
+        } catch (error) {
+            console.error("Failed to load note state:", error);
+        }
+    }
+
+    async function updateNoteName(name) {
+        try {
+            const newState = await invoke("set_note_name", { noteName: name });
+            setNoteState(prev => ({
+                ...prev,
+                noteName: newState.note_name,
+                showError: newState.show_error,
+                errorMessage: newState.error_message
+            }));
+        } catch (error) {
+            console.error("Failed to update note name:", error);
+        }
+    }
 
     async function saveNote() {
-        if (!noteName.trim()) {
-            setShowError(true);
-            setErrorMessage(t('addNotePopup.errors.noteNameEmpty'));
+        try {
+            await invoke("validate_note_name");
+        } catch (error) {
+            setNoteState(prev => ({
+                ...prev,
+                showError: true,
+                errorMessage: t('addNotePopup.errors.noteNameEmpty')
+            }));
             return;
         }
 
-        setIsLoading(true);
-        setShowError(false);
+        setNoteState(prev => ({ ...prev, isLoading: true }));
 
         try {
             const dateNow = await invoke("cli_date_without_hours");
             const db = await Database.load("sqlite:fenris_app_notes.db");
             const createNewNoteFromRust = await invoke("create_single_note", {
-                noteName: noteName.trim(),
+                noteName: noteState.noteName.trim(),
                 content: ""
-            })
+            });
             await db.execute(createNewNoteFromRust);
 
+            // Reset Rust state on success
+            await invoke("reset_note_state");
             isPopupClosed();
         } catch (e) {
-            setShowError(true);
-            setErrorMessage(e.message.includes("UNIQUE")
-                ? t('addNotePopup.errors.noteNameExists')
-                : t('addNotePopup.errors.createFailed', {error: e.message})
-            );
+            setNoteState(prev => ({
+                ...prev,
+                showError: true,
+                errorMessage: e.message.includes("UNIQUE")
+                    ? t('addNotePopup.errors.noteNameExists')
+                    : t('addNotePopup.errors.createFailed', {error: e.message})
+            }));
         } finally {
-            setIsLoading(false);
+            setNoteState(prev => ({ ...prev, isLoading: false }));
         }
     }
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !isLoading && noteName.trim()) {
+        if (e.key === 'Enter' && !noteState.isLoading && noteState.noteName.trim()) {
             saveNote();
         }
     };
 
-    const handleInputChange = (e) => {
-        setNoteName(e.target.value);
-        if (showError) setShowError(false);
+    const handleInputChange = async (e) => {
+        const value = e.target.value;
+        await updateNoteName(value);
     };
 
     const handleOverlayClick = (e) => {
-        if (e.target === e.currentTarget && !isLoading) {
+        if (e.target === e.currentTarget && !noteState.isLoading) {
+            // Reset state when closing
+            invoke("reset_note_state").catch(console.error);
             isPopupClosed();
         }
     };
 
     const handleKeyPressClose = (e) => {
         if (e.key === 'Escape') {
+            invoke("reset_note_state").catch(console.error);
             isPopupClosed();
         }
     };
@@ -82,8 +128,11 @@ export default function AddNotePopupComponent({isPopupClosed}) {
                     <h2 className="text-xl font-semibold text-(--on-surface)">{t('addNotePopup.createNewNote')}</h2>
                     <button
                         className="cursor-pointer p-2 rounded-full hover:bg-(--surface-container-high) transition-colors duration-200"
-                        onClick={isPopupClosed}
-                        disabled={isLoading}
+                        onClick={() => {
+                            invoke("reset_note_state").catch(console.error);
+                            isPopupClosed();
+                        }}
+                        disabled={noteState.isLoading}
                     >
                         <RiCloseLargeFill className="text-(--on-surface-variant) text-xl"/>
                     </button>
@@ -101,23 +150,23 @@ export default function AddNotePopupComponent({isPopupClosed}) {
                                 <MdOutlineEditNote className="text-(--primary) text-lg"/>
                             </div>
                             <input
-                                value={noteName}
+                                value={noteState.noteName}
                                 onChange={handleInputChange}
                                 onKeyDown={handleKeyPress}
                                 placeholder={t('addNotePopup.enterNoteName')}
                                 className="w-full pl-10 pr-4 py-3 border border-(--outline) rounded-xl bg-(--surface-container-low) text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent transition-all duration-200"
-                                disabled={isLoading}
+                                disabled={noteState.isLoading}
                                 autoFocus
                             />
                         </div>
                     </div>
 
                     {/* Error Display */}
-                    {showError && (
+                    {noteState.showError && (
                         <div className="p-3 bg-(--error) border border-(--error-container) rounded-lg">
                             <p className="text-(--on-error) text-sm flex items-center">
                                 <span className="w-2 h-2 bg-(--error) rounded-full mr-2"></span>
-                                {errorMessage}
+                                {noteState.errorMessage}
                             </p>
                         </div>
                     )}
@@ -127,18 +176,21 @@ export default function AddNotePopupComponent({isPopupClosed}) {
                 <div
                     className="flex items-center justify-end gap-3 p-6 border-t border-(--outline-variant) bg-(--surface-container-low) rounded-b-2xl">
                     <button
-                        onClick={isPopupClosed}
-                        disabled={isLoading}
+                        onClick={() => {
+                            invoke("reset_note_state").catch(console.error);
+                            isPopupClosed();
+                        }}
+                        disabled={noteState.isLoading}
                         className="cursor-pointer px-6 py-2.5 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-xl transition-colors duration-200 font-medium disabled:opacity-50"
                     >
                         {t('addNotePopup.cancel')}
                     </button>
                     <button
                         onClick={saveNote}
-                        disabled={isLoading || !noteName.trim()}
+                        disabled={noteState.isLoading || !noteState.noteName.trim()}
                         className="cursor-pointer px-6 py-2.5 bg-(--primary) text-(--on-primary) hover:bg-(--primary-dark) rounded-xl transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                     >
-                        {isLoading ? (
+                        {noteState.isLoading ? (
                             <>
                                 <FaSpinner className="animate-spin"/>
                                 {t('addNotePopup.creating')}
