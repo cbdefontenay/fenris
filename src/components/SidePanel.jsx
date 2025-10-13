@@ -8,8 +8,10 @@ import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
 import {useEffect, useState} from "react";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
+import { useTranslation } from 'react-i18next';
 
-export default function SidePanel({ onNoteSelect }) {
+export default function SidePanel({ onNoteSelect, selectedNote }) {
+    const { t } = useTranslation();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -36,9 +38,10 @@ export default function SidePanel({ onNoteSelect }) {
             const getAllFolderCommandFromRust = await invoke("get_all_folders")
             const dbFolders = await db.select(getAllFolderCommandFromRust);
             setFolders(dbFolders);
+            setShowError(false);
         } catch (e) {
             setShowError(true);
-            setErrorMessage(`An error occurred. Impossible to load folders: ${e.message}`);
+            setErrorMessage(t('sidePanel.errors.loadFoldersFailed', { error: e.message }));
         }
     }
 
@@ -48,16 +51,16 @@ export default function SidePanel({ onNoteSelect }) {
             const getAllFSingleNoteCommandFromRust = await invoke("get_all_single_note")
             const dbNotes = await db.select(getAllFSingleNoteCommandFromRust);
             setSingleNotes(dbNotes);
+            setShowError(false);
         } catch (e) {
             setShowError(true);
-            setErrorMessage(`An error occurred. Impossible to load notes: ${e.message}`);
+            setErrorMessage(t('sidePanel.errors.loadNotesFailed', { error: e.message }));
         }
     }
 
     const getRecentItems = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            // Get recent items from both folders and single_notes, limited to 3
             const recentFolders = await db.select(`
                 SELECT id, name, date_modified, 'folder' as type
                 FROM folders
@@ -69,14 +72,13 @@ export default function SidePanel({ onNoteSelect }) {
                 ORDER BY date_modified DESC LIMIT 3
             `);
 
-            // Combine and sort by date_modified
             const allRecent = [...recentFolders, ...recentNotes]
                 .sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
                 .slice(0, 5);
 
             setRecentItems(allRecent);
         } catch (e) {
-            console.error("Error loading recent items:", e);
+            // Silent fail for recent items - not critical
         }
     }
 
@@ -127,21 +129,21 @@ export default function SidePanel({ onNoteSelect }) {
                         <button
                             onClick={handleAddNote}
                             className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
-                            title="Add new note"
+                            title={t('sidePanel.addNewNote')}
                         >
                             <MdOutlineEditNote className="" size={20}/>
                         </button>
                         <button
                             onClick={handleAddFolder}
                             className="cursor-pointer p-2 rounded-lg bg-(--primary) text-(--on-primary) hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors duration-200"
-                            title="Add new folder"
+                            title={t('sidePanel.addNewFolder')}
                         >
                             <FaRegFolderOpen className="" size={20}/>
                         </button>
                         <button
                             onClick={refreshAll}
                             className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200"
-                            title="Refresh"
+                            title={t('sidePanel.refresh')}
                         >
                             <IoMdRefresh className="text-(--on-surface-variant)" size={20}/>
                         </button>
@@ -158,7 +160,7 @@ export default function SidePanel({ onNoteSelect }) {
                         >
                             <div className="flex items-center gap-3">
                                 <MdOutlineEditNote className="text-(--tertiary)" size={24}/>
-                                <span className="text-sm font-medium text-(--on-surface)">Single Notes</span>
+                                <span className="text-sm font-medium text-(--on-surface)">{t('sidePanel.singleNotes')}</span>
                                 <span
                                     className="text-xs bg-(--tertiary-fixed) text-(--on-tertiary-fixed) px-2 py-1 rounded-full">
                                     {singleNotes.length}
@@ -181,7 +183,8 @@ export default function SidePanel({ onNoteSelect }) {
                                             isAnyMenuOpen={isAnyMenuOpen}
                                             onMenuToggle={handleMenuToggle}
                                             onNoteUpdate={getAllSingleNotes}
-                                            onNoteSelect={onNoteSelect} // Add this line
+                                            onNoteSelect={onNoteSelect}
+                                            isSelected={selectedNote?.id === note.id}
                                         />
                                     ))}
                                 </div>
@@ -191,9 +194,8 @@ export default function SidePanel({ onNoteSelect }) {
                                     <div className="text-center py-6">
                                         <MdOutlineEditNote
                                             className="mx-auto text-(--tertiary) mb-2 opacity-50" size={35}/>
-                                        <p className="text-(--tertiary) text-sm">No single notes yet</p>
-                                        <p className="text-(--tertiary) italic text-xs mt-1">Create your first
-                                            note</p>
+                                        <p className="text-(--tertiary) text-sm">{t('sidePanel.noSingleNotes')}</p>
+                                        <p className="text-(--tertiary) italic text-xs mt-1">{t('sidePanel.createFirstNote')}</p>
                                     </div>
                                 )}
                             </div>
@@ -208,7 +210,7 @@ export default function SidePanel({ onNoteSelect }) {
                         >
                             <div className="flex items-center gap-3">
                                 <FaFolder className="text-(--primary)" size={20}/>
-                                <span className="text-sm font-medium text-(--on-surface)">Folders</span>
+                                <span className="text-sm font-medium text-(--on-surface)">{t('sidePanel.folders')}</span>
                                 <span
                                     className="text-xs bg-(--primary-container) text-(--on-primary-container) px-2 py-1 rounded-full">
                                     {folders.length}
@@ -232,6 +234,7 @@ export default function SidePanel({ onNoteSelect }) {
                                             onMenuToggle={handleMenuToggle}
                                             onFolderUpdate={getAllFolders}
                                             onNoteSelect={onNoteSelect}
+                                            selectedNote={selectedNote}
                                         />
                                     ))}
                                 </div>
@@ -242,9 +245,8 @@ export default function SidePanel({ onNoteSelect }) {
                                         <FaRegFolder
                                             size={35}
                                             className="mx-auto text-(--primary) mb-2 opacity-50"/>
-                                        <p className="text-(--primary) text-sm">No folders yet</p>
-                                        <p className="text-(--primary) italic text-xs mt-1">Create your first
-                                            folder</p>
+                                        <p className="text-(--primary) text-sm">{t('sidePanel.noFolders')}</p>
+                                        <p className="text-(--primary) italic text-xs mt-1">{t('sidePanel.createFirstFolder')}</p>
                                     </div>
                                 )}
 

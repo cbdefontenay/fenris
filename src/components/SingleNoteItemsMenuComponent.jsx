@@ -3,8 +3,10 @@ import {MdOutlineEditNote} from "react-icons/md";
 import {FaEllipsisV} from "react-icons/fa";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
+import { useTranslation } from 'react-i18next';
 
-export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate, onNoteSelect, isSelected}) { // Add onNoteSelect and isSelected props
+export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate, onNoteSelect, isSelected}) {
+    const {t} = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateNotePopupOpen, setIsUpdateNotePopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +23,6 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }
     };
 
-    // Show toast function
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
         setTimeout(() => {
@@ -30,7 +31,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     };
 
     const handleMenuToggle = (e) => {
-        e.stopPropagation(); // Prevent triggering note selection when clicking menu
+        e.stopPropagation();
         const newState = !isMenuOpen;
         setIsMenuOpen(newState);
         onMenuToggle(newState);
@@ -57,7 +58,6 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }
     }, [isAnyMenuOpen, isMenuOpen]);
 
-    // Focus input when popup opens
     useEffect(() => {
         if (isUpdateNotePopupOpen && inputRef.current) {
             inputRef.current.focus();
@@ -66,7 +66,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     }, [isUpdateNotePopupOpen]);
 
     const handleEditClick = (e) => {
-        e.stopPropagation(); // Prevent triggering note selection
+        e.stopPropagation();
         setIsUpdateNotePopupOpen(true);
         setNewSingleNoteName(note.title);
         setIsMenuOpen(false);
@@ -74,7 +74,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
 
     const handleUpdateSingleNote = async () => {
         if (newSingleNoteName.trim() === '') {
-            showToast('Note name cannot be empty', 'error');
+            showToast(t('singleNotes.errors.noteNameEmpty'), 'error');
             return;
         }
 
@@ -95,7 +95,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
 
             await db.execute(updateResultCommand);
 
-            showToast('Note updated successfully');
+            showToast(t('singleNotes.success.noteUpdated'));
 
             if (onNoteUpdate) {
                 onNoteUpdate();
@@ -104,19 +104,19 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
             setIsUpdateNotePopupOpen(false);
 
         } catch (e) {
-            showToast(`Error updating note: ${e.message}`, 'error');
+            showToast(t('singleNotes.errors.updateFailed', { error: e.message }), 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDelete = async (e) => {
-        e.stopPropagation(); // Prevent triggering note selection
+        e.stopPropagation();
         const confirmationDialog = await invoke("delete_single_note_dialog", {
-            message: `Are you sure you want to delete the note "${note.title}"?`,
-            title: "Delete Note",
-            confirmation: "Delete",
-            cancellation: "Cancel",
+            message: t('singleNotes.deleteConfirmation.message', { noteTitle: note.title }),
+            title: t('singleNotes.deleteConfirmation.title'),
+            confirmation: t('singleNotes.deleteConfirmation.confirm'),
+            cancellation: t('singleNotes.deleteConfirmation.cancel'),
             folderName: note.title
         });
 
@@ -135,14 +135,14 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
 
             await db.execute(resultCommand);
 
-            showToast('Note deleted successfully');
+            showToast(t('singleNotes.success.noteDeleted'));
 
             if (onNoteUpdate) {
                 onNoteUpdate();
             }
 
         } catch (e) {
-            showToast(`Error deleting note: ${e.message}`, 'error');
+            showToast(t('singleNotes.errors.deleteFailed', { error: e.message }), 'error');
         } finally {
             setIsLoading(false);
             handleMenuToggle();
@@ -167,7 +167,6 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
         }
     };
 
-    // Calculate menu position
     const getMenuPosition = () => {
         if (!buttonRef.current) return {top: 0, left: 0};
 
@@ -185,11 +184,11 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                 <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
                         <h2 className="text-lg font-semibold mb-4">
-                            Update Note Name
+                            {t('singleNotes.updateNoteTitle')}
                         </h2>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
-                                New Note Name:
+                                {t('singleNotes.newNoteName')}:
                             </label>
                             <input
                                 ref={inputRef}
@@ -199,7 +198,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                                 onKeyDown={handleKeyDown}
                                 className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary) transition-colors"
                                 disabled={isLoading}
-                                placeholder="Enter note name..."
+                                placeholder={t('singleNotes.enterNoteName')}
                             />
                         </div>
                         <div className="flex justify-end space-x-2">
@@ -208,7 +207,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                                 disabled={isLoading}
                                 className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors disabled:opacity-50"
                             >
-                                Cancel
+                                {t('singleNotes.cancel')}
                             </button>
                             <button
                                 onClick={handleUpdateSingleNote}
@@ -218,10 +217,10 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                                 {isLoading ? (
                                     <>
                                         <div className="animate-spin h-4 w-4 border-2 border-(--on-tertiary) border-t-transparent rounded-full"></div>
-                                        <span>Saving...</span>
+                                        <span>{t('singleNotes.saving')}</span>
                                     </>
                                 ) : (
-                                    'Save'
+                                    t('singleNotes.save')
                                 )}
                             </button>
                         </div>
@@ -240,7 +239,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                 </div>
             )}
 
-            {/* Note Item - Updated with click handler and active state */}
+            {/* Note Item */}
             <div
                 className={`group flex items-center justify-between p-2 rounded-lg transition-colors duration-200 cursor-pointer ${
                     isSelected
@@ -301,14 +300,14 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                                 className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
                                 disabled={isLoading}
                             >
-                                Edit
+                                {t('singleNotes.edit')}
                             </button>
                             <button
                                 onClick={handleDelete}
                                 className="cursor-pointer w-full text-left px-3 py-2 text-(--error) hover:bg-(--error-container) text-sm"
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Deleting...' : 'Delete'}
+                                {isLoading ? t('singleNotes.deleting') : t('singleNotes.delete')}
                             </button>
                         </div>
                     )}

@@ -102,6 +102,47 @@
       "jsonStatsShown": "JSON-Statistikabschnitt eingeblendet"
     }
   },
+  "sidePanel": {
+    "addNewNote": "Neue Notiz hinzufügen",
+    "addNewFolder": "Neuen Ordner hinzufügen",
+    "refresh": "Aktualisieren",
+    "singleNotes": "Einzelne Notizen",
+    "folders": "Ordner",
+    "noSingleNotes": "Noch keine einzelnen Notizen",
+    "createFirstNote": "Erstellen Sie Ihre erste Notiz",
+    "noFolders": "Noch keine Ordner",
+    "createFirstFolder": "Erstellen Sie Ihren ersten Ordner",
+    "errors": {
+      "loadFoldersFailed": "Ein Fehler ist aufgetreten. Ordner konnten nicht geladen werden: {{error}}",
+      "loadNotesFailed": "Ein Fehler ist aufgetreten. Notizen konnten nicht geladen werden: {{error}}"
+    }
+  },
+  "addFolderPopup": {
+    "createNewFolder": "Neuen Ordner erstellen",
+    "folderName": "Ordnername",
+    "enterFolderName": "Ordnernamen eingeben...",
+    "cancel": "Abbrechen",
+    "createFolder": "Ordner erstellen",
+    "creating": "Wird erstellt...",
+    "errors": {
+      "folderNameEmpty": "Bitte geben Sie einen Ordnernamen ein",
+      "folderNameExists": "Ein Ordner mit diesem Namen existiert bereits",
+      "createFailed": "Fehler beim Erstellen des Ordners: {{error}}"
+    }
+  },
+  "addNotePopup": {
+    "createNewNote": "Neue Notiz erstellen",
+    "noteName": "Notizname",
+    "enterNoteName": "Notiznamen eingeben...",
+    "cancel": "Abbrechen",
+    "createNote": "Notiz erstellen",
+    "creating": "Wird erstellt...",
+    "errors": {
+      "noteNameEmpty": "Bitte geben Sie einen Notiznamen ein",
+      "noteNameExists": "Eine Notiz mit diesem Namen existiert bereits",
+      "createFailed": "Fehler beim Erstellen der Notiz: {{error}}"
+    }
+  },
   "aiChatbot": {
     "title": "KI-Chat",
     "poweredBy": "Unterstützt von Ollama",
@@ -226,5 +267,67 @@
       "formatError": "Formatierungsfehler"
     },
     "rawContent": "Roher Inhalt"
+  },
+  "singleNotes": {
+    "updateNoteTitle": "Notizname aktualisieren",
+    "newNoteName": "Neuer Notizname",
+    "enterNoteName": "Notiznamen eingeben...",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleting": "Wird gelöscht...",
+    "success": {
+      "noteUpdated": "Notiz erfolgreich aktualisiert",
+      "noteDeleted": "Notiz erfolgreich gelöscht"
+    },
+    "errors": {
+      "noteNameEmpty": "Notizname darf nicht leer sein",
+      "updateFailed": "Fehler beim Aktualisieren der Notiz: {{error}}",
+      "deleteFailed": "Fehler beim Löschen der Notiz: {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Notiz löschen",
+      "message": "Sind Sie sicher, dass Sie die Notiz \"{{noteTitle}}\" löschen möchten?",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    }
+  },
+  "folderMenu": {
+    "addNote": "Notiz hinzufügen",
+    "changeFolderName": "Ordnernamen ändern",
+    "deleteFolder": "Ordner löschen",
+    "deleting": "Wird gelöscht...",
+    "addNewNote": "Neue Notiz hinzufügen",
+    "noteTitle": "Notiztitel",
+    "enterNoteTitle": "Notiztitel eingeben...",
+    "cancel": "Abbrechen",
+    "createNote": "Notiz erstellen",
+    "creating": "Wird erstellt..."
+  },
+  "folderManagement": {
+    "changeFolderName": "Ordnernamen ändern",
+    "newFolderName": "Neuer Ordnername",
+    "enterFolderName": "Ordnernamen eingeben...",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "folderOptions": "Ordneroptionen",
+    "untitled": "Unbenannt",
+    "noNotesInFolder": "Keine Notizen in diesem Ordner",
+    "errors": {
+      "folderNameEmpty": "Ordnername darf nicht leer sein",
+      "updateFailed": "Fehler beim Aktualisieren des Ordnernamens",
+      "updateFailedWithError": "Fehler beim Aktualisieren des Ordnernamens: {{error}}",
+      "deleteFailed": "Fehler beim Löschen des Ordners",
+      "deleteFailedWithError": "Fehler beim Löschen des Ordners: {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Ordner löschen",
+      "message": "Sind Sie sicher, dass Sie den Ordner löschen möchten?",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    }
   }
 }

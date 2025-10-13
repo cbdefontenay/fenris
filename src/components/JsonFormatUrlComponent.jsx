@@ -373,7 +373,7 @@ export default function JsonFormatUrlComponent() {
                 <div className="px-8 py-6">
                     <div className="flex items-center gap-4 mb-3">
                         <div className="w-12 h-12 bg-(--primary-container) rounded-xl flex items-center justify-center">
-                            <LuFileJson/>
+                            <LuFileJson className="text-(--on-primary-container)"/>
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-(--on-background)">{t('jsonFormatter.title')}</h1>

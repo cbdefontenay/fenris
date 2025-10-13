@@ -102,6 +102,47 @@
       "jsonStatsShown": "Section des statistiques JSON affichée"
     }
   },
+  "sidePanel": {
+    "addNewNote": "Ajouter une nouvelle note",
+    "addNewFolder": "Ajouter un nouveau dossier",
+    "refresh": "Actualiser",
+    "singleNotes": "Notes individuelles",
+    "folders": "Dossiers",
+    "noSingleNotes": "Aucune note individuelle pour le moment",
+    "createFirstNote": "Créez votre première note",
+    "noFolders": "Aucun dossier pour le moment",
+    "createFirstFolder": "Créez votre premier dossier",
+    "errors": {
+      "loadFoldersFailed": "Une erreur s'est produite. Impossible de charger les dossiers : {{error}}",
+      "loadNotesFailed": "Une erreur s'est produite. Impossible de charger les notes : {{error}}"
+    }
+  },
+  "addFolderPopup": {
+    "createNewFolder": "Créer un nouveau dossier",
+    "folderName": "Nom du dossier",
+    "enterFolderName": "Entrez le nom du dossier...",
+    "cancel": "Annuler",
+    "createFolder": "Créer le dossier",
+    "creating": "Création...",
+    "errors": {
+      "folderNameEmpty": "Veuillez saisir un nom de dossier",
+      "folderNameExists": "Un dossier avec ce nom existe déjà",
+      "createFailed": "Échec de la création du dossier : {{error}}"
+    }
+  },
+  "addNotePopup": {
+    "createNewNote": "Créer une nouvelle note",
+    "noteName": "Nom de la note",
+    "enterNoteName": "Entrez le nom de la note...",
+    "cancel": "Annuler",
+    "createNote": "Créer la note",
+    "creating": "Création...",
+    "errors": {
+      "noteNameEmpty": "Veuillez saisir un nom de note",
+      "noteNameExists": "Une note avec ce nom existe déjà",
+      "createFailed": "Échec de la création de la note : {{error}}"
+    }
+  },
   "aiChatbot": {
     "title": "Chat IA",
     "poweredBy": "Propulsé par Ollama",
@@ -226,5 +267,67 @@
       "formatError": "Erreur de formatage"
     },
     "rawContent": "Contenu brut"
+  },
+  "singleNotes": {
+    "updateNoteTitle": "Modifier le nom de la note",
+    "newNoteName": "Nouveau nom de note",
+    "enterNoteName": "Entrez le nom de la note...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
+    "success": {
+      "noteUpdated": "Note mise à jour avec succès",
+      "noteDeleted": "Note supprimée avec succès"
+    },
+    "errors": {
+      "noteNameEmpty": "Le nom de la note ne peut pas être vide",
+      "updateFailed": "Erreur lors de la mise à jour de la note : {{error}}",
+      "deleteFailed": "Erreur lors de la suppression de la note : {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Supprimer la note",
+      "message": "Êtes-vous sûr de vouloir supprimer la note \"{{noteTitle}}\" ?",
+      "confirm": "Supprimer",
+      "cancel": "Annuler"
+    }
+  },
+  "folderMenu": {
+    "addNote": "Ajouter une note",
+    "changeFolderName": "Changer le nom du dossier",
+    "deleteFolder": "Supprimer le dossier",
+    "deleting": "Suppression...",
+    "addNewNote": "Ajouter une nouvelle note",
+    "noteTitle": "Titre de la note",
+    "enterNoteTitle": "Entrez le titre de la note...",
+    "cancel": "Annuler",
+    "createNote": "Créer la note",
+    "creating": "Création..."
+  },
+  "folderManagement": {
+    "changeFolderName": "Changer le nom du dossier",
+    "newFolderName": "Nouveau nom du dossier",
+    "enterFolderName": "Entrez le nom du dossier...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "folderOptions": "Options du dossier",
+    "untitled": "Sans titre",
+    "noNotesInFolder": "Aucune note dans ce dossier",
+    "errors": {
+      "folderNameEmpty": "Le nom du dossier ne peut pas être vide",
+      "updateFailed": "Échec de la mise à jour du nom du dossier",
+      "updateFailedWithError": "Erreur lors de la mise à jour du nom du dossier : {{error}}",
+      "deleteFailed": "Échec de la suppression du dossier",
+      "deleteFailedWithError": "Erreur lors de la suppression du dossier : {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Supprimer le dossier",
+      "message": "Êtes-vous sûr de vouloir supprimer le dossier ?",
+      "confirm": "Supprimer",
+      "cancel": "Annuler"
+    }
   }
 }

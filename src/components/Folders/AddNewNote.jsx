@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { invoke } from '@tauri-apps/api/core';
 import Database from "@tauri-apps/plugin-sql";
+import { useTranslation } from 'react-i18next';
 
 export default function AddNewNote({
                                        menuRef,
@@ -13,6 +14,7 @@ export default function AddNewNote({
                                        onNoteAdded,
                                        onMenuClose
                                    }) {
+    const { t } = useTranslation();
     const [isAddNotePopupOpen, setIsAddNotePopupOpen] = useState(false);
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [isLoadingNote, setIsLoadingNote] = useState(false);
@@ -67,20 +69,20 @@ export default function AddNewNote({
                     className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
                     onClick={handleAddNote}
                 >
-                    Add note
+                    {t('folderMenu.addNote')}
                 </button>
                 <button
                     className="cursor-pointer w-full text-left px-3 py-2 text-(--on-surface) hover:bg-(--surface-container-high) text-sm"
                     onClick={updateFolderNameHandler}
                 >
-                    Change folder's name
+                    {t('folderMenu.changeFolderName')}
                 </button>
                 <button
                     className="cursor-pointer w-full text-left px-3 py-2 text-(--error) hover:bg-(--error-container) text-sm"
                     onClick={handleDeleteFolder}
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Deleting...' : 'Delete Folder'}
+                    {isLoading ? t('folderMenu.deleting') : t('folderMenu.deleteFolder')}
                 </button>
             </div>
 
@@ -89,10 +91,10 @@ export default function AddNewNote({
                 createPortal(
                     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[5000] p-4">
                         <div className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
-                            <h2 className="text-lg font-semibold mb-4">Add New Note</h2>
+                            <h2 className="text-lg font-semibold mb-4">{t('folderMenu.addNewNote')}</h2>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
-                                    Note Title:
+                                    {t('folderMenu.noteTitle')}:
                                 </label>
                                 <input
                                     type="text"
@@ -103,7 +105,7 @@ export default function AddNewNote({
                                         if (e.key === 'Escape') handleCancelNote();
                                     }}
                                     className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
-                                    placeholder="Enter note title..."
+                                    placeholder={t('folderMenu.enterNoteTitle')}
                                     autoFocus
                                 />
                             </div>
@@ -113,19 +115,19 @@ export default function AddNewNote({
                                     disabled={isLoadingNote}
                                     className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors"
                                 >
-                                    Cancel
+                                    {t('folderMenu.cancel')}
                                 </button>
                                 <button
                                     onClick={handleSaveNote}
                                     disabled={isLoadingNote || !newNoteTitle.trim()}
                                     className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-md hover:bg-(--secondary) transition-colors disabled:opacity-50"
                                 >
-                                    {isLoadingNote ? 'Creating...' : 'Create Note'}
+                                    {isLoadingNote ? t('folderMenu.creating') : t('folderMenu.createNote')}
                                 </button>
                             </div>
                         </div>
                     </div>,
-                    document.body // ← THIS is the magic line
+                    document.body
                 )}
         </>
     );

@@ -102,6 +102,47 @@
       "jsonStatsShown": "JSON stats section shown"
     }
   },
+  "sidePanel": {
+    "addNewNote": "Add new note",
+    "addNewFolder": "Add new folder",
+    "refresh": "Refresh",
+    "singleNotes": "Single Notes",
+    "folders": "Folders",
+    "noSingleNotes": "No single notes yet",
+    "createFirstNote": "Create your first note",
+    "noFolders": "No folders yet",
+    "createFirstFolder": "Create your first folder",
+    "errors": {
+      "loadFoldersFailed": "An error occurred. Impossible to load folders: {{error}}",
+      "loadNotesFailed": "An error occurred. Impossible to load notes: {{error}}"
+    }
+  },
+  "addFolderPopup": {
+    "createNewFolder": "Create New Folder",
+    "folderName": "Folder Name",
+    "enterFolderName": "Enter folder name...",
+    "cancel": "Cancel",
+    "createFolder": "Create Folder",
+    "creating": "Creating...",
+    "errors": {
+      "folderNameEmpty": "Please enter a folder name",
+      "folderNameExists": "A folder with this name already exists",
+      "createFailed": "Failed to create folder: {{error}}"
+    }
+  },
+  "addNotePopup": {
+    "createNewNote": "Create New Note",
+    "noteName": "Note Name",
+    "enterNoteName": "Enter note name...",
+    "cancel": "Cancel",
+    "createNote": "Create Note",
+    "creating": "Creating...",
+    "errors": {
+      "noteNameEmpty": "Please enter a note name",
+      "noteNameExists": "A note with this name already exists",
+      "createFailed": "Failed to create note: {{error}}"
+    }
+  },
   "aiChatbot": {
     "title": "AI Chat",
     "poweredBy": "Powered by Ollama",
@@ -226,5 +267,67 @@
       "formatError": "Formatting Error"
     },
     "rawContent": "Raw Content"
+  },
+  "singleNotes": {
+    "updateNoteTitle": "Update Note Name",
+    "newNoteName": "New Note Name",
+    "enterNoteName": "Enter note name...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "success": {
+      "noteUpdated": "Note updated successfully",
+      "noteDeleted": "Note deleted successfully"
+    },
+    "errors": {
+      "noteNameEmpty": "Note name cannot be empty",
+      "updateFailed": "Error updating note: {{error}}",
+      "deleteFailed": "Error deleting note: {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Delete Note",
+      "message": "Are you sure you want to delete the note \"{{noteTitle}}\"?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "folderMenu": {
+    "addNote": "Add note",
+    "changeFolderName": "Change folder's name",
+    "deleteFolder": "Delete Folder",
+    "deleting": "Deleting...",
+    "addNewNote": "Add New Note",
+    "noteTitle": "Note Title",
+    "enterNoteTitle": "Enter note title...",
+    "cancel": "Cancel",
+    "createNote": "Create Note",
+    "creating": "Creating..."
+  },
+  "folderManagement": {
+    "changeFolderName": "Change Folder's Name",
+    "newFolderName": "New Folder Name",
+    "enterFolderName": "Enter folder name...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "folderOptions": "Folder options",
+    "untitled": "Untitled",
+    "noNotesInFolder": "No notes in this folder",
+    "errors": {
+      "folderNameEmpty": "Folder name cannot be empty",
+      "updateFailed": "Failed to update folder name",
+      "updateFailedWithError": "Error updating folder name: {{error}}",
+      "deleteFailed": "Failed to delete folder",
+      "deleteFailedWithError": "Error deleting folder: {{error}}"
+    },
+    "deleteConfirmation": {
+      "title": "Delete Folder",
+      "message": "Are you sure you want to delete the folder?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
   }
 }

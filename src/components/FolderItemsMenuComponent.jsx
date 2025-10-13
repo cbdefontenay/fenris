@@ -7,8 +7,10 @@ import AddNewNote from "./Folders/AddNewNote.jsx";
 import Database from "@tauri-apps/plugin-sql";
 import {MdOutlineEditNote} from "react-icons/md";
 import {createPortal} from "react-dom";
+import { useTranslation } from 'react-i18next';
 
 export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuToggle, onFolderUpdate, onNoteSelect}) {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateFolderNameMenuOpen, setIsUpdateFolderNameOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState(folder.name || '');
@@ -99,7 +101,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     const handleSaveFolderName = async () => {
         if (newFolderName.trim() === '') {
-            setError('Folder name cannot be empty');
+            setError(t('folderManagement.errors.folderNameEmpty'));
             return;
         }
 
@@ -121,10 +123,10 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                 setIsUpdateFolderNameOpen(false);
                 setNewFolderName(folder.name);
             } else {
-                setError(result.error || 'Failed to update folder name');
+                setError(result.error || t('folderManagement.errors.updateFailed'));
             }
         } catch (error) {
-            setError('Error updating folder name: ' + error.message);
+            setError(t('folderManagement.errors.updateFailedWithError', { error: error.message }));
         } finally {
             setIsLoading(false);
         }
@@ -132,10 +134,10 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     const handleDeleteFolder = async () => {
         const confirmationDialog = await invoke("delete_folder_dialog", {
-            message: `Are you sure you want to delete the folder `,
-            title: "Delete Folder",
-            confirmation: "Delete",
-            cancellation: "Cancel",
+            message: t('folderManagement.deleteConfirmation.message'),
+            title: t('folderManagement.deleteConfirmation.title'),
+            confirmation: t('folderManagement.deleteConfirmation.confirm'),
+            cancellation: t('folderManagement.deleteConfirmation.cancel'),
             folderName: folder.name
         });
 
@@ -157,13 +159,13 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                     onFolderUpdate();
                 }
             } else {
-                setError(result?.error || 'Failed to delete folder');
+                setError(result?.error || t('folderManagement.errors.deleteFailed'));
                 setIsMenuOpen(true);
                 onMenuToggle(true);
             }
         } catch (error) {
             console.error('Error deleting folder:', error);
-            setError('Error deleting folder: ' + error.message);
+            setError(t('folderManagement.errors.deleteFailedWithError', { error: error.message }));
             setIsMenuOpen(true);
             onMenuToggle(true);
         } finally {
@@ -179,7 +181,6 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     const handleInputChange = (e) => {
         setNewFolderName(e.target.value);
-        document.body
         if (error) {
             setError('');
         }
@@ -205,10 +206,10 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                     (
                         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                             <div className="bg-white text-black rounded-lg shadow-xl p-4 w-96">
-                                <h2 className="text-lg font-semibold mb-4">Change Folder’s Name</h2>
+                                <h2 className="text-lg font-semibold mb-4">{t('folderManagement.changeFolderName')}</h2>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
-                                        New Folder Name:
+                                        {t('folderManagement.newFolderName')}:
                                     </label>
                                     <input
                                         ref={inputRef}
@@ -222,20 +223,20 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                                 : 'border-(--outline-variant) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)'
                                         }`}
                                         disabled={isLoading}
-                                        placeholder="Enter folder name..."
+                                        placeholder={t('folderManagement.enterFolderName')}
                                     />
                                     {error && (
                                         <div className="mt-2 flex items-center space-x-1">
-                                <span className="text-(--error) text-sm flex items-center">
-                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    {error}
-                                </span>
+                                            <span className="text-(--error) text-sm flex items-center">
+                                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                                {error}
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -245,7 +246,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                         disabled={isLoading}
                                         className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) hover:text-(--error) rounded-md transition-colors disabled:opacity-50"
                                     >
-                                        Cancel
+                                        {t('folderManagement.cancel')}
                                     </button>
                                     <button
                                         onClick={handleSaveFolderName}
@@ -273,10 +274,10 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                                     ></path>
                                                 </svg>
-                                                <span>Saving...</span>
+                                                <span>{t('folderManagement.saving')}</span>
                                             </>
                                         ) : (
-                                            'Save'
+                                            t('folderManagement.save')
                                         )}
                                     </button>
                                 </div>
@@ -312,7 +313,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                             ref={buttonRef}
                             onClick={handleMenuToggle}
                             className="cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-colors"
-                            title="Folder options"
+                            title={t('folderManagement.folderOptions')}
                         >
                             <RxDotsVertical className="w-3 h-3 text-(--on-surface-variant)"/>
                         </button>
@@ -349,12 +350,12 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                 }`}
                             >
                                 <MdOutlineEditNote className="text-(--tertiary)" size={16}/>
-                                <span className="text-sm truncate">{note.title || 'Untitled'}</span>
+                                <span className="text-sm truncate">{note.title || t('folderManagement.untitled')}</span>
                             </div>
                         ))}
                         {notes.length === 0 && (
                             <div className="text-center py-3 text-(--on-surface-variant) text-sm italic">
-                                No notes in this folder
+                                {t('folderManagement.noNotesInFolder')}
                             </div>
                         )}
                     </div>
