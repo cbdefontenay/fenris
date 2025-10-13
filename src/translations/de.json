@@ -289,7 +289,7 @@
     },
     "deleteConfirmation": {
       "title": "Notiz löschen",
-      "message": "Sind Sie sicher, dass Sie die Notiz \"{{noteTitle}}\" löschen möchten?",
+      "message": "Sind Sie sicher, dass Sie die Notiz löschen möchten?",
       "confirm": "Löschen",
       "cancel": "Abbrechen"
     }

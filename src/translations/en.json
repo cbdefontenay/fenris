@@ -289,7 +289,7 @@
     },
     "deleteConfirmation": {
       "title": "Delete Note",
-      "message": "Are you sure you want to delete the note \"{{noteTitle}}\"?",
+      "message": "Are you sure you want to delete the note ?",
       "confirm": "Delete",
       "cancel": "Cancel"
     }

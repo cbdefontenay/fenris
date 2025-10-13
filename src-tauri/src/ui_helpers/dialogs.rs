@@ -29,11 +29,10 @@ pub fn delete_single_note_dialog(
     title: String,
     confirmation: String,
     cancellation: String,
-    folder_name: String,
 ) -> Result<bool, String> {
     let delete_dialog = app
         .dialog()
-        .message(format!("{} \"{}\"?", message, folder_name))
+        .message(format!("{}?", message))
         .title(title)
         .buttons(MessageDialogButtons::OkCancelCustom(
             confirmation,

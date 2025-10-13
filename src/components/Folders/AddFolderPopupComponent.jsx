@@ -1,22 +1,21 @@
 import {RiCloseLargeFill} from "react-icons/ri";
-import {FaSpinner} from "react-icons/fa";
+import {FaFolder, FaSpinner} from "react-icons/fa";
 import Database from '@tauri-apps/plugin-sql';
 import {useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
-import {MdOutlineEditNote} from "react-icons/md";
 import { useTranslation } from 'react-i18next';
 
-export default function AddNotePopupComponent({isPopupClosed}) {
+export default function AddFolderPopupComponent({isPopupClosed}) {
     const { t } = useTranslation();
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [noteName, setNoteName] = useState("");
+    const [folderName, setFolderName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    async function saveNote() {
-        if (!noteName.trim()) {
+    async function saveFolder() {
+        if (!folderName.trim()) {
             setShowError(true);
-            setErrorMessage(t('addNotePopup.errors.noteNameEmpty'));
+            setErrorMessage(t('addFolderPopup.errors.folderNameEmpty'));
             return;
         }
 
@@ -24,25 +23,19 @@ export default function AddNotePopupComponent({isPopupClosed}) {
         setShowError(false);
 
         try {
-            const dateNow = await invoke("cli_date_without_hours");
             const db = await Database.load("sqlite:fenris_app_notes.db");
+            const saveFolderFromRust = await invoke("save_folder_sqlite", {
+                folderName: folderName.trim(),
+            })
 
-            await db.execute(
-                "INSERT INTO single_notes (title, content, date_created, date_modified) VALUES ($1, $2, $3, $4)",
-                [
-                    noteName.trim(),
-                    "",
-                    dateNow,
-                    dateNow
-                ]
-            );
+            await db.execute(saveFolderFromRust);
 
             isPopupClosed();
         } catch (e) {
             setShowError(true);
             setErrorMessage(e.message.includes("UNIQUE")
-                ? t('addNotePopup.errors.noteNameExists')
-                : t('addNotePopup.errors.createFailed', { error: e.message })
+                ? t('addFolderPopup.errors.folderNameExists')
+                : t('addFolderPopup.errors.createFailed', { error: e.message })
             );
         } finally {
             setIsLoading(false);
@@ -50,13 +43,13 @@ export default function AddNotePopupComponent({isPopupClosed}) {
     }
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !isLoading && noteName.trim()) {
-            saveNote();
+        if (e.key === 'Enter' && !isLoading && folderName.trim()) {
+            saveFolder();
         }
     };
 
     const handleInputChange = (e) => {
-        setNoteName(e.target.value);
+        setFolderName(e.target.value);
         if (showError) setShowError(false);
     };
 
@@ -84,7 +77,7 @@ export default function AddNotePopupComponent({isPopupClosed}) {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-(--outline-variant)">
-                    <h2 className="text-xl font-semibold text-(--on-surface)">{t('addNotePopup.createNewNote')}</h2>
+                    <h2 className="text-xl font-semibold text-(--on-surface)">{t('addFolderPopup.createNewFolder')}</h2>
                     <button
                         className="cursor-pointer p-2 rounded-full hover:bg-(--surface-container-high) transition-colors duration-200"
                         onClick={isPopupClosed}
@@ -99,17 +92,17 @@ export default function AddNotePopupComponent({isPopupClosed}) {
                     {/* Input Group */}
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-(--on-surface-variant) block">
-                            {t('addNotePopup.noteName')}
+                            {t('addFolderPopup.folderName')}
                         </label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <MdOutlineEditNote className="text-(--primary) text-lg"/>
+                                <FaFolder className="text-(--primary) text-lg"/>
                             </div>
                             <input
-                                value={noteName}
+                                value={folderName}
                                 onChange={handleInputChange}
                                 onKeyDown={handleKeyPress}
-                                placeholder={t('addNotePopup.enterNoteName')}
+                                placeholder={t('addFolderPopup.enterFolderName')}
                                 className="w-full pl-10 pr-4 py-3 border border-(--outline) rounded-xl bg-(--surface-container-low) text-(--on-surface) placeholder-(--on-surface-variant) focus:outline-none focus:ring-2 focus:ring-(--primary) focus:border-transparent transition-all duration-200"
                                 disabled={isLoading}
                                 autoFocus
@@ -136,20 +129,20 @@ export default function AddNotePopupComponent({isPopupClosed}) {
                         disabled={isLoading}
                         className="cursor-pointer px-6 py-2.5 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-xl transition-colors duration-200 font-medium disabled:opacity-50"
                     >
-                        {t('addNotePopup.cancel')}
+                        {t('addFolderPopup.cancel')}
                     </button>
                     <button
-                        onClick={saveNote}
-                        disabled={isLoading || !noteName.trim()}
+                        onClick={saveFolder}
+                        disabled={isLoading || !folderName.trim()}
                         className="cursor-pointer px-6 py-2.5 bg-(--primary) text-(--on-primary) hover:bg-(--primary-dark) rounded-xl transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                     >
                         {isLoading ? (
                             <>
                                 <FaSpinner className="animate-spin"/>
-                                {t('addNotePopup.creating')}
+                                {t('addFolderPopup.creating')}
                             </>
                         ) : (
-                            t('addNotePopup.createNote')
+                            t('addFolderPopup.createFolder')
                         )}
                     </button>
                 </div>

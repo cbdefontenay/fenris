@@ -1,4 +1,4 @@
-import {AiChatbotComponent} from "../components/AiChatbotComponent.jsx";
+import {AiChatbotComponent} from "../components/Ai/AiChatbotComponent.jsx";
 
 export default function AiChatbotPage() {
     return (

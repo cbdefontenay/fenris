@@ -1,26 +1,31 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
+import {ImFilesEmpty} from "react-icons/im";
 
-export default function MarkdownEditorComponent({ selectedNote }) {
-    const [content, setContent] = useState('');
-    const [title, setTitle] = useState('');
+export default function MarkdownEditorComponent({selectedNote}) {
+    const [content, setContent] = useState("");
+    const [title, setTitle] = useState("");
 
     useEffect(() => {
         if (selectedNote) {
-            setTitle(selectedNote.title || '');
-            setContent(selectedNote.content || '');
+            setTitle(selectedNote.title || "");
+            setContent(selectedNote.content || "");
         } else {
-            setTitle('');
-            setContent('');
+            setTitle("");
+            setContent("");
         }
     }, [selectedNote]);
 
     if (!selectedNote) {
         return (
-            <div className="flex items-center justify-center h-full text-(--on-surface-variant)">
+            <div className="flex items-center justify-center mr-44 h-full text-(--primary)">
                 <div className="text-center">
-                    <div className="text-6xl mb-4 opacity-50">📝</div>
-                    <h2 className="text-xl font-semibold mb-2">No Note Selected</h2>
-                    <p>Select a note from the sidebar to start editing</p>
+                    <div className="mb-4 flex items-center justify-center">
+                        <ImFilesEmpty size={64}/>
+                    </div>
+                    <h2 className="text-xl font-semibold mb-2">
+                        No Note Selected
+                    </h2>
+                    <p className="italic">Select a note from the sidebar to start editing <br/> or create a new one.</p>
                 </div>
             </div>
         );

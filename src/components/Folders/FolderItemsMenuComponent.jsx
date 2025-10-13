@@ -1,9 +1,9 @@
 import {useState, useEffect, useRef} from 'react';
 import {FaRegFolder, FaChevronDown, FaChevronRight} from "react-icons/fa";
 import {RxDotsVertical} from "react-icons/rx";
-import {deleteFolder, updateFolderName} from "../data/CreateNotesDataShell.jsx";
+import {deleteFolder, updateFolderName} from "../../data/CreateNotesDataShell.jsx";
 import {invoke} from "@tauri-apps/api/core";
-import AddNewNote from "./Folders/AddNewNote.jsx";
+import AddNewNote from "./AddNewNote.jsx";
 import Database from "@tauri-apps/plugin-sql";
 import {MdOutlineEditNote} from "react-icons/md";
 import {createPortal} from "react-dom";

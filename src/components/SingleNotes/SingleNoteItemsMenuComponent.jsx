@@ -113,11 +113,10 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     const handleDelete = async (e) => {
         e.stopPropagation();
         const confirmationDialog = await invoke("delete_single_note_dialog", {
-            message: t('singleNotes.deleteConfirmation.message', { noteTitle: note.title }),
+            message: t('singleNotes.deleteConfirmation.message'),
             title: t('singleNotes.deleteConfirmation.title'),
             confirmation: t('singleNotes.deleteConfirmation.confirm'),
-            cancellation: t('singleNotes.deleteConfirmation.cancel'),
-            folderName: note.title
+            cancellation: t('singleNotes.deleteConfirmation.cancel')
         });
 
         if (!confirmationDialog) {

@@ -69,7 +69,11 @@ pub fn get_all_folders() -> Result<String, ()> {
 
 // Notes from folders:
 #[command]
-pub fn save_note_to_folder_sqlite(title: String, content: String, folder_id: usize) -> Result<String, ()> {
+pub fn save_note_to_folder_sqlite(
+    title: String,
+    content: String,
+    folder_id: usize,
+) -> Result<String, ()> {
     let now: DateTime<Utc> = Utc::now();
     let formatted_date = now.format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -91,7 +95,11 @@ pub fn get_notes_by_folder_sqlite(folder_id: usize) -> Result<String, ()> {
 }
 
 #[command]
-pub fn update_note_in_folder_sqlite(note_id: usize, title: String, content: String) -> Result<String, ()> {
+pub fn update_note_in_folder_sqlite(
+    note_id: usize,
+    title: String,
+    content: String,
+) -> Result<String, ()> {
     let now: DateTime<Utc> = Utc::now();
     let formatted_date = now.format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -109,6 +117,19 @@ pub fn delete_note_from_folder_sqlite(note_id: usize) -> Result<String, ()> {
 }
 
 // Single Note Commands
+#[command]
+pub fn create_single_note(note_name: String, content: String) -> Result<String, ()> {
+    let now: DateTime<Utc> = Utc::now();
+    let formatted_date = now.format("%Y-%m-%d %H:%M:%S").to_string();
+
+    let create_single_note_command = format!(
+        "INSERT INTO single_notes (title, content, date_created, date_modified) VALUES ('{}', '{}', '{}', '{}')",
+        note_name, content, formatted_date, formatted_date
+    );
+
+    Ok(create_single_note_command)
+}
+
 #[command]
 pub fn delete_single_note(note_id: usize) -> Result<String, ()> {
     let delete_note_command = format!("DELETE FROM single_notes WHERE id = {}", note_id);
@@ -128,7 +149,8 @@ pub fn update_single_note(new_note_name: String, note_id: usize) -> Result<Strin
 
 #[command]
 pub fn get_all_single_note() -> Result<String, ()> {
-    let get_all_single_note_command = "SELECT * FROM single_notes ORDER BY date_created DESC".to_string();
+    let get_all_single_note_command =
+        "SELECT * FROM single_notes ORDER BY date_created DESC".to_string();
 
     Ok(get_all_single_note_command)
 }

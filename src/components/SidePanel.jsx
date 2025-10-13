@@ -1,10 +1,10 @@
 import {FaChevronDown, FaChevronRight, FaFolder, FaRegFolder, FaRegFolderOpen} from "react-icons/fa";
-import FolderItemsMenuComponent from "./FolderItemsMenuComponent.jsx";
+import FolderItemsMenuComponent from "./Folders/FolderItemsMenuComponent.jsx";
 import {MdOutlineEditNote} from "react-icons/md";
-import SingleNoteItemsMenuComponent from "./SingleNoteItemsMenuComponent.jsx";
+import SingleNoteItemsMenuComponent from "./SingleNotes/SingleNoteItemsMenuComponent.jsx";
 import {IoMdRefresh} from "react-icons/io";
-import AddNotePopupComponent from "./AddNotePopupComponent.jsx";
-import AddFolderPopupComponent from "./AddFolderPopupComponent.jsx";
+import AddNotePopupComponent from "./SingleNotes/AddNotePopupComponent.jsx";
+import AddFolderPopupComponent from "./Folders/AddFolderPopupComponent.jsx";
 import {useEffect, useState} from "react";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";

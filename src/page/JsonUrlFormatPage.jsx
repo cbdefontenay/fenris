@@ -1,4 +1,4 @@
-import JsonFormatUrlComponent from "../components/JsonFormatUrlComponent.jsx";
+import JsonFormatUrlComponent from "../components/Json/JsonFormatUrlComponent.jsx";
 
 export default function JsonUrlFormatPage() {
     return (

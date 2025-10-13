@@ -1,7 +1,7 @@
 import {invoke} from "@tauri-apps/api/core";
 import {useState, useEffect, useRef} from "react";
 import {useTranslation} from "react-i18next";
-import DaisyToast from "./DaisyToast.jsx";
+import DaisyToast from "../DaisyToast.jsx";
 import SearchJsonComponent from "./SearchJsonComponent.jsx";
 import {TiCloudStorageOutline} from "react-icons/ti";
 import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
