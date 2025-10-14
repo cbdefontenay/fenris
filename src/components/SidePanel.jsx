@@ -117,11 +117,9 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
 
             {/* Side Panel */}
             <div className={`
-                fixed lg:relative z-40
+                fixed z-40 overflow-hidden
                 w-64 h-screen bg-(--surface-container) text-(--on-surface) border-r border-(--outline-variant)
-                transform transition-transform duration-300 ease-in-out
-                ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                page-margin lg:ml-20
+                transform transition-transform duration-300 ease-in-out page-margin md:ml-20
             `}>
                 {/* Header */}
                 <div className="flex justify-around p-4 border-b border-(--outline-variant) w-full">

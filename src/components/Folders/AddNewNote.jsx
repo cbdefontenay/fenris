@@ -15,27 +15,28 @@ export default function AddNewNote({
                                        onMenuClose
                                    }) {
     const { t } = useTranslation();
-    const [isAddNotePopupOpen, setIsAddNotePopupOpen] = useState(false);
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [isLoadingNote, setIsLoadingNote] = useState(false);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     const handleAddNote = () => {
-        setIsAddNotePopupOpen(true);
+        setIsPopupOpen(true);
     };
 
     const handleSaveNote = async () => {
         if (!newNoteTitle.trim()) return;
+
         setIsLoadingNote(true);
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
             const saveNoteCommand = await invoke("save_note_to_folder_sqlite", {
                 title: newNoteTitle.trim(),
                 content: '',
-                folderId: folderId
+                folderId: parseInt(folderId) // Ensure it's a number
             });
 
             await db.execute(saveNoteCommand);
-            setIsAddNotePopupOpen(false);
+            setIsPopupOpen(false);
             setNewNoteTitle('');
             if (onNoteAdded) onNoteAdded();
         } catch (error) {
@@ -46,8 +47,17 @@ export default function AddNewNote({
     };
 
     const handleCancelNote = () => {
-        setIsAddNotePopupOpen(false);
+        setIsPopupOpen(false);
         setNewNoteTitle('');
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSaveNote();
+        }
+        if (e.key === 'Escape') {
+            handleCancelNote();
+        }
     };
 
     const menuPosition = getMenuPosition();
@@ -87,10 +97,16 @@ export default function AddNewNote({
             </div>
 
             {/* Global Popup via Portal */}
-            {isAddNotePopupOpen &&
+            {isPopupOpen &&
                 createPortal(
-                    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[5000] p-4">
-                        <div className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
+                    <div
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[5000] p-4 popup-overlay"
+                        onClick={handleCancelNote}
+                    >
+                        <div
+                            className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96 popup-content"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <h2 className="text-lg font-semibold mb-4">{t('folderMenu.addNewNote')}</h2>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
@@ -100,10 +116,7 @@ export default function AddNewNote({
                                     type="text"
                                     value={newNoteTitle}
                                     onChange={(e) => setNewNoteTitle(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') handleSaveNote();
-                                        if (e.key === 'Escape') handleCancelNote();
-                                    }}
+                                    onKeyDown={handleKeyDown}
                                     className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
                                     placeholder={t('folderMenu.enterNoteTitle')}
                                     autoFocus

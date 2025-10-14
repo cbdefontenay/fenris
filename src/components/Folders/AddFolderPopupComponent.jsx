@@ -3,10 +3,10 @@ import {FaFolder, FaSpinner} from "react-icons/fa";
 import Database from '@tauri-apps/plugin-sql';
 import {useState, useEffect} from "react";
 import {invoke} from "@tauri-apps/api/core";
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 export default function AddFolderPopupComponent({isPopupClosed}) {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
     const [folderState, setFolderState] = useState({
         folderName: "",
         isLoading: false,
@@ -14,7 +14,6 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
         errorMessage: ""
     });
 
-    // Load initial state from Rust
     useEffect(() => {
         loadFolderState();
     }, []);
@@ -24,23 +23,29 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
             const state = await invoke("get_folder_state");
             setFolderState(prev => ({
                 ...prev,
-                folderName: state.folder_name,
-                showError: state.show_error,
-                errorMessage: state.error_message
+                folderName: state.folder_name || "",
+                showError: state.show_error || false,
+                errorMessage: state.error_message || ""
             }));
         } catch (error) {
             console.error("Failed to load folder state:", error);
+            setFolderState(prev => ({
+                ...prev,
+                folderName: "",
+                showError: false,
+                errorMessage: ""
+            }));
         }
     }
 
     async function updateFolderName(name) {
         try {
-            const newState = await invoke("set_folder_name", { folderName: name });
+            const newState = await invoke("set_folder_name", {folderName: name});
             setFolderState(prev => ({
                 ...prev,
-                folderName: newState.folder_name,
-                showError: newState.show_error,
-                errorMessage: newState.error_message
+                folderName: newState.folder_name || "",
+                showError: newState.show_error || false,
+                errorMessage: newState.error_message || ""
             }));
         } catch (error) {
             console.error("Failed to update folder name:", error);
@@ -59,7 +64,7 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
             return;
         }
 
-        setFolderState(prev => ({ ...prev, isLoading: true }));
+        setFolderState(prev => ({...prev, isLoading: true}));
 
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
@@ -69,19 +74,22 @@ export default function AddFolderPopupComponent({isPopupClosed}) {
 
             await db.execute(saveFolderFromRust);
 
-            // Reset Rust state on success
             await invoke("reset_folder_state");
             isPopupClosed();
         } catch (e) {
+            const errorMessage = e.toString().includes('UNIQUE') ||
+            e.toString().includes('unique') ||
+            e.toString().includes('duplicate')
+                ? t('addFolderPopup.errors.folderNameExists')
+                : t('addFolderPopup.errors.createFailed', {error: e.toString()});
+
             setFolderState(prev => ({
                 ...prev,
                 showError: true,
-                errorMessage: e.message.includes("UNIQUE")
-                    ? t('addFolderPopup.errors.folderNameExists')
-                    : t('addFolderPopup.errors.createFailed', { error: e.message })
+                errorMessage
             }));
         } finally {
-            setFolderState(prev => ({ ...prev, isLoading: false }));
+            setFolderState(prev => ({...prev, isLoading: false}));
         }
     }
 

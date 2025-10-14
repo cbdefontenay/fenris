@@ -1,5 +1,5 @@
-import {useState, useEffect, useRef} from 'react';
-import {FaRegFolder, FaChevronDown, FaChevronRight} from "react-icons/fa";
+import {useEffect, useRef, useState} from 'react';
+import {FaChevronDown, FaChevronRight, FaRegFolder} from "react-icons/fa";
 import {RxDotsVertical} from "react-icons/rx";
 import {deleteFolder, updateFolderName} from "../../data/CreateNotesDataShell.jsx";
 import {invoke} from "@tauri-apps/api/core";
@@ -7,30 +7,32 @@ import AddNewNote from "./AddNewNote.jsx";
 import Database from "@tauri-apps/plugin-sql";
 import {MdOutlineEditNote} from "react-icons/md";
 import {createPortal} from "react-dom";
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuToggle, onFolderUpdate, onNoteSelect}) {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateFolderNameMenuOpen, setIsUpdateFolderNameOpen] = useState(false);
-    const [newFolderName, setNewFolderName] = useState(folder.name || '');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
     const [notes, setNotes] = useState([]);
     const [selectedNote, setSelectedNote] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
     const inputRef = useRef(null);
 
     const loadNotes = async () => {
         try {
+            setIsLoading(true);
             const db = await Database.load("sqlite:fenris_app_notes.db");
             const getNotesCommand = await invoke("get_notes_by_folder_sqlite", {folderId: folder.id});
             const dbNotes = await db.select(getNotesCommand);
             setNotes(dbNotes);
         } catch (error) {
             console.error('Error loading notes:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -42,8 +44,12 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     useEffect(() => {
         function handleClickOutside(event) {
+            const isPopupClick = event.target.closest('.popup-overlay') ||
+                event.target.closest('.popup-content');
+
             if (menuRef.current && !menuRef.current.contains(event.target) &&
-                buttonRef.current && !buttonRef.current.contains(event.target)) {
+                buttonRef.current && !buttonRef.current.contains(event.target) &&
+                !isPopupClick) {
                 setIsMenuOpen(false);
                 onMenuToggle(false);
             }
@@ -88,6 +94,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     };
 
     const handleNoteClick = (note) => {
+        setSelectedNote(note.id);
         if (onNoteSelect) {
             onNoteSelect(note);
         }
@@ -95,40 +102,46 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
     const updateFolderNameHandler = () => {
         setIsUpdateFolderNameOpen(true);
-        setError('');
         setIsMenuOpen(false);
     }
 
+    const handleNoteAdded = () => {
+        loadNotes();
+        if (!isExpanded) {
+            setIsExpanded(true);
+        }
+    }
+
     const handleSaveFolderName = async () => {
-        if (newFolderName.trim() === '') {
-            setError(t('folderManagement.errors.folderNameEmpty'));
+        if (folderItemsState.newFolderName.trim() === '') {
+            await updateField("error", t('folderManagement.errors.folderNameEmpty'));
             return;
         }
 
-        if (newFolderName.trim() === folder.name) {
+        if (folderItemsState.newFolderName.trim() === folder.name) {
             setIsUpdateFolderNameOpen(false);
             return;
         }
 
-        setIsLoading(true);
-        setError('');
+        await updateField("is_loading", true);
+        await updateField("error", '');
 
         try {
-            const result = await updateFolderName(newFolderName.trim(), folder.id);
+            const result = await updateFolderName(folderItemsState.newFolderName.trim(), folder.id);
 
             if (result.success) {
                 if (onFolderUpdate) {
                     onFolderUpdate();
                 }
                 setIsUpdateFolderNameOpen(false);
-                setNewFolderName(folder.name);
+                await updateField("new_folder_name", folder.name);
             } else {
-                setError(result.error || t('folderManagement.errors.updateFailed'));
+                await updateField("error", result.error || t('folderManagement.errors.updateFailed'));
             }
         } catch (error) {
-            setError(t('folderManagement.errors.updateFailedWithError', { error: error.message }));
+            await updateField("error", t('folderManagement.errors.updateFailedWithError', {error: error.message}));
         } finally {
-            setIsLoading(false);
+            await updateField("is_loading", false);
         }
     }
 
@@ -145,8 +158,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
             return;
         }
 
-        setIsLoading(true);
-        setError('');
+        await updateField("is_loading", true);
+        await updateField("error", '');
 
         try {
             setIsMenuOpen(false);
@@ -159,30 +172,30 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                     onFolderUpdate();
                 }
             } else {
-                setError(result?.error || t('folderManagement.errors.deleteFailed'));
+                await updateField("error", result?.error || t('folderManagement.errors.deleteFailed'));
                 setIsMenuOpen(true);
                 onMenuToggle(true);
             }
         } catch (error) {
             console.error('Error deleting folder:', error);
-            setError(t('folderManagement.errors.deleteFailedWithError', { error: error.message }));
+            await updateField("error", t('folderManagement.errors.deleteFailedWithError', {error: error.message}));
             setIsMenuOpen(true);
             onMenuToggle(true);
         } finally {
-            setIsLoading(false);
+            await updateField("is_loading", false);
         }
     }
 
     const handleCancelUpdate = () => {
         setIsUpdateFolderNameOpen(false);
-        setNewFolderName(folder.name);
-        setError('');
+        updateField("new_folder_name", folder.name);
+        updateField("error", '');
     }
 
-    const handleInputChange = (e) => {
-        setNewFolderName(e.target.value);
-        if (error) {
-            setError('');
+    const handleInputChange = async (e) => {
+        await updateField("new_folder_name", e.target.value);
+        if (folderItemsState.error) {
+            await updateField("error", '');
         }
     }
 
@@ -195,16 +208,13 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         }
     }
 
-    const handleNoteAdded = () => {
-        loadNotes(); // Refresh notes list
-    }
-
     return (
         <>
             {isUpdateFolderNameMenuOpen &&
                 createPortal(
                     (
-                        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                             <div className="bg-white text-black rounded-lg shadow-xl p-4 w-96">
                                 <h2 className="text-lg font-semibold mb-4">{t('folderManagement.changeFolderName')}</h2>
                                 <div className="mb-4">
@@ -214,71 +224,26 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                     <input
                                         ref={inputRef}
                                         type="text"
-                                        value={newFolderName}
-                                        onChange={handleInputChange}
-                                        onKeyDown={handleKeyDown}
-                                        className={`w-full p-3 border rounded-md bg-(--surface) text-(--on-surface) transition-colors ${
-                                            error
-                                                ? 'border-(--error) focus:border-(--error) focus:ring-1 focus:ring-(--error)'
-                                                : 'border-(--outline-variant) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)'
-                                        }`}
-                                        disabled={isLoading}
+                                        defaultValue={folder.name}
+                                        className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
                                         placeholder={t('folderManagement.enterFolderName')}
                                     />
-                                    {error && (
-                                        <div className="mt-2 flex items-center space-x-1">
-                                            <span className="text-(--error) text-sm flex items-center">
-                                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                                {error}
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
                                 <div className="flex justify-end space-x-2">
                                     <button
-                                        onClick={handleCancelUpdate}
-                                        disabled={isLoading}
-                                        className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) hover:text-(--error) rounded-md transition-colors disabled:opacity-50"
+                                        onClick={() => setIsUpdateFolderNameOpen(false)}
+                                        className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors"
                                     >
                                         {t('folderManagement.cancel')}
                                     </button>
                                     <button
-                                        onClick={handleSaveFolderName}
-                                        disabled={isLoading || !newFolderName.trim()}
-                                        className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-md hover:bg-(--secondary) transition-colors disabled:opacity-50 flex items-center space-x-2"
+                                        onClick={() => {
+                                            // Handle folder name update here
+                                            setIsUpdateFolderNameOpen(false);
+                                        }}
+                                        className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-md hover:bg-(--secondary) transition-colors"
                                     >
-                                        {isLoading ? (
-                                            <>
-                                                <svg
-                                                    className="animate-spin h-4 w-4 text-(--on-tertiary)"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <circle
-                                                        className="opacity-25"
-                                                        cx="12"
-                                                        cy="12"
-                                                        r="10"
-                                                        stroke="currentColor"
-                                                        strokeWidth="4"
-                                                    ></circle>
-                                                    <path
-                                                        className="opacity-75"
-                                                        fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                    ></path>
-                                                </svg>
-                                                <span>{t('folderManagement.saving')}</span>
-                                            </>
-                                        ) : (
-                                            t('folderManagement.save')
-                                        )}
+                                        {t('folderManagement.save')}
                                     </button>
                                 </div>
                             </div>
@@ -344,7 +309,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                 key={note.id}
                                 onClick={() => handleNoteClick(note)}
                                 className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                                    selectedNote?.id === note.id
+                                    selectedNote === note.id
                                         ? 'bg-(--primary-container) text-(--on-primary-container)'
                                         : 'hover:bg-(--surface-container-high)'
                                 }`}

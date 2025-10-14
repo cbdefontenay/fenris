@@ -39,7 +39,7 @@ export default function ShellPopup() {
 
     return (
         <div
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 font-mono"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-100 font-mono"
             onClick={handleOverlayClick}
             onKeyDown={handleKeyDown}
         >
