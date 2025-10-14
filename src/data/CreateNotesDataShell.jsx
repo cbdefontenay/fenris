@@ -3,30 +3,33 @@ import Database from "@tauri-apps/plugin-sql";
 
 export async function saveFolder(folderName) {
     try {
-        const dateNow = await invoke("cli_date_without_hours");
         const saveFolderCommandFromRust = await invoke("save_folder_sqlite", {
-            folderName: folderName.trim(),
-            dateNow: dateNow
+            folderName: folderName.trim()
         });
         const db = await Database.load("sqlite:fenris_app_notes.db");
-
         await db.execute(saveFolderCommandFromRust);
+        return {success: true};
     } catch (e) {
         console.log(e);
+        return {success: false, error: e.message};
     }
 }
 
 export async function deleteFolder(folderId) {
     try {
         const db = await Database.load("sqlite:fenris_app_notes.db");
-        const deleteFolders = await invoke("delete_folder_sqlite", {folderId: folderId});
-        const deleteFoldersAndNotes = await invoke("delete_folder_and_note_sqlite", {folderId: folderId});
 
-        await db.execute(deleteFoldersAndNotes);
-        await db.execute(deleteFolders);
+        // First delete all notes in the folder (due to foreign key constraints)
+        const deleteNotesCommand = await invoke("delete_folder_and_note_sqlite", {folderId: folderId});
+        await db.execute(deleteNotesCommand);
+
+        // Then delete the folder itself
+        const deleteFolderCommand = await invoke("delete_folder_sqlite", {folderId: folderId});
+        await db.execute(deleteFolderCommand);
 
         return {success: true};
     } catch (e) {
+        console.error('Error deleting folder:', e);
         return {success: false, error: e.message};
     }
 }
@@ -34,8 +37,8 @@ export async function deleteFolder(folderId) {
 export async function deleteFolderByName(folderName) {
     try {
         const db = await Database.load("sqlite:fenris_app_notes.db");
-        const deleteFolderByNameFromRust = await invoke("delete_folder_by_name_sqlite", {folderName: folderName.trim()});
-        const folders = await db.select(deleteFolderByNameFromRust);
+        const getFolderIdCommand = await invoke("delete_folder_by_name_sqlite", {folderName: folderName.trim()});
+        const folders = await db.select(getFolderIdCommand);
 
         if (folders.length === 0) {
             return {success: false, error: `Folder "${folderName}" not found`};
@@ -43,15 +46,16 @@ export async function deleteFolderByName(folderName) {
 
         const folderId = folders[0].id;
 
-        // Then delete using the ID
-        const deleteFolders = await invoke("delete_folder_sqlite", {folderId: folderId});
-        const deleteFoldersAndNotes = await invoke("delete_folder_and_note_sqlite", {folderId: folderId});
+        // Delete notes first, then folder
+        const deleteNotesCommand = await invoke("delete_folder_and_note_sqlite", {folderId: folderId});
+        await db.execute(deleteNotesCommand);
 
-        await db.execute(deleteFoldersAndNotes);
-        await db.execute(deleteFolders);
+        const deleteFolderCommand = await invoke("delete_folder_sqlite", {folderId: folderId});
+        await db.execute(deleteFolderCommand);
 
         return {success: true};
     } catch (e) {
+        console.error('Error deleting folder by name:', e);
         return {success: false, error: e.message};
     }
 }
@@ -59,14 +63,15 @@ export async function deleteFolderByName(folderName) {
 export async function updateFolderName(newFolderName, folderId) {
     try {
         const db = await Database.load("sqlite:fenris_app_notes.db");
-        const updateFolderNameFromRust = await invoke("update_folder_sqlite", {
-            folderName: newFolderName.trim(),
+        const updateFolderCommand = await invoke("update_folder_by_id_sqlite", {
+            newFolderName: newFolderName.trim(),
             folderId: folderId
         });
 
-        await db.execute(updateFolderNameFromRust);
+        await db.execute(updateFolderCommand);
         return {success: true};
     } catch (e) {
+        console.error('Error updating folder name:', e);
         return {success: false, error: e.message};
     }
 }
@@ -74,26 +79,27 @@ export async function updateFolderName(newFolderName, folderId) {
 export async function updateFolderByName(currentFolderName, newFolderName) {
     try {
         const db = await Database.load("sqlite:fenris_app_notes.db");
-        const updateFolderByNameFromRust = await invoke("update_folder_by_name_sqlite", {
+        const getFolderIdCommand = await invoke("update_folder_by_name_sqlite", {
             currentFolderName: currentFolderName.trim()
-        })
+        });
 
-        const folders = await db.select(updateFolderByNameFromRust);
+        const folders = await db.select(getFolderIdCommand);
 
         if (folders.length === 0) {
-            throw new Error(`Folder "${currentFolderName}" not found`);
+            return {success: false, error: `Folder "${currentFolderName}" not found`};
         }
 
         const folderId = folders[0].id;
 
-        const updateFolderByIdFromRust = await invoke("update_folder_by_id_sqlite", {
+        const updateFolderCommand = await invoke("update_folder_by_id_sqlite", {
             newFolderName: newFolderName.trim(),
-            folderId
-        })
-        await db.execute(updateFolderByIdFromRust);
+            folderId: folderId
+        });
 
+        await db.execute(updateFolderCommand);
         return {success: true};
     } catch (e) {
+        console.error('Error updating folder by name:', e);
         return {success: false, error: e.message};
     }
 }

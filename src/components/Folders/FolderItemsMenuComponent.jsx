@@ -18,6 +18,11 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     const [isLoading, setIsLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Add state for folder operations
+    const [newFolderName, setNewFolderName] = useState(folder.name);
+    const [error, setError] = useState('');
+    const [isOperationLoading, setIsOperationLoading] = useState(false);
+
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
     const inputRef = useRef(null);
@@ -101,6 +106,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     };
 
     const updateFolderNameHandler = () => {
+        setNewFolderName(folder.name);
+        setError('');
         setIsUpdateFolderNameOpen(true);
         setIsMenuOpen(false);
     }
@@ -113,39 +120,39 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     }
 
     const handleSaveFolderName = async () => {
-        if (folderItemsState.newFolderName.trim() === '') {
-            await updateField("error", t('folderManagement.errors.folderNameEmpty'));
+        if (newFolderName.trim() === '') {
+            setError(t('folderManagement.errors.folderNameEmpty'));
             return;
         }
 
-        if (folderItemsState.newFolderName.trim() === folder.name) {
+        if (newFolderName.trim() === folder.name) {
             setIsUpdateFolderNameOpen(false);
             return;
         }
 
-        await updateField("is_loading", true);
-        await updateField("error", '');
+        setIsOperationLoading(true);
+        setError('');
 
         try {
-            const result = await updateFolderName(folderItemsState.newFolderName.trim(), folder.id);
+            const result = await updateFolderName(newFolderName.trim(), folder.id);
 
             if (result.success) {
                 if (onFolderUpdate) {
                     onFolderUpdate();
                 }
                 setIsUpdateFolderNameOpen(false);
-                await updateField("new_folder_name", folder.name);
             } else {
-                await updateField("error", result.error || t('folderManagement.errors.updateFailed'));
+                setError(result.error || t('folderManagement.errors.updateFailed'));
             }
         } catch (error) {
-            await updateField("error", t('folderManagement.errors.updateFailedWithError', {error: error.message}));
+            setError(t('folderManagement.errors.updateFailedWithError', {error: error.message}));
         } finally {
-            await updateField("is_loading", false);
+            setIsOperationLoading(false);
         }
     }
 
     const handleDeleteFolder = async () => {
+        // Use the correct dialog function
         const confirmationDialog = await invoke("delete_folder_dialog", {
             message: t('folderManagement.deleteConfirmation.message'),
             title: t('folderManagement.deleteConfirmation.title'),
@@ -158,8 +165,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
             return;
         }
 
-        await updateField("is_loading", true);
-        await updateField("error", '');
+        setIsOperationLoading(true);
+        setError('');
 
         try {
             setIsMenuOpen(false);
@@ -172,30 +179,30 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                     onFolderUpdate();
                 }
             } else {
-                await updateField("error", result?.error || t('folderManagement.errors.deleteFailed'));
+                setError(result?.error || t('folderManagement.errors.deleteFailed'));
                 setIsMenuOpen(true);
                 onMenuToggle(true);
             }
         } catch (error) {
             console.error('Error deleting folder:', error);
-            await updateField("error", t('folderManagement.errors.deleteFailedWithError', {error: error.message}));
+            setError(t('folderManagement.errors.deleteFailedWithError', {error: error.message}));
             setIsMenuOpen(true);
             onMenuToggle(true);
         } finally {
-            await updateField("is_loading", false);
+            setIsOperationLoading(false);
         }
     }
 
     const handleCancelUpdate = () => {
         setIsUpdateFolderNameOpen(false);
-        updateField("new_folder_name", folder.name);
-        updateField("error", '');
+        setNewFolderName(folder.name);
+        setError('');
     }
 
-    const handleInputChange = async (e) => {
-        await updateField("new_folder_name", e.target.value);
-        if (folderItemsState.error) {
-            await updateField("error", '');
+    const handleInputChange = (e) => {
+        setNewFolderName(e.target.value);
+        if (error) {
+            setError('');
         }
     }
 
@@ -213,10 +220,16 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
             {isUpdateFolderNameMenuOpen &&
                 createPortal(
                     (
-                        <div
-                            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                            <div className="bg-white text-black rounded-lg shadow-xl p-4 w-96">
+                        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 popup-overlay">
+                            <div className="bg-(--surface) text-(--on-surface) rounded-lg shadow-xl p-6 w-96 max-w-full popup-content">
                                 <h2 className="text-lg font-semibold mb-4">{t('folderManagement.changeFolderName')}</h2>
+
+                                {error && (
+                                    <div className="mb-4 p-3 bg-(--error-container) text-(--on-error-container) rounded-md text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-(--on-surface-variant) mb-2">
                                         {t('folderManagement.newFolderName')}:
@@ -224,26 +237,36 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                     <input
                                         ref={inputRef}
                                         type="text"
-                                        defaultValue={folder.name}
-                                        className="w-full p-3 border border-(--outline-variant) rounded-md bg-(--surface) text-(--on-surface) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+                                        value={newFolderName}
+                                        onChange={handleInputChange}
+                                        onKeyDown={handleKeyDown}
+                                        disabled={isOperationLoading}
+                                        className="w-full p-3 border border-(--outline) rounded-md bg-(--surface-container) text-(--on-surface-container) focus:border-(--primary) focus:ring-1 focus:ring-(--primary) disabled:opacity-50"
                                         placeholder={t('folderManagement.enterFolderName')}
                                     />
                                 </div>
+
                                 <div className="flex justify-end space-x-2">
                                     <button
-                                        onClick={() => setIsUpdateFolderNameOpen(false)}
-                                        className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors"
+                                        onClick={handleCancelUpdate}
+                                        disabled={isOperationLoading}
+                                        className="cursor-pointer px-4 py-2 text-(--on-surface-variant) hover:bg-(--surface-container-high) rounded-md transition-colors disabled:opacity-50"
                                     >
                                         {t('folderManagement.cancel')}
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            // Handle folder name update here
-                                            setIsUpdateFolderNameOpen(false);
-                                        }}
-                                        className="cursor-pointer px-4 py-2 bg-(--tertiary) text-(--on-tertiary) rounded-md hover:bg-(--secondary) transition-colors"
+                                        onClick={handleSaveFolderName}
+                                        disabled={isOperationLoading}
+                                        className="cursor-pointer px-4 py-2 bg-(--primary) text-(--on-primary) rounded-md hover:bg-(--primary-dark) transition-colors disabled:opacity-50 flex items-center gap-2"
                                     >
-                                        {t('folderManagement.save')}
+                                        {isOperationLoading ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-(--on-primary) border-t-transparent rounded-full animate-spin"></div>
+                                                {t('folderManagement.saving')}
+                                            </>
+                                        ) : (
+                                            t('folderManagement.save')
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -255,8 +278,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
             <div className="mb-1">
                 {/* Folder Header */}
-                <div
-                    className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
+                <div className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
                     <div
                         className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                         onClick={handleFolderClick}
@@ -267,8 +289,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                         <span className="text-(--on-surface) text-sm font-medium truncate">
                             {folder.name}
                         </span>
-                        <span
-                            className="text-xs text-(--on-surface-variant) bg-(--surface-container-highest) px-2 py-1 rounded-full">
+                        <span className="text-xs text-(--on-surface-variant) bg-(--surface-container-highest) px-2 py-1 rounded-full">
                             {notes.length}
                         </span>
                     </div>
@@ -289,7 +310,7 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                 getMenuPosition={getMenuPosition}
                                 updateFolderNameHandler={updateFolderNameHandler}
                                 handleDeleteFolder={handleDeleteFolder}
-                                isLoading={isLoading}
+                                isLoading={isOperationLoading}
                                 folderId={folder.id}
                                 onNoteAdded={handleNoteAdded}
                                 onMenuClose={() => {
