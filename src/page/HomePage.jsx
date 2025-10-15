@@ -13,9 +13,9 @@ export default function HomePage() {
 
     return (
         <div className="flex min-h-screen">
-            <SidePanel onNoteSelect={handleNoteSelect} />
+            <SidePanel onNoteSelect={handleNoteSelect} selectedNote={selectedNote} />
             {/* Main content */}
-            <main className="flex-1 pl-[350px] bg-(--background)">
+            <main className="flex-1 pl-[350px]">
                 <MarkdownEditorComponent selectedNote={selectedNote} />
             </main>
         </div>

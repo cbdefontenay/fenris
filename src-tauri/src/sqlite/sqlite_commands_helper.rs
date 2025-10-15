@@ -154,3 +154,49 @@ pub fn get_all_single_note() -> Result<String, ()> {
 
     Ok(get_all_single_note_command)
 }
+
+#[command]
+pub fn get_note_by_id_sqlite(note_id: usize) -> Result<String, ()> {
+    let get_note_command = format!(
+        "SELECT * FROM note WHERE id = {}",
+        note_id
+    );
+    Ok(get_note_command)
+}
+
+#[command]
+pub fn get_single_note_by_id_sqlite(note_id: usize) -> Result<String, ()> {
+    let get_single_note_command = format!(
+        "SELECT * FROM single_notes WHERE id = {}",
+        note_id
+    );
+    Ok(get_single_note_command)
+}
+
+#[command]
+pub fn update_note_content_sqlite(note_id: usize, content: String) -> Result<String, ()> {
+    let now: DateTime<Utc> = Utc::now();
+    let formatted_date = now.format("%Y-%m-%d %H:%M:%S").to_string();
+
+    let update_note_content_command = format!(
+        "UPDATE note SET content = '{}', date_modified = '{}' WHERE id = {}",
+        content.replace("'", "''"),
+        formatted_date,
+        note_id
+    );
+    Ok(update_note_content_command)
+}
+
+#[command]
+pub fn update_single_note_content_sqlite(note_id: usize, content: String) -> Result<String, ()> {
+    let now: DateTime<Utc> = Utc::now();
+    let formatted_date = now.format("%Y-%m-%d %H:%M:%S").to_string();
+
+    let update_single_note_content_command = format!(
+        "UPDATE single_notes SET content = '{}', date_modified = '{}' WHERE id = {}",
+        content.replace("'", "''"),
+        formatted_date,
+        note_id
+    );
+    Ok(update_single_note_content_command)
+}

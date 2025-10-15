@@ -9,12 +9,11 @@ import {MdOutlineEditNote} from "react-icons/md";
 import {createPortal} from "react-dom";
 import {useTranslation} from 'react-i18next';
 
-export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuToggle, onFolderUpdate, onNoteSelect}) {
+export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuToggle, onFolderUpdate, onNoteSelect, selectedNote}) {
     const {t} = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateFolderNameMenuOpen, setIsUpdateFolderNameOpen] = useState(false);
     const [notes, setNotes] = useState([]);
-    const [selectedNote, setSelectedNote] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -31,11 +30,18 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         try {
             setIsLoading(true);
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const getNotesCommand = await invoke("get_notes_by_folder_sqlite", {folderId: folder.id});
+            const getNotesCommand = await invoke("get_notes_by_folder_sqlite", { folderId: folder.id });
             const dbNotes = await db.select(getNotesCommand);
-            setNotes(dbNotes);
+
+            // Ensure each note has the folder_id property for correct type detection
+            const notesWithFolderId = dbNotes.map(note => ({
+                ...note,
+                folder_id: folder.id // This ensures the note type is correctly identified
+            }));
+
+            setNotes(notesWithFolderId);
         } catch (error) {
-            console.error('Error loading notes:', error);
+            // Handle error
         } finally {
             setIsLoading(false);
         }
@@ -98,10 +104,20 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         setIsExpanded(!isExpanded);
     };
 
-    const handleNoteClick = (note) => {
-        setSelectedNote(note.id);
-        if (onNoteSelect) {
-            onNoteSelect(note);
+    const handleNoteClick = async (note) => {
+        try {
+            const db = await Database.load("sqlite:fenris_app_notes.db");
+            const getNoteByIdCmd = await invoke("get_note_by_id_sqlite", { noteId: note.id });
+            const rows = await db.select(getNoteByIdCmd);
+            const fresh = rows && rows[0] ? { ...rows[0], folder_id: folder.id } : { ...note, folder_id: folder.id };
+            if (onNoteSelect) {
+                onNoteSelect(fresh);
+            }
+        } catch (e) {
+            if (onNoteSelect) {
+                // Fallback to existing note if fetch fails
+                onNoteSelect({ ...note, folder_id: folder.id });
+            }
         }
     };
 
@@ -289,9 +305,6 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                         <span className="text-(--on-surface) text-sm font-medium truncate">
                             {folder.name}
                         </span>
-                        <span className="text-xs text-(--on-surface-variant) bg-(--surface-container-highest) px-2 py-1 rounded-full">
-                            {notes.length}
-                        </span>
                     </div>
 
                     <div className="relative">
@@ -330,8 +343,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                 key={note.id}
                                 onClick={() => handleNoteClick(note)}
                                 className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                                    selectedNote === note.id
-                                        ? 'bg-(--primary-container) text-(--on-primary-container)'
+                                    selectedNote?.folder_id === folder.id && selectedNote?.id === note.id
+                                        ? 'bg-(--surface-variant) text-(--on-surface-variant)'
                                         : 'hover:bg-(--surface-container-high)'
                                 }`}
                             >

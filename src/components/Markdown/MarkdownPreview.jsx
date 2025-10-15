@@ -7,7 +7,6 @@ import SyntaxHighlighterComponent from "./SyntaxHighlighterComponent.jsx";
 import { useState } from "react";
 import { FiCopy, FiCheck } from "react-icons/fi";
 
-// Copy button component
 function CopyButton({ text }) {
     const [copied, setCopied] = useState(false);
 
@@ -52,7 +51,7 @@ export default function MarkdownPreview({ markdown, theme }) {
 
                         if (!inline && language) {
                             return (
-                                <div className="relative group my-3">
+                                <div className="relative group my-3 overflow-x-auto">
                                     <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
                                         <span className="text-xs px-2 py-1 bg-(--surface-container-high) text-(--on-surface-container-high) rounded border border-(--outline)">
                                             {language}
@@ -72,7 +71,7 @@ export default function MarkdownPreview({ markdown, theme }) {
 
                         return (
                             <code
-                                className="bg-(--surface-container-high) text-(--on-surface-container-high) px-1.5 py-0.5 rounded text-xs font-mono border border-(--outline)/30"
+                                className="bg-(--surface-container-high) text-(--on-surface-container-high) px-1.5 py-0.5 rounded text-xs font-mono border border-(--outline)/30 break-words max-w-full"
                                 {...props}
                             >
                                 {children}

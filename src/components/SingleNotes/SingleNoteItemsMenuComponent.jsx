@@ -17,9 +17,19 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     const menuRef = useRef(null);
     const inputRef = useRef(null);
 
-    const handleNoteClick = () => {
-        if (onNoteSelect) {
-            onNoteSelect(note);
+    const handleNoteClick = async () => {
+        try {
+            const db = await Database.load("sqlite:fenris_app_notes.db");
+            const getByIdCmd = await invoke("get_single_note_by_id_sqlite", { noteId: note.id });
+            const rows = await db.select(getByIdCmd);
+            const fresh = rows && rows[0] ? rows[0] : note;
+            if (onNoteSelect) {
+                onNoteSelect(fresh);
+            }
+        } catch (e) {
+            if (onNoteSelect) {
+                onNoteSelect(note);
+            }
         }
     };
 

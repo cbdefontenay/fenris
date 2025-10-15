@@ -182,7 +182,7 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
                                             onMenuToggle={handleMenuToggle}
                                             onNoteUpdate={getAllSingleNotes}
                                             onNoteSelect={onNoteSelect}
-                                            isSelected={selectedNote?.id === note.id}
+                                            isSelected={selectedNote && !selectedNote.folder_id && selectedNote.id === note.id}
                                         />
                                     ))}
                                 </div>

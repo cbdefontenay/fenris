@@ -10,7 +10,10 @@ export default function SyntaxHighlighterComponent({ theme, language, children, 
             className="rounded-lg border border-(--outline) shadow-lg syntax-highlighter"
             showLineNumbers
             wrapLines={false}
+            wrapLongLines={true}
             showInlineLineNumbers={false}
+            customStyle={{ maxWidth: '100%', overflowX: 'auto' }}
+            codeTagProps={{ style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word' } }}
             {...props}
         >
             {String(children).replace(/\n$/, '')}

@@ -9,11 +9,22 @@ use crate::ollama::{list_of_models, ollama_api_call};
 use crate::sqlite::{
     create_single_note, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite,
     delete_folder_sqlite, delete_single_note, get_all_folders, get_all_single_note,
-    get_notes_by_folder_sqlite, save_folder_sqlite, save_note_to_folder_sqlite, sqlite_migrations,
-    update_folder_by_id_sqlite, update_folder_by_name_sqlite, update_folder_sqlite,
-    update_single_note,
+    get_note_by_id_sqlite, get_notes_by_folder_sqlite, get_single_note_by_id_sqlite,
+    save_folder_sqlite, save_note_to_folder_sqlite, sqlite_migrations, update_folder_by_id_sqlite,
+    update_folder_by_name_sqlite, update_folder_sqlite, update_note_content_sqlite,
+    update_single_note, update_single_note_content_sqlite,
 };
-use crate::state::{calculate, editor_state, get_add_note_state, get_folder_items_state, get_folder_state, get_note_state, preview_state, reset_add_note_state, reset_folder_items_state, reset_folder_state, reset_note_state, set_add_note_state, set_editor_state, set_folder_items_state, set_folder_name, set_markdown_content, set_markdown_state, set_markdown_title, set_note_name, set_preview_state, toggle_view_mode, update_add_note_field, update_folder_items_field, validate_folder_name, validate_note_name, AddNoteManager, AddNoteState, Counter, FolderItemsManager, FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState, NoteManager, NoteState};
+use crate::state::{
+    auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state,
+    get_folder_items_state, get_folder_note_by_id, get_folder_state, get_note_state,
+    get_single_note_by_id, preview_state, reset_add_note_state, reset_folder_items_state,
+    reset_folder_state, reset_note_state, set_add_note_state, set_editor_state,
+    set_folder_items_state, set_folder_name, set_markdown_content, set_markdown_state,
+    set_markdown_title, set_note_name, set_preview_state, toggle_view_mode, update_add_note_field,
+    update_folder_items_field, validate_folder_name, validate_note_name, AddNoteManager,
+    AddNoteState, Counter, FolderItemsManager, FolderItemsState, FolderManager, FolderState,
+    MarkdownPreviewManager, MarkdownState, NoteManager, NoteState,
+};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
 };
@@ -108,7 +119,15 @@ pub fn run() {
             set_markdown_content,
             toggle_view_mode,
             editor_state,
-            set_editor_state
+            set_editor_state,
+            update_note_content_sqlite,
+            update_single_note_content_sqlite,
+            get_note_by_id_sqlite,
+            get_single_note_by_id_sqlite,
+            auto_save_folder_note,
+            auto_save_single_note,
+            get_folder_note_by_id,
+            get_single_note_by_id
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");
