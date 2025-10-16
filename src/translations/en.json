@@ -329,5 +329,53 @@
       "confirm": "Delete",
       "cancel": "Cancel"
     }
+  },
+  "markdownEditor": {
+    "header": {
+      "singleNote": "Single Note",
+      "folderNote": "Folder Note"
+    },
+    "viewMode": {
+      "split": "Split View",
+      "editor": "Editor Only",
+      "preview": "Preview Only",
+      "toggle": "Change View Mode",
+      "splitTooltip": "Split View (Click to cycle)",
+      "editorTooltip": "Editor Only (Click to cycle)",
+      "previewTooltip": "Preview Only (Click to cycle)"
+    },
+    "saveStatus": {
+      "saved": "Saved",
+      "saving": "Saving...",
+      "unsaved": "Unsaved changes",
+      "lastSaved": "Last saved: {{time}}",
+      "saveButton": "Save (Ctrl+S)",
+      "autoSave": "Auto-save: Enabled",
+      "debounce": "Debounce: 1 second"
+    },
+    "panels": {
+      "editor": "EDITOR",
+      "preview": "PREVIEW",
+      "editing": "Editing",
+      "live": "Live",
+      "editorPlaceholder": "Write your markdown here..."
+    },
+    "settings": {
+      "title": "Settings",
+      "viewMode": "View Mode",
+      "theme": "Theme",
+      "noteType": "Note Type"
+    },
+    "fullscreen": {
+      "enter": "Enter fullscreen",
+      "exit": "Exit fullscreen"
+    },
+    "emptyState": {
+      "title": "No Note Selected",
+      "description": "Select a note from the sidebar or create a new one to start editing."
+    },
+    "preview": {
+      "copyCode": "Copy code"
+    }
   }
 }

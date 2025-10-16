@@ -4,11 +4,13 @@ import remarkBreaks from "remark-breaks";
 import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
 import SyntaxHighlighterComponent from "./SyntaxHighlighterComponent.jsx";
-import { useState } from "react";
-import { FiCopy, FiCheck } from "react-icons/fi";
+import {useState} from "react";
+import {FiCopy, FiCheck} from "react-icons/fi";
+import {useTranslation} from "react-i18next";
 
-function CopyButton({ text }) {
+function CopyButton({text}) {
     const [copied, setCopied] = useState(false);
+    const {t} = useTranslation();
 
     const handleCopy = async () => {
         try {
@@ -24,18 +26,20 @@ function CopyButton({ text }) {
         <button
             onClick={handleCopy}
             className="p-1.5 rounded bg-(--surface-container-high) border border-(--outline) hover:bg-(--surface-container-highest) transition-all duration-200 group"
-            title="Copy code"
+            title={t('markdownEditor.preview.copyCode')}
         >
             {copied ? (
-                <FiCheck size={12} className="text-green-500" />
+                <FiCheck size={12} className="text-green-500"/>
             ) : (
-                <FiCopy size={12} className="text-(--on-surface-container-high) group-hover:text-(--primary)" />
+                <FiCopy size={12} className="text-(--on-surface-container-high) group-hover:text-(--primary)"/>
             )}
         </button>
     );
 }
 
-export default function MarkdownPreview({ markdown, theme }) {
+export default function MarkdownPreview({markdown, theme}) {
+    const {t} = useTranslation();
+
     return (
         <div className="markdown-preview text-sm">
             <ReactMarkdown
@@ -44,7 +48,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                 rehypePlugins={[rehypeRaw]}
                 components={{
                     // Code blocks
-                    code({ node, inline, className, children, ...props }) {
+                    code({node, inline, className, children, ...props}) {
                         const match = /language-(\w+)/.exec(className || '');
                         const language = match ? match[1] : '';
                         const codeText = String(children).replace(/\n$/, '');
@@ -53,10 +57,11 @@ export default function MarkdownPreview({ markdown, theme }) {
                             return (
                                 <div className="relative group my-3 overflow-x-auto">
                                     <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                                        <span className="text-xs px-2 py-1 bg-(--surface-container-high) text-(--on-surface-container-high) rounded border border-(--outline)">
+                                        <span
+                                            className="text-xs px-2 py-1 bg-(--surface-container-high) text-(--on-surface-container-high) rounded border border-(--outline)">
                                             {language}
                                         </span>
-                                        <CopyButton text={codeText} />
+                                        <CopyButton text={codeText}/>
                                     </div>
                                     <SyntaxHighlighterComponent
                                         theme={theme}
@@ -80,7 +85,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Task lists - remove bullet points and style properly
-                    li({ node, children, ...props }) {
+                    li({node, children, ...props}) {
                         const taskListItem = node.children?.[0]?.type === 'input';
 
                         if (taskListItem) {
@@ -91,11 +96,12 @@ export default function MarkdownPreview({ markdown, theme }) {
                             );
                         }
 
-                        return <li className="text-(--on-surface) marker:text-(--primary) my-1" {...props}>{children}</li>;
+                        return <li
+                            className="text-(--on-surface) marker:text-(--primary) my-1" {...props}>{children}</li>;
                     },
 
                     // Checkboxes for tasks
-                    input({ node, checked, ...props }) {
+                    input({node, checked, ...props}) {
                         if (props.type === "checkbox") {
                             return (
                                 <input
@@ -115,7 +121,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Links
-                    a({ node, ...props }) {
+                    a({node, ...props}) {
                         return (
                             <a
                                 {...props}
@@ -127,7 +133,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Blockquotes
-                    blockquote({ node, ...props }) {
+                    blockquote({node, ...props}) {
                         return (
                             <blockquote
                                 className="border-l-3 border-(--primary) pl-3 py-1 my-3 bg-(--surface-container) text-(--on-surface-container) not-italic rounded-r text-sm"
@@ -137,7 +143,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Horizontal rules
-                    hr({ node, ...props }) {
+                    hr({node, ...props}) {
                         return (
                             <hr
                                 className="my-4 border-t border-(--outline) opacity-30"
@@ -147,7 +153,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Tables
-                    table({ node, ...props }) {
+                    table({node, ...props}) {
                         return (
                             <div className="overflow-x-auto my-3 border border-(--outline) rounded text-xs">
                                 <table
@@ -159,7 +165,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Table headers
-                    th({ node, ...props }) {
+                    th({node, ...props}) {
                         return (
                             <th
                                 className="bg-(--surface-container-high) text-(--on-surface-container-high) px-3 py-2 border-b border-(--outline) font-semibold text-left text-xs"
@@ -169,7 +175,7 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Table cells
-                    td({ node, ...props }) {
+                    td({node, ...props}) {
                         return (
                             <td
                                 className="px-3 py-2 border-b border-(--outline) text-(--on-surface) text-xs"
@@ -179,44 +185,46 @@ export default function MarkdownPreview({ markdown, theme }) {
                     },
 
                     // Headings
-                    h1({ node, ...props }) {
+                    h1({node, ...props}) {
                         return <h1 className="text-2xl font-bold text-(--on-surface) pb-2 mb-3 mt-4" {...props} />;
                     },
-                    h2({ node, ...props }) {
+                    h2({node, ...props}) {
                         return <h2 className="text-xl font-bold text-(--on-surface)  pb-1 mb-2 mt-3" {...props} />;
                     },
-                    h3({ node, ...props }) {
+                    h3({node, ...props}) {
                         return <h3 className="text-lg font-bold text-(--on-surface) mb-1 mt-2" {...props} />;
                     },
-                    h4({ node, ...props }) {
+                    h4({node, ...props}) {
                         return <h4 className="text-base font-bold text-(--on-surface) mb-1 mt-2" {...props} />;
                     },
 
                     // Paragraphs
-                    p({ node, ...props }) {
+                    p({node, ...props}) {
                         return <p className="text-(--on-surface) leading-relaxed mb-3 text-sm" {...props} />;
                     },
 
                     // Lists
-                    ul({ node, ...props }) {
-                        return <ul className="text-(--on-surface) leading-6 mb-3 list-disc list-inside text-sm" {...props} />;
+                    ul({node, ...props}) {
+                        return <ul
+                            className="text-(--on-surface) leading-6 mb-3 list-disc list-inside text-sm" {...props} />;
                     },
-                    ol({ node, ...props }) {
-                        return <ol className="text-(--on-surface) leading-6 mb-3 list-decimal list-inside text-sm" {...props} />;
+                    ol({node, ...props}) {
+                        return <ol
+                            className="text-(--on-surface) leading-6 mb-3 list-decimal list-inside text-sm" {...props} />;
                     },
 
                     // Strong text
-                    strong({ node, ...props }) {
+                    strong({node, ...props}) {
                         return <strong className="text-(--primary) font-bold" {...props} />;
                     },
 
                     // Emphasis
-                    em({ node, ...props }) {
+                    em({node, ...props}) {
                         return <em className="text-(--secondary) italic" {...props} />;
                     },
 
                     // Images
-                    img({ node, ...props }) {
+                    img({node, ...props}) {
                         return <img className="rounded border border-(--outline) max-w-full h-auto my-3" {...props} />;
                     },
                 }}

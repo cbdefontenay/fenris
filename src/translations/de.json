@@ -329,5 +329,53 @@
       "confirm": "Löschen",
       "cancel": "Abbrechen"
     }
+  },
+  "markdownEditor": {
+    "header": {
+      "singleNote": "Einzelne Notiz",
+      "folderNote": "Ordner-Notiz"
+    },
+    "viewMode": {
+      "split": "Geteilte Ansicht",
+      "editor": "Nur Editor",
+      "preview": "Nur Vorschau",
+      "toggle": "Ansichtsmodus ändern",
+      "splitTooltip": "Geteilte Ansicht (Klicken zum Wechseln)",
+      "editorTooltip": "Nur Editor (Klicken zum Wechseln)",
+      "previewTooltip": "Nur Vorschau (Klicken zum Wechseln)"
+    },
+    "saveStatus": {
+      "saved": "Gespeichert",
+      "saving": "Wird gespeichert...",
+      "unsaved": "Ungespeicherte Änderungen",
+      "lastSaved": "Zuletzt gespeichert: {{time}}",
+      "saveButton": "Speichern (Strg+S)",
+      "autoSave": "Auto-Speichern: Aktiviert",
+      "debounce": "Debounce: 1 Sekunde"
+    },
+    "panels": {
+      "editor": "EDITOR",
+      "preview": "VORSCHAU",
+      "editing": "Wird bearbeitet",
+      "live": "Live",
+      "editorPlaceholder": "Schreiben Sie hier Ihren Markdown-Text..."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "viewMode": "Ansichtsmodus",
+      "theme": "Thema",
+      "noteType": "Notiztyp"
+    },
+    "fullscreen": {
+      "enter": "Vollbildmodus aktivieren",
+      "exit": "Vollbildmodus verlassen"
+    },
+    "emptyState": {
+      "title": "Keine Notiz ausgewählt",
+      "description": "Wählen Sie eine Notiz aus der Seitenleiste aus oder erstellen Sie eine neue, um mit der Bearbeitung zu beginnen."
+    },
+    "preview": {
+      "copyCode": "Code kopieren"
+    }
   }
 }

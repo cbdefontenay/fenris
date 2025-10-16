@@ -329,5 +329,53 @@
       "confirm": "Supprimer",
       "cancel": "Annuler"
     }
+  },
+  "markdownEditor": {
+    "header": {
+      "singleNote": "Note simple",
+      "folderNote": "Note de dossier"
+    },
+    "viewMode": {
+      "split": "Vue divisée",
+      "editor": "Éditeur uniquement",
+      "preview": "Aperçu uniquement",
+      "toggle": "Changer le mode d'affichage",
+      "splitTooltip": "Vue divisée (Cliquer pour alterner)",
+      "editorTooltip": "Éditeur uniquement (Cliquer pour alterner)",
+      "previewTooltip": "Aperçu uniquement (Cliquer pour alterner)"
+    },
+    "saveStatus": {
+      "saved": "Sauvegardé",
+      "saving": "Sauvegarde en cours...",
+      "unsaved": "Modifications non sauvegardées",
+      "lastSaved": "Dernière sauvegarde : {{time}}",
+      "saveButton": "Sauvegarder (Ctrl+S)",
+      "autoSave": "Sauvegarde auto : Activée",
+      "debounce": "Debounce : 1 seconde"
+    },
+    "panels": {
+      "editor": "ÉDITEUR",
+      "preview": "APERÇU",
+      "editing": "En cours d'édition",
+      "live": "En direct",
+      "editorPlaceholder": "Écrivez votre markdown ici..."
+    },
+    "settings": {
+      "title": "Paramètres",
+      "viewMode": "Mode d'affichage",
+      "theme": "Thème",
+      "noteType": "Type de note"
+    },
+    "fullscreen": {
+      "enter": "Plein écran",
+      "exit": "Quitter le plein écran"
+    },
+    "emptyState": {
+      "title": "Aucune note sélectionnée",
+      "description": "Sélectionnez une note dans la barre latérale ou créez-en une nouvelle pour commencer à éditer."
+    },
+    "preview": {
+      "copyCode": "Copier le code"
+    }
   }
 }

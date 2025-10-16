@@ -7,6 +7,7 @@ import DocumentStats from "./DocumentStats.jsx";
 import MarkdownPreview from "./MarkdownPreview.jsx";
 import {MdOutlinePreview, MdOutlineSave, MdSave} from "react-icons/md";
 import Database from "@tauri-apps/plugin-sql";
+import {useTranslation} from "react-i18next";
 
 export default function MarkdownEditorComponent({selectedNote}) {
     const [content, setContent] = useState("");
@@ -25,6 +26,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
     const isInitialLoadRef = useRef(true);
     const selectedNoteRef = useRef(selectedNote);
     const saveTimeoutRef = useRef(null);
+    const {t} = useTranslation();
 
     const isSingleNote = useCallback((note) => {
         if (!note) return false;
@@ -250,13 +252,13 @@ export default function MarkdownEditorComponent({selectedNote}) {
     const getViewModeTooltip = () => {
         switch (viewMode) {
             case "split":
-                return "Split View (Click to cycle)";
+                return t('markdownEditor.viewMode.splitTooltip');
             case "editor":
-                return "Editor Only (Click to cycle)";
+                return t('markdownEditor.viewMode.editorTooltip');
             case "preview":
-                return "Preview Only (Click to cycle)";
+                return t('markdownEditor.viewMode.previewTooltip');
             default:
-                return "Change View Mode";
+                return t('markdownEditor.viewMode.toggle');
         }
     };
 
@@ -277,11 +279,13 @@ export default function MarkdownEditorComponent({selectedNote}) {
     const getSaveStatusText = () => {
         switch (saveStatus) {
             case "saved":
-                return lastSaveTime ? `Saved ${lastSaveTime.toLocaleTimeString()}` : "Saved";
+                return lastSaveTime
+                    ? t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})
+                    : t('markdownEditor.saveStatus.saved');
             case "saving":
-                return "Saving...";
+                return t('markdownEditor.saveStatus.saving');
             case "unsaved":
-                return "Unsaved changes";
+                return t('markdownEditor.saveStatus.unsaved');
             default:
                 return "";
         }
@@ -300,7 +304,10 @@ export default function MarkdownEditorComponent({selectedNote}) {
                     </h1>
                     <span
                         className="text-xs bg-(--surface-container) px-2 py-1 rounded-full border border-(--outline) text-(--on-surface-container)">
-                        {isSingleNote(selectedNote) ? 'Single Note' : 'Folder Note'}
+                        {isSingleNote(selectedNote)
+                            ? t('markdownEditor.header.singleNote')
+                            : t('markdownEditor.header.folderNote')
+                        }
                     </span>
                 </div>
 
@@ -311,7 +318,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                             onClick={handleManualSave}
                             disabled={isSaving || saveStatus === "saved"}
                             className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed tooltip"
-                            title="Save (Ctrl+S)"
+                            title={t('markdownEditor.saveStatus.saveButton')}
                         >
                             {getSaveStatusIcon()}
                         </button>
@@ -333,6 +340,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                     <button
                         onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                         className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                        title={t('markdownEditor.settings.title')}
                     >
                         <FiSettings className="text-(--on-surface)" size={16}/>
                     </button>
@@ -341,6 +349,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                     <button
                         onClick={toggleFullscreen}
                         className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                        title={isFullscreen ? t('markdownEditor.fullscreen.exit') : t('markdownEditor.fullscreen.enter')}
                     >
                         {isFullscreen ? <FiMinimize2 size={16}/> : <FiMaximize2 size={16}/>}
                     </button>
@@ -351,7 +360,9 @@ export default function MarkdownEditorComponent({selectedNote}) {
                             className="absolute top-14 right-2 bg-(--surface-container) border border-(--outline) rounded-xl shadow-2xl p-4 z-10 min-w-48">
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-(--on-surface)">View Mode</span>
+                                    <span className="text-sm font-medium text-(--on-surface)">
+                                        {t('markdownEditor.settings.viewMode')}
+                                    </span>
                                     <div className="flex items-center gap-1 text-xs">
                                         <button
                                             onClick={() => toggleViewMode("split")}
@@ -361,7 +372,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                                     : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
                                             }`}
                                         >
-                                            Split
+                                            {t('markdownEditor.viewMode.split')}
                                         </button>
                                         <button
                                             onClick={() => toggleViewMode("editor")}
@@ -371,7 +382,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                                     : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
                                             }`}
                                         >
-                                            Editor
+                                            {t('markdownEditor.viewMode.editor')}
                                         </button>
                                         <button
                                             onClick={() => toggleViewMode("preview")}
@@ -381,13 +392,15 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                                     : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
                                             }`}
                                         >
-                                            Preview
+                                            {t('markdownEditor.viewMode.preview')}
                                         </button>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="text-sm font-medium block mb-2 text-(--on-surface)">Theme</label>
+                                    <label className="text-sm font-medium block mb-2 text-(--on-surface)">
+                                        {t('markdownEditor.settings.theme')}
+                                    </label>
                                     <select
                                         value={theme}
                                         onChange={(e) => setTheme(e.target.value)}
@@ -404,9 +417,14 @@ export default function MarkdownEditorComponent({selectedNote}) {
 
                                 <div className="pt-2 border-t border-(--outline)">
                                     <div className="text-xs text-(--on-surface-variant)">
-                                        <p>Auto-save: Enabled</p>
-                                        <p>Debounce: 1 second</p>
-                                        <p>Note Type: {isSingleNote(selectedNote) ? 'Single Note' : 'Folder Note'}</p>
+                                        <p>{t('markdownEditor.saveStatus.autoSave')}</p>
+                                        <p>{t('markdownEditor.saveStatus.debounce')}</p>
+                                        <p>
+                                            {t('markdownEditor.settings.noteType')}: {isSingleNote(selectedNote)
+                                            ? t('markdownEditor.header.singleNote')
+                                            : t('markdownEditor.header.folderNote')
+                                        }
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -423,11 +441,11 @@ export default function MarkdownEditorComponent({selectedNote}) {
                         <div className="flex-shrink-0 flex items-center gap-2 text-xs text-(--on-surface-variant) mb-2">
                             <div
                                 className="bg-(--surface-container) px-3 py-1 rounded-t-lg border border-b-0 border-(--outline) font-medium text-(--on-surface-container)">
-                                EDITOR
+                                {t('markdownEditor.panels.editor')}
                             </div>
                             <div className="flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                <span>Editing</span>
+                                <span>{t('markdownEditor.panels.editing')}</span>
                             </div>
                         </div>
                         <div
@@ -439,7 +457,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                 value={markdown}
                                 onChange={handleMarkdownChange}
                                 className="w-full h-full p-4 bg-(--surface-container) text-(--on-surface-container) resize-none outline-none font-mono text-sm leading-relaxed scrollbar-thin placeholder:text-(--on-surface-variant) text-sm"
-                                placeholder="Write your markdown here..."
+                                placeholder={t('markdownEditor.panels.editorPlaceholder')}
                             />
                         </div>
                     </div>
@@ -451,11 +469,11 @@ export default function MarkdownEditorComponent({selectedNote}) {
                         <div className="flex-shrink-0 flex items-center gap-2 text-xs text-(--on-surface-variant) mb-2">
                             <div
                                 className="bg-(--surface-container) px-3 py-1 rounded-t-lg border border-b-0 border-(--outline) font-medium text-(--on-surface-container)">
-                                PREVIEW
+                                {t('markdownEditor.panels.preview')}
                             </div>
                             <div className="flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
-                                <span>Live</span>
+                                <span>{t('markdownEditor.panels.live')}</span>
                             </div>
                         </div>
                         <div
@@ -479,11 +497,13 @@ export default function MarkdownEditorComponent({selectedNote}) {
                         </span>
                         <DocumentStats charCount={charCount} wordCount={wordCount}/>
                         <span className="text-xs opacity-75">
-                            Mode: {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
+                            {t('markdownEditor.viewMode.toggle')}: {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
                         </span>
                     </div>
                     <div className="text-xs opacity-75">
-                        {saveStatus === "saved" && lastSaveTime && `Last saved: ${lastSaveTime.toLocaleTimeString()}`}
+                        {saveStatus === "saved" && lastSaveTime &&
+                            t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})
+                        }
                     </div>
                 </div>
             </div>
