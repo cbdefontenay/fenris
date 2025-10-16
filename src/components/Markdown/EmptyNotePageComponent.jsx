@@ -1,6 +1,9 @@
-import {ImFilesEmpty} from "react-icons/im";
+import { ImFilesEmpty } from "react-icons/im";
+import { useTranslation } from "react-i18next";
 
 export default function EmptyNotePageComponent() {
+    const { t } = useTranslation();
+
     return (
         <div
             className="flex items-center justify-center h-full text-(--primary)">
@@ -12,11 +15,10 @@ export default function EmptyNotePageComponent() {
                     </div>
                 </div>
                 <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-(--primary) to-(--secondary) bg-clip-text text-transparent">
-                    Welcome to Your Notes
+                    {t('markdownEditor.emptyState.title')}
                 </h2>
                 <p className="italic text-(--on-surface-variant) leading-relaxed mb-6">
-                    Select a note from the sidebar<br/>
-                    or create a new note from the CLI or manually.
+                    {t('markdownEditor.emptyState.description')}
                 </p>
             </div>
         </div>

@@ -376,6 +376,10 @@
     },
     "preview": {
       "copyCode": "Code kopieren"
+    },
+    "documentStats": {
+      "words": "Wörter",
+      "chars": "Zeichen"
     }
   }
 }

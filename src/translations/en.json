@@ -370,12 +370,16 @@
       "enter": "Enter fullscreen",
       "exit": "Exit fullscreen"
     },
+    "preview": {
+      "copyCode": "Copy code"
+    },
+    "documentStats": {
+      "words": "words",
+      "chars": "chars"
+    },
     "emptyState": {
       "title": "No Note Selected",
       "description": "Select a note from the sidebar or create a new one to start editing."
-    },
-    "preview": {
-      "copyCode": "Copy code"
     }
   }
 }

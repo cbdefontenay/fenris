@@ -55,7 +55,6 @@ export async function deleteFolderByName(folderName) {
 
         return {success: true};
     } catch (e) {
-        console.error('Error deleting folder by name:', e);
         return {success: false, error: e.message};
     }
 }
