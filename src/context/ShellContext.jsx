@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
 import i18next from "i18next";
-import {deleteFolder, deleteFolderByName, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
+import {deleteFolderByName, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
 
 const ShellContext = createContext();
 
@@ -21,6 +21,42 @@ export function ShellProvider({children}) {
         setCurrentLanguage(code);
         i18next.changeLanguage(code).then(r => "");
     };
+
+    const getHistoryFromRust = async () => {
+        try {
+            const rustHistory = await invoke("get_vec_history");
+            const historyArray = rustHistory.history || rustHistory || [];
+            setHistory(historyArray);
+        } catch (error) {
+            setHistory([]);
+        }
+    };
+
+    const updateHistory = async (newHistory) => {
+        try {
+            const historyForRust = newHistory.map(item => {
+                if (typeof item === 'string') {
+                    return item;
+                } else {
+                    return JSON.stringify(item);
+                }
+            });
+
+            const result = await invoke("set_vec_history", {
+                history: historyForRust
+            });
+
+            const updatedHistory = result.history || result || [];
+            setHistory(updatedHistory);
+
+        } catch (error) {
+            setHistory(newHistory);
+        }
+    };
+
+    useEffect(() => {
+        getHistoryFromRust();
+    }, []);
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -48,10 +84,8 @@ export function ShellProvider({children}) {
     }, []);
 
     const handleClearTerminal = (input) => {
-        if (input.ctrlKey && input.key === 'l') {
-            setHistory([]);
-        } else if (input === "clear") {
-            setHistory([]);
+        if ((input.ctrlKey && input.key === 'l') || input === "clear") {
+            updateHistory([]);
         }
     }
 
@@ -356,7 +390,15 @@ export function ShellProvider({children}) {
 
         const outputText = await processCommand(command);
 
-        setHistory(prev => [...prev, {command, output: outputText}]);
+        const newHistoryEntry = {
+            command,
+            output: outputText,
+            timestamp: new Date().toISOString()
+        };
+        const newHistory = [...history, newHistoryEntry];
+
+        await updateHistory(newHistory);
+
         setCommand("");
     };
 

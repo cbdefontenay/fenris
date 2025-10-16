@@ -1,4 +1,3 @@
-// state.rs - Add this to your existing state management
 use std::sync::Mutex;
 use tauri::{command, State};
 use serde::{Deserialize, Serialize};
