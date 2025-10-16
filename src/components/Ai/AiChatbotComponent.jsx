@@ -2,6 +2,7 @@ import {invoke} from "@tauri-apps/api/core";
 import {useState, useRef, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 
+// TODO : local storage to rust + Design
 export const AiChatbotComponent = () => {
     const [prompt, setPrompt] = useState("");
     const [model, setModel] = useState("");
@@ -9,7 +10,7 @@ export const AiChatbotComponent = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [availableModels, setAvailableModels] = useState([]);
-    const [modelsLoaded, setModelsLoaded] = useState(false); // Track when models are loaded
+    const [modelsLoaded, setModelsLoaded] = useState(false);
     const messagesEndRef = useRef(null);
     const {t} = useTranslation();
 
@@ -27,7 +28,6 @@ export const AiChatbotComponent = () => {
         }
     }, [modelsLoaded, availableModels]);
 
-    // Save model to localStorage whenever it changes
     useEffect(() => {
         if (model) {
             localStorage.setItem("ai-chat-model", model);
