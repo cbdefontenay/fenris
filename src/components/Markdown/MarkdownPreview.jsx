@@ -4,7 +4,7 @@ import remarkBreaks from "remark-breaks";
 import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
 import SyntaxHighlighterComponent from "./SyntaxHighlighterComponent.jsx";
-import {useState} from "react";
+import {useState, useEffect, useMemo} from "react";
 import {FiCopy, FiCheck} from "react-icons/fi";
 import {useTranslation} from "react-i18next";
 
@@ -39,15 +39,23 @@ function CopyButton({text}) {
 
 export default function MarkdownPreview({markdown, theme}) {
     const {t} = useTranslation();
+    const [debouncedMarkdown, setDebouncedMarkdown] = useState(markdown);
 
-    return (
-        <div className="markdown-preview text-sm">
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedMarkdown(markdown);
+        }, 150);
+
+        return () => clearTimeout(timer);
+    }, [markdown]);
+
+    const memoizedMarkdown = useMemo(() => {
+        return (
             <ReactMarkdown
-                children={markdown}
+                children={debouncedMarkdown}
                 remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
-                    // Code blocks
                     code({node, inline, className, children, ...props}) {
                         const match = /language-(\w+)/.exec(className || '');
                         const language = match ? match[1] : '';
@@ -84,10 +92,9 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Task lists - remove bullet points and style properly
+                    // ... keep all your other component definitions exactly as they are
                     li({node, children, ...props}) {
                         const taskListItem = node.children?.[0]?.type === 'input';
-
                         if (taskListItem) {
                             return (
                                 <li className="flex items-start gap-2 list-none ml-0 my-1" {...props}>
@@ -95,12 +102,9 @@ export default function MarkdownPreview({markdown, theme}) {
                                 </li>
                             );
                         }
-
-                        return <li
-                            className="text-(--on-surface) marker:text-(--primary) my-1" {...props}>{children}</li>;
+                        return <li className="text-(--on-surface) marker:text-(--primary) my-1" {...props}>{children}</li>;
                     },
 
-                    // Checkboxes for tasks
                     input({node, checked, ...props}) {
                         if (props.type === "checkbox") {
                             return (
@@ -120,7 +124,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         return <input {...props} />;
                     },
 
-                    // Links
                     a({node, ...props}) {
                         return (
                             <a
@@ -132,7 +135,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Blockquotes
                     blockquote({node, ...props}) {
                         return (
                             <blockquote
@@ -142,7 +144,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Horizontal rules
                     hr({node, ...props}) {
                         return (
                             <hr
@@ -152,7 +153,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Tables
                     table({node, ...props}) {
                         return (
                             <div className="overflow-x-auto my-3 border border-(--outline) rounded text-xs">
@@ -164,7 +164,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Table headers
                     th({node, ...props}) {
                         return (
                             <th
@@ -174,7 +173,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Table cells
                     td({node, ...props}) {
                         return (
                             <td
@@ -184,7 +182,6 @@ export default function MarkdownPreview({markdown, theme}) {
                         );
                     },
 
-                    // Headings
                     h1({node, ...props}) {
                         return <h1 className="text-2xl font-bold text-(--on-surface) pb-2 mb-3 mt-4" {...props} />;
                     },
@@ -198,12 +195,10 @@ export default function MarkdownPreview({markdown, theme}) {
                         return <h4 className="text-base font-bold text-(--on-surface) mb-1 mt-2" {...props} />;
                     },
 
-                    // Paragraphs
                     p({node, ...props}) {
                         return <p className="text-(--on-surface) leading-relaxed mb-3 text-sm" {...props} />;
                     },
 
-                    // Lists
                     ul({node, ...props}) {
                         return <ul
                             className="text-(--on-surface) leading-6 mb-3 list-disc list-inside text-sm" {...props} />;
@@ -213,22 +208,25 @@ export default function MarkdownPreview({markdown, theme}) {
                             className="text-(--on-surface) leading-6 mb-3 list-decimal list-inside text-sm" {...props} />;
                     },
 
-                    // Strong text
                     strong({node, ...props}) {
                         return <strong className="text-(--primary) font-bold" {...props} />;
                     },
 
-                    // Emphasis
                     em({node, ...props}) {
                         return <em className="text-(--secondary) italic" {...props} />;
                     },
 
-                    // Images
                     img({node, ...props}) {
-                        return <img className="rounded border border-(--outline) max-w-full h-auto my-3" {...props} />;
+                        return <img className="rounded border border-(--outline) max-w-full h-auto my-3" {...props}  alt=""/>;
                     },
                 }}
             />
+        );
+    }, [debouncedMarkdown, theme, t]);
+
+    return (
+        <div className="markdown-preview text-sm">
+            {memoizedMarkdown}
         </div>
     );
 }

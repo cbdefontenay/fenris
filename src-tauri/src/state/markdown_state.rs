@@ -4,40 +4,28 @@ use tauri::{command, State};
 pub struct MarkdownState {
     pub is_preview_open: bool,
     pub is_editor_open: bool,
-    pub markdown: String,
     pub title: String,
     pub content: String,
+    pub word_count: usize,
+    pub char_count: usize,
+    pub is_full_screen: bool,
 }
 
 impl Default for MarkdownState {
     fn default() -> Self {
         Self {
             is_preview_open: true,
-            is_editor_open: true, // Both open by default (split view)
-            markdown: String::new(),
+            is_editor_open: true,
             title: String::new(),
             content: String::new(),
+            word_count: 0,
+            char_count: 0,
+            is_full_screen: false,
         }
     }
 }
 
 pub struct MarkdownPreviewManager(pub Mutex<MarkdownState>);
-
-#[command]
-pub fn preview_state(state: State<MarkdownPreviewManager>) -> Result<bool, String> {
-    let state = state.0.lock().unwrap();
-    Ok(state.is_preview_open)
-}
-
-#[command]
-pub fn set_preview_state(
-    is_open: bool,
-    state: State<MarkdownPreviewManager>,
-) -> Result<bool, String> {
-    let mut state = state.0.lock().unwrap();
-    state.is_preview_open = is_open;
-    Ok(state.is_preview_open)
-}
 
 #[command]
 pub fn editor_state(state: State<MarkdownPreviewManager>) -> Result<bool, String> {
@@ -84,26 +72,6 @@ pub fn toggle_view_mode(
 }
 
 #[command]
-pub fn set_markdown_state(
-    markdown: String,
-    state: State<MarkdownPreviewManager>,
-) -> Result<String, String> {
-    let mut state = state.0.lock().unwrap();
-    state.markdown = markdown;
-    Ok(state.markdown.clone())
-}
-
-#[command]
-pub fn set_markdown_title(
-    title: String,
-    state: State<MarkdownPreviewManager>,
-) -> Result<String, String> {
-    let mut state = state.0.lock().unwrap();
-    state.title = title;
-    Ok(state.title.clone())
-}
-
-#[command]
 pub fn set_markdown_content(
     content: String,
     state: State<MarkdownPreviewManager>,
@@ -111,4 +79,34 @@ pub fn set_markdown_content(
     let mut state = state.0.lock().unwrap();
     state.content = content;
     Ok(state.content.clone())
+}
+
+#[command]
+pub fn set_word_count_for_markdown(
+    count: usize,
+    state: State<MarkdownPreviewManager>,
+) -> Result<String, String> {
+    let mut state = state.0.lock().unwrap();
+    state.word_count = count;
+    Ok(state.word_count.to_string().clone())
+}
+
+#[command]
+pub fn set_char_count_for_markdown(
+    char_count: usize,
+    state: State<MarkdownPreviewManager>,
+) -> Result<usize, String> {
+    let mut state = state.0.lock().unwrap();
+    state.char_count = char_count;
+    Ok(state.char_count)
+}
+
+#[command]
+pub fn is_markdown_full_screen(
+    is_full_screen: bool,
+    state: State<MarkdownPreviewManager>,
+) -> Result<bool, String> {
+    let mut state = state.0.lock().unwrap();
+    state.is_full_screen = is_full_screen;
+    Ok(state.is_full_screen.clone())
 }

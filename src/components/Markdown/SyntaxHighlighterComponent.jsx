@@ -8,12 +8,20 @@ export default function SyntaxHighlighterComponent({ theme, language, children, 
             language={language}
             PreTag="div"
             className="rounded-lg border border-(--outline) shadow-lg syntax-highlighter"
-            showLineNumbers
+            // showLineNumbers
             wrapLines={false}
-            wrapLongLines={true}
+            wrapLongLines={false}
             showInlineLineNumbers={false}
-            customStyle={{ maxWidth: '100%', overflowX: 'auto' }}
-            codeTagProps={{ style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word' } }}
+            customStyle={{
+                maxWidth: '100%',
+                overflowX: 'auto',
+            }}
+            codeTagProps={{
+                style: {
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                }
+            }}
             {...props}
         >
             {String(children).replace(/\n$/, '')}

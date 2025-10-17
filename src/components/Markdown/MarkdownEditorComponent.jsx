@@ -1,197 +1,65 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {FiCode, FiLayout, FiMaximize2, FiMinimize2, FiSettings} from "react-icons/fi";
+import {MdOutlinePreview, MdOutlineSave, MdSave} from "react-icons/md";
 import {invoke} from "@tauri-apps/api/core";
-import {THEMES} from "../../data/StateManagementFunctions/MarkdownHelpers.jsx";
+import Database from "@tauri-apps/plugin-sql";
+import {useTranslation} from "react-i18next";
+import {
+    getStoredTheme,
+    setCharCountForMarkdown,
+    setIsMarkdownFullScreen,
+    setStoredTheme,
+    setWordCountForMarkdown,
+    listOfThemes
+} from "../../data/StateManagementFunctions/MarkdownHelpers.jsx";
 import EmptyNotePageComponent from "./EmptyNotePageComponent.jsx";
 import DocumentStats from "./DocumentStats.jsx";
 import MarkdownPreview from "./MarkdownPreview.jsx";
-import {MdOutlinePreview, MdOutlineSave, MdSave} from "react-icons/md";
-import Database from "@tauri-apps/plugin-sql";
-import {useTranslation} from "react-i18next";
+import PanelHeader from "./PanelHeader.jsx";
 
 export default function MarkdownEditorComponent({selectedNote}) {
-    const [content, setContent] = useState("");
+    const {t} = useTranslation();
+    const [markdown, setMarkdown] = useState("");
     const [title, setTitle] = useState("");
     const [viewMode, setViewMode] = useState("split");
-    const [markdown, setMarkdown] = useState("");
-    const [theme, setTheme] = useState("atomDark");
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [lastSaveTime, setLastSaveTime] = useState(null);
     const [saveStatus, setSaveStatus] = useState("saved");
+    const [lastSaveTime, setLastSaveTime] = useState(null);
+    const [theme, setTheme] = useState('atomDark');
+
     const previousMarkdownRef = useRef("");
     const isInitialLoadRef = useRef(true);
     const selectedNoteRef = useRef(selectedNote);
     const saveTimeoutRef = useRef(null);
-    const {t} = useTranslation();
 
-    const isSingleNote = useCallback((note) => {
-        if (!note) return false;
-        return note.hasOwnProperty('folder_id') === false;
-    }, []);
+    const VIEW_MODES = {
+        split: {icon: <FiLayout size={12}/>, tooltip: 'markdownEditor.viewMode.splitTooltip'},
+        editor: {icon: <FiCode size={12}/>, tooltip: 'markdownEditor.viewMode.editorTooltip'},
+        preview: {icon: <MdOutlinePreview size={12}/>, tooltip: 'markdownEditor.viewMode.previewTooltip'}
+    };
 
-    useEffect(() => {
-        selectedNoteRef.current = selectedNote;
-    }, [selectedNote]);
+    const SAVE_STATUS = {
+        saved: {icon: <MdOutlineSave className="text-green-500" size={16}/>},
+        saving: {
+            icon: <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>
+        },
+        unsaved: {icon: <MdSave className="text-orange-500" size={16}/>}
+    };
 
-    useEffect(() => {
-        const initializeViewMode = async () => {
-            try {
-                const [isEditorOpen, isPreviewOpen] = await invoke("get_view_mode");
-                if (isEditorOpen && isPreviewOpen) {
-                    setViewMode("split");
-                } else if (isEditorOpen && !isPreviewOpen) {
-                    setViewMode("editor");
-                } else if (!isEditorOpen && isPreviewOpen) {
-                    setViewMode("preview");
-                }
-            } catch (error) {
-                console.log("Using default view mode: split");
-            }
-        };
-        initializeViewMode();
-    }, []);
+    const isSingleNote = useCallback((note) => !note || note.hasOwnProperty('folder_id') === false, []);
 
-    useEffect(() => {
-        if (selectedNote) {
-            setTitle(selectedNote.title || "");
-            setContent(selectedNote.content || "");
-            setMarkdown(selectedNote.content || "");
-            previousMarkdownRef.current = selectedNote.content || "";
-            setSaveStatus("saved");
-            setLastSaveTime(new Date());
-            isInitialLoadRef.current = true;
-        } else {
-            setTitle("");
-            setContent("");
-            setMarkdown("");
-            previousMarkdownRef.current = "";
-            setSaveStatus("saved");
-        }
-    }, [selectedNote]);
+    const calculateCounts = useCallback((text) => ({
+        words: text.trim() ? text.trim().split(/\s+/).length : 0,
+        chars: text.length
+    }), []);
 
-    useEffect(() => {
-        const words = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
-        const chars = markdown.length;
-        setWordCount(words);
-        setCharCount(chars);
-    }, [markdown]);
-
-    // Auto-save functionality with debounce (1s)
-    useEffect(() => {
-        // Don't auto-save on initial load or if no note is selected
-        if (isInitialLoadRef.current || !selectedNote) {
-            isInitialLoadRef.current = false;
-            return;
-        }
-
-        // Don't save if content hasn't changed
-        if (markdown === previousMarkdownRef.current) {
-            return;
-        }
-
-        // Update save status to "unsaved"
-        setSaveStatus("unsaved");
-
-        // Clear any pending save
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-            saveTimeoutRef.current = null;
-        }
-
-        // Schedule a debounced save
-        saveTimeoutRef.current = setTimeout(async () => {
-            setIsSaving(true);
-            setSaveStatus("saving");
-            try {
-                const singleNote = isSingleNote(selectedNote);
-                const sql = await invoke(singleNote ? "auto_save_single_note" : "auto_save_folder_note", {
-                    noteId: selectedNote.id,
-                    content: markdown,
-                });
-                const db = await Database.load("sqlite:fenris_app_notes.db");
-                await db.execute(sql);
-
-                setSaveStatus("saved");
-                setLastSaveTime(new Date());
-                previousMarkdownRef.current = markdown;
-                console.log(`${singleNote ? 'Single' : 'Folder'} note saved successfully`);
-            } catch (error) {
-                console.error('Error in auto-save:', error);
-                setSaveStatus("unsaved");
-            } finally {
-                setIsSaving(false);
-                saveTimeoutRef.current = null;
-            }
-        }, 1000);
-
-        // Cleanup if markdown/selection changes before timeout fires
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-                saveTimeoutRef.current = null;
-            }
-        };
-    }, [markdown, selectedNote, isSingleNote]);
-
-    // Manual save function
-    const handleManualSave = useCallback(async () => {
-        if (!selectedNote || markdown === previousMarkdownRef.current) {
-            return;
-        }
-
-        // Cancel any pending debounced save and perform immediately
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-            saveTimeoutRef.current = null;
-        }
-
-        setIsSaving(true);
-        setSaveStatus("saving");
-
-        try {
-            const singleNote = isSingleNote(selectedNote);
-            const sql = await invoke(singleNote ? "auto_save_single_note" : "auto_save_folder_note", {
-                noteId: selectedNote.id,
-                content: markdown,
-            });
-            const db = await Database.load("sqlite:fenris_app_notes.db");
-            await db.execute(sql);
-
-            setSaveStatus("saved");
-            setLastSaveTime(new Date());
-            previousMarkdownRef.current = markdown;
-        } catch (error) {
-            setSaveStatus("unsaved");
-        } finally {
-            setIsSaving(false);
-        }
-    }, [selectedNote, markdown, isSingleNote]);
-
-    // Keyboard shortcut for save (Ctrl+S)
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                handleManualSave();
-            }
-            if (e.key === 'Escape') {
-                setIsFullscreen(false);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [handleManualSave]);
-
-    if (!selectedNote) {
-        return <EmptyNotePageComponent/>;
-    }
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme);
+        setStoredTheme(newTheme);
+    };
 
     const toggleViewMode = async (mode) => {
         setViewMode(mode);
@@ -204,98 +72,166 @@ export default function MarkdownEditorComponent({selectedNote}) {
 
     const cycleViewMode = async () => {
         const modes = ["split", "editor", "preview"];
-        const currentIndex = modes.indexOf(viewMode);
-        const nextMode = modes[(currentIndex + 1) % modes.length];
+        const nextMode = modes[(modes.indexOf(viewMode) + 1) % modes.length];
         await toggleViewMode(nextMode);
     };
 
-    function toggleFullscreen() {
-        setIsFullscreen(!isFullscreen);
+    const saveNote = async (content, note) => {
+        const singleNote = isSingleNote(note);
+        const sql = await invoke(singleNote ? "auto_save_single_note" : "auto_save_folder_note", {
+            noteId: note.id,
+            content: content,
+        });
+        const db = await Database.load("sqlite:fenris_app_notes.db");
+        await db.execute(sql);
+    };
+
+    const handleManualSave = useCallback(async () => {
+        if (!selectedNote || markdown === previousMarkdownRef.current) return;
+
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+            saveTimeoutRef.current = null;
+        }
+
+        setSaveStatus("saving");
+        try {
+            await saveNote(markdown, selectedNote);
+            setSaveStatus("saved");
+            setLastSaveTime(new Date());
+            previousMarkdownRef.current = markdown;
+        } catch (error) {
+            setSaveStatus("unsaved");
+        }
+    }, [selectedNote, markdown, isSingleNote]);
+
+    useEffect(() => {
+        selectedNoteRef.current = selectedNote;
+    }, [selectedNote]);
+
+    useEffect(() => {
+        const initializeViewMode = async () => {
+            try {
+                const [isEditorOpen, isPreviewOpen] = await invoke("get_view_mode");
+                if (isEditorOpen && isPreviewOpen) setViewMode("split");
+                else if (isEditorOpen && !isPreviewOpen) setViewMode("editor");
+                else if (!isEditorOpen && isPreviewOpen) setViewMode("preview");
+            } catch (error) {
+                console.log("Using default view mode: split");
+            }
+        };
+        initializeViewMode();
+    }, []);
+
+    useEffect(() => {
+        const loadTheme = async () => {
+            const storedTheme = await getStoredTheme();
+            setTheme(storedTheme);
+        };
+        loadTheme();
+    }, []);
+
+    useEffect(() => {
+        if (selectedNote) {
+            setTitle(selectedNote.title || "");
+            setMarkdown(selectedNote.content || "");
+            previousMarkdownRef.current = selectedNote.content || "";
+            setSaveStatus("saved");
+            setLastSaveTime(new Date());
+            isInitialLoadRef.current = true;
+        } else {
+            setTitle("");
+            setMarkdown("");
+            previousMarkdownRef.current = "";
+            setSaveStatus("saved");
+        }
+    }, [selectedNote]);
+
+    useEffect(() => {
+        const {words, chars} = calculateCounts(markdown);
+        setWordCountForMarkdown(words, setWordCount);
+        setCharCountForMarkdown(chars, setCharCount);
+    }, [markdown, calculateCounts]);
+
+    useEffect(() => {
+        if (isInitialLoadRef.current || !selectedNote || markdown === previousMarkdownRef.current) {
+            isInitialLoadRef.current = false;
+            return;
+        }
+
+        setSaveStatus("unsaved");
+
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+        saveTimeoutRef.current = setTimeout(async () => {
+            setSaveStatus("saving");
+            try {
+                await saveNote(markdown, selectedNote);
+                setSaveStatus("saved");
+                setLastSaveTime(new Date());
+                previousMarkdownRef.current = markdown;
+            } catch (error) {
+                setSaveStatus("unsaved");
+            }
+            saveTimeoutRef.current = null;
+        }, 10000);
+
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+                saveTimeoutRef.current = null;
+            }
+        };
+    }, [markdown, selectedNote, isSingleNote]);
+
+    useEffect(() => {
+        const handleKeyDown = async (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                handleManualSave().then(r => `${r}`);
+            }
+            if (e.key === 'Escape') {
+                await setIsMarkdownFullScreen(isFullscreen, setIsFullscreen());
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [handleManualSave]);
+
+    const handleFullScreenMode = async () => {
+        await setIsMarkdownFullScreen(!isFullscreen, setIsFullscreen(!isFullscreen));
     }
 
-    const handleMarkdownChange = (e) => {
-        const newContent = e.target.value;
-        setMarkdown(newContent);
-        setContent(newContent);
-    };
-
-    // Determine which panels to show based on view mode
-    const showEditor = viewMode === "split" || viewMode === "editor";
-    const showPreview = viewMode === "split" || viewMode === "preview";
-
-    // Calculate widths based on view mode
-    const getEditorWidth = () => {
-        if (viewMode === "split") return "w-1/2";
-        if (viewMode === "editor") return "w-full";
-        return "w-0";
-    };
-
-    const getPreviewWidth = () => {
-        if (viewMode === "split") return "w-1/2";
-        if (viewMode === "preview") return "w-full";
-        return "w-0";
-    };
-
-    const getViewModeIcon = () => {
-        switch (viewMode) {
-            case "split":
-                return <FiLayout size={12}/>;
-            case "editor":
-                return <FiCode size={12}/>;
-            case "preview":
-                return <MdOutlinePreview size={12}/>;
-            default:
-                return <FiLayout size={12}/>;
-        }
-    };
-
-    const getViewModeTooltip = () => {
-        switch (viewMode) {
-            case "split":
-                return t('markdownEditor.viewMode.splitTooltip');
-            case "editor":
-                return t('markdownEditor.viewMode.editorTooltip');
-            case "preview":
-                return t('markdownEditor.viewMode.previewTooltip');
-            default:
-                return t('markdownEditor.viewMode.toggle');
-        }
-    };
-
-    const getSaveStatusIcon = () => {
-        switch (saveStatus) {
-            case "saved":
-                return <MdOutlineSave className="text-green-500" size={16}/>;
-            case "saving":
-                return <div
-                    className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>;
-            case "unsaved":
-                return <MdSave className="text-orange-500" size={16}/>;
-            default:
-                return <MdOutlineSave size={16}/>;
-        }
+    const getPanelClasses = () => {
+        const base = "relative transition-all duration-500 flex flex-col min-w-0";
+        return {
+            editor: `${base} ${viewMode === "split" ? "w-1/2" : viewMode === "editor" ? "w-full" : "w-0"}`,
+            preview: `${base} ${viewMode === "split" ? "w-1/2" : viewMode === "preview" ? "w-full" : "w-0"}`
+        };
     };
 
     const getSaveStatusText = () => {
-        switch (saveStatus) {
-            case "saved":
-                return lastSaveTime
-                    ? t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})
-                    : t('markdownEditor.saveStatus.saved');
-            case "saving":
-                return t('markdownEditor.saveStatus.saving');
-            case "unsaved":
-                return t('markdownEditor.saveStatus.unsaved');
-            default:
-                return "";
-        }
+        const texts = {
+            saved: lastSaveTime
+                ? t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})
+                : t('markdownEditor.saveStatus.saved'),
+            saving: t('markdownEditor.saveStatus.saving'),
+            unsaved: t('markdownEditor.saveStatus.unsaved')
+        };
+        return texts[saveStatus] || "";
     };
+
+    const panelClasses = getPanelClasses();
+    const showEditor = viewMode === "split" || viewMode === "editor";
+    const showPreview = viewMode === "split" || viewMode === "preview";
+
+    if (!selectedNote) return <EmptyNotePageComponent/>;
 
     return (
         <div
             className={`h-full w-full flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 p-6 bg-(--background)/30 backdrop-blur-sm' : 'p-4'} overflow-x-hidden`}
-            tabIndex={0}
-        >
+            tabIndex={0}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4 px-2">
                 <div className="flex items-center gap-4">
@@ -304,10 +240,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                     </h1>
                     <span
                         className="text-xs bg-(--surface-container) px-2 py-1 rounded-full border border-(--outline) text-(--on-surface-container)">
-                        {isSingleNote(selectedNote)
-                            ? t('markdownEditor.header.singleNote')
-                            : t('markdownEditor.header.folderNote')
-                        }
+                        {isSingleNote(selectedNote) ? t('markdownEditor.header.singleNote') : t('markdownEditor.header.folderNote')}
                     </span>
                 </div>
 
@@ -316,25 +249,23 @@ export default function MarkdownEditorComponent({selectedNote}) {
                     <div className="flex items-center gap-2 text-sm text-(--on-surface-variant)">
                         <button
                             onClick={handleManualSave}
-                            disabled={isSaving || saveStatus === "saved"}
+                            disabled={saveStatus === "saved"}
                             className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed tooltip"
                             title={t('markdownEditor.saveStatus.saveButton')}
                         >
-                            {getSaveStatusIcon()}
+                            {SAVE_STATUS[saveStatus]?.icon}
                         </button>
                         <span className="text-xs">{getSaveStatusText()}</span>
                     </div>
 
                     {/* View Mode Toggle */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={cycleViewMode}
-                            className="cursor-pointer p-2 bg-(--surface-container) border border-(--outline) rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 text-(--on-surface-container) tooltip"
-                            title={getViewModeTooltip()}
-                        >
-                            {getViewModeIcon()}
-                        </button>
-                    </div>
+                    <button
+                        onClick={cycleViewMode}
+                        className="cursor-pointer p-2 bg-(--surface-container) border border-(--outline) rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 text-(--on-surface-container) tooltip"
+                        title={t(VIEW_MODES[viewMode]?.tooltip)}
+                    >
+                        {VIEW_MODES[viewMode]?.icon}
+                    </button>
 
                     {/* Settings Button */}
                     <button
@@ -347,7 +278,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
 
                     {/* Fullscreen Toggle */}
                     <button
-                        onClick={toggleFullscreen}
+                        onClick={handleFullScreenMode}
                         className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
                         title={isFullscreen ? t('markdownEditor.fullscreen.exit') : t('markdownEditor.fullscreen.enter')}
                     >
@@ -360,53 +291,34 @@ export default function MarkdownEditorComponent({selectedNote}) {
                             className="absolute top-14 right-2 bg-(--surface-container) border border-(--outline) rounded-xl shadow-2xl p-4 z-10 min-w-48">
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-(--on-surface)">
-                                        {t('markdownEditor.settings.viewMode')}
-                                    </span>
+                                    <span
+                                        className="text-sm font-medium text-(--on-surface)">{t('markdownEditor.settings.viewMode')}</span>
                                     <div className="flex items-center gap-1 text-xs">
-                                        <button
-                                            onClick={() => toggleViewMode("split")}
-                                            className={`px-2 py-1 rounded transition-all duration-200 ${
-                                                viewMode === "split"
-                                                    ? "bg-(--primary) text-(--on-primary)"
-                                                    : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
-                                            }`}
-                                        >
-                                            {t('markdownEditor.viewMode.split')}
-                                        </button>
-                                        <button
-                                            onClick={() => toggleViewMode("editor")}
-                                            className={`px-2 py-1 rounded transition-all duration-200 ${
-                                                viewMode === "editor"
-                                                    ? "bg-(--primary) text-(--on-primary)"
-                                                    : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
-                                            }`}
-                                        >
-                                            {t('markdownEditor.viewMode.editor')}
-                                        </button>
-                                        <button
-                                            onClick={() => toggleViewMode("preview")}
-                                            className={`px-2 py-1 rounded transition-all duration-200 ${
-                                                viewMode === "preview"
-                                                    ? "bg-(--primary) text-(--on-primary)"
-                                                    : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
-                                            }`}
-                                        >
-                                            {t('markdownEditor.viewMode.preview')}
-                                        </button>
+                                        {["split", "editor", "preview"].map((mode) => (
+                                            <button
+                                                key={mode}
+                                                onClick={() => toggleViewMode(mode)}
+                                                className={`px-2 py-1 rounded transition-all duration-200 ${
+                                                    viewMode === mode
+                                                        ? "bg-(--primary) text-(--on-primary)"
+                                                        : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
+                                                }`}
+                                            >
+                                                {t(`markdownEditor.viewMode.${mode}`)}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="text-sm font-medium block mb-2 text-(--on-surface)">
-                                        {t('markdownEditor.settings.theme')}
-                                    </label>
+                                    <label
+                                        className="text-sm font-medium block mb-2 text-(--on-surface)">{t('markdownEditor.settings.theme')}</label>
                                     <select
                                         value={theme}
-                                        onChange={(e) => setTheme(e.target.value)}
+                                        onChange={(e) => handleThemeChange(e.target.value)}
                                         className="cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none focus:ring-2 focus:ring-(--primary) transition-all"
                                     >
-                                        {THEMES.map((themeOption) => (
+                                        {listOfThemes.map((themeOption) => (
                                             <option className="cursor-pointer" key={themeOption.name}
                                                     value={themeOption.name}>
                                                 {themeOption.display}
@@ -437,17 +349,12 @@ export default function MarkdownEditorComponent({selectedNote}) {
             <div className="flex flex-row gap-4 h-full w-full items-stretch flex-1 min-h-0 overflow-hidden">
                 {/* Editor Panel */}
                 {showEditor && (
-                    <div className={`relative transition-all duration-500 flex flex-col min-w-0 ${getEditorWidth()}`}>
-                        <div className="flex-shrink-0 flex items-center gap-2 text-xs text-(--on-surface-variant) mb-2">
-                            <div
-                                className="bg-(--surface-container) px-3 py-1 rounded-t-lg border border-b-0 border-(--outline) font-medium text-(--on-surface-container)">
-                                {t('markdownEditor.panels.editor')}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                <span>{t('markdownEditor.panels.editing')}</span>
-                            </div>
-                        </div>
+                    <div className={panelClasses.editor}>
+                        <PanelHeader
+                            title={t('markdownEditor.panels.editor')}
+                            status={t('markdownEditor.panels.editing')}
+                            color="green"
+                        />
                         <div
                             className="flex-1 relative rounded-lg border border-(--outline) bg-(--surface-container) overflow-hidden">
                             <textarea
@@ -455,7 +362,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                 autoCorrect="off"
                                 autoCapitalize="off"
                                 value={markdown}
-                                onChange={handleMarkdownChange}
+                                onChange={(e) => setMarkdown(e.target.value)}
                                 className="w-full h-full p-4 bg-(--surface-container) text-(--on-surface-container) resize-none outline-none font-mono text-sm leading-relaxed scrollbar-thin placeholder:text-(--on-surface-variant) text-sm"
                                 placeholder={t('markdownEditor.panels.editorPlaceholder')}
                             />
@@ -465,17 +372,12 @@ export default function MarkdownEditorComponent({selectedNote}) {
 
                 {/* Preview Panel */}
                 {showPreview && (
-                    <div className={`relative transition-all duration-500 flex flex-col min-w-0 ${getPreviewWidth()}`}>
-                        <div className="flex-shrink-0 flex items-center gap-2 text-xs text-(--on-surface-variant) mb-2">
-                            <div
-                                className="bg-(--surface-container) px-3 py-1 rounded-t-lg border border-b-0 border-(--outline) font-medium text-(--on-surface-container)">
-                                {t('markdownEditor.panels.preview')}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
-                                <span>{t('markdownEditor.panels.live')}</span>
-                            </div>
-                        </div>
+                    <div className={panelClasses.preview}>
+                        <PanelHeader
+                            title={t('markdownEditor.panels.preview')}
+                            status={t('markdownEditor.panels.live')}
+                            color="blue"
+                        />
                         <div
                             className="flex-1 rounded-lg border border-(--outline) bg-(--surface-container-low) overflow-hidden">
                             <div
@@ -501,9 +403,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                         </span>
                     </div>
                     <div className="text-xs opacity-75">
-                        {saveStatus === "saved" && lastSaveTime &&
-                            t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})
-                        }
+                        {saveStatus === "saved" && lastSaveTime && t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})}
                     </div>
                 </div>
             </div>

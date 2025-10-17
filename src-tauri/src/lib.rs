@@ -14,7 +14,8 @@ use crate::sqlite::{
     update_folder_by_name_sqlite, update_folder_sqlite, update_note_content_sqlite,
     update_single_note, update_single_note_content_sqlite,
 };
-use crate::state::{auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state, get_folder_items_state, get_folder_note_by_id, get_folder_state, get_note_state, get_single_note_by_id, get_vec_history, preview_state, reset_add_note_state, reset_folder_items_state, reset_folder_state, reset_note_state, set_add_note_state, set_editor_state, set_folder_items_state, set_folder_name, set_markdown_content, set_markdown_state, set_markdown_title, set_note_name, set_preview_state, set_vec_history, toggle_view_mode, update_add_note_field, update_folder_items_field, validate_folder_name, validate_note_name, AddNoteManager, AddNoteState, Counter, FolderItemsManager, FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState, NoteManager, NoteState, ShellManager, ShellState};
+use crate::state::{auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state, get_folder_items_state, get_folder_note_by_id, get_folder_state, get_note_state, get_single_note_by_id, get_vec_history, is_markdown_full_screen, reset_add_note_state, reset_folder_items_state, reset_folder_state, reset_note_state, set_add_note_state, set_char_count_for_markdown, set_editor_state, set_folder_items_state, set_folder_name, set_markdown_content, set_note_name, set_vec_history, set_word_count_for_markdown, toggle_view_mode, update_add_note_field, update_folder_items_field, validate_folder_name, validate_note_name, AddNoteManager, AddNoteState, Counter, FolderItemsManager, FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState, NoteManager, NoteState, ShellManager, ShellState};
+use crate::theme::{get_theme, list_of_themes, set_theme};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
 };
@@ -27,6 +28,7 @@ mod json;
 mod ollama;
 mod sqlite;
 mod state;
+mod theme;
 mod ui_helpers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -44,7 +46,9 @@ pub fn run() {
         .manage(FolderItemsManager(Mutex::new(FolderItemsState::default())))
         .manage(AddNoteManager(Mutex::new(AddNoteState::default())))
         .manage(MarkdownPreviewManager(Mutex::new(MarkdownState::default())))
-        .manage(ShellManager{state: Mutex::new(ShellState::default())})
+        .manage(ShellManager {
+            state: Mutex::new(ShellState::default()),
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
@@ -103,10 +107,6 @@ pub fn run() {
             set_add_note_state,
             update_add_note_field,
             reset_add_note_state,
-            preview_state,
-            set_preview_state,
-            set_markdown_state,
-            set_markdown_title,
             set_markdown_content,
             toggle_view_mode,
             editor_state,
@@ -120,7 +120,13 @@ pub fn run() {
             get_folder_note_by_id,
             get_single_note_by_id,
             set_vec_history,
-            get_vec_history
+            get_vec_history,
+            set_theme,
+            get_theme,
+            list_of_themes,
+            set_word_count_for_markdown,
+            set_char_count_for_markdown,
+            is_markdown_full_screen
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");
