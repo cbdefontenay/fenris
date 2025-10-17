@@ -109,6 +109,7 @@ html.dark {
 
 :root {
     --navbar-margin: 5rem;
+    --markdown-margin: 350px;
 }
 
 html, body {
@@ -122,6 +123,10 @@ html, body {
 
 .page-margin {
     margin-left: var(--navbar-margin);
+}
+
+.page-margin-markdown {
+    padding-left: var(--markdown-margin);
 }
 
 .json-example {

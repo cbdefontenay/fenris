@@ -3,15 +3,23 @@ import {MdOutlineEditNote} from "react-icons/md";
 import {FaEllipsisV} from "react-icons/fa";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
-export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMenuToggle, onNoteUpdate, onNoteSelect, isSelected}) {
+export default function SingleNoteItemsMenuComponent({
+                                                         note,
+                                                         isAnyMenuOpen,
+                                                         onMenuToggle,
+                                                         onNoteUpdate,
+                                                         onNoteSelect,
+                                                         isSelected,
+                                                         onNoteDelete
+                                                     }) {
     const {t} = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateNotePopupOpen, setIsUpdateNotePopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [newSingleNoteName, setNewSingleNoteName] = useState(note.title || "Fenris");
-    const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [toast, setToast] = useState({show: false, message: '', type: ''});
 
     const buttonRef = useRef(null);
     const menuRef = useRef(null);
@@ -20,7 +28,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     const handleNoteClick = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const getByIdCmd = await invoke("get_single_note_by_id_sqlite", { noteId: note.id });
+            const getByIdCmd = await invoke("get_single_note_by_id_sqlite", {noteId: note.id});
             const rows = await db.select(getByIdCmd);
             const fresh = rows && rows[0] ? rows[0] : note;
             if (onNoteSelect) {
@@ -34,9 +42,9 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
     };
 
     const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
+        setToast({show: true, message, type});
         setTimeout(() => {
-            setToast({ show: false, message: '', type: '' });
+            setToast({show: false, message: '', type: ''});
         }, 3000);
     };
 
@@ -114,7 +122,7 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
             setIsUpdateNotePopupOpen(false);
 
         } catch (e) {
-            showToast(t('singleNotes.errors.updateFailed', { error: e.message }), 'error');
+            showToast(t('singleNotes.errors.updateFailed', {error: e.message}), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -145,6 +153,10 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
             await db.execute(resultCommand);
 
             showToast(t('singleNotes.success.noteDeleted'));
+
+            if (onNoteDelete) {
+                onNoteDelete(note.id);
+            }
 
             if (onNoteUpdate) {
                 onNoteUpdate();
@@ -191,7 +203,8 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
             {/* Update Note Name Popup */}
             {isUpdateNotePopupOpen && (
                 <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
+                    <div
+                        className="bg-(--surface-container) border border-(--outline-variant) rounded-lg shadow-xl p-4 w-96">
                         <h2 className="text-lg font-semibold mb-4">
                             {t('singleNotes.updateNoteTitle')}
                         </h2>
@@ -225,7 +238,8 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
                             >
                                 {isLoading ? (
                                     <>
-                                        <div className="animate-spin h-4 w-4 border-2 border-(--on-tertiary) border-t-transparent rounded-full"></div>
+                                        <div
+                                            className="animate-spin h-4 w-4 border-2 border-(--on-tertiary) border-t-transparent rounded-full"></div>
                                         <span>{t('singleNotes.saving')}</span>
                                     </>
                                 ) : (
@@ -239,11 +253,12 @@ export default function SingleNoteItemsMenuComponent({note, isAnyMenuOpen, onMen
 
             {/* Simple Toast */}
             {toast.show && (
-                <div className={`fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg border transition-all duration-300 ${
-                    toast.type === 'error'
-                        ? 'bg-(--error-container) text-(--on-error-container) border-(--error)'
-                        : 'bg-(--secondary-container) text-(--on-secondary-container) border-(--secondary)'
-                }`}>
+                <div
+                    className={`fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg border transition-all duration-300 ${
+                        toast.type === 'error'
+                            ? 'bg-(--error-container) text-(--on-error-container) border-(--error)'
+                            : 'bg-(--secondary-container) text-(--on-secondary-container) border-(--secondary)'
+                    }`}>
                     {toast.message}
                 </div>
             )}

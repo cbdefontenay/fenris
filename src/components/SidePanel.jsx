@@ -8,10 +8,10 @@ import AddFolderPopupComponent from "./Folders/AddFolderPopupComponent.jsx";
 import {useEffect, useState} from "react";
 import Database from "@tauri-apps/plugin-sql";
 import {invoke} from "@tauri-apps/api/core";
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
-export default function SidePanel({ onNoteSelect, selectedNote }) {
-    const { t } = useTranslation();
+export default function SidePanel({onNoteSelect, selectedNote}) {
+    const {t} = useTranslation();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -32,6 +32,12 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
         setIsNoteWindowOpen(true);
     };
 
+    const handleNoteDelete = (deletedNoteId) => {
+        if (selectedNote && selectedNote.id === deletedNoteId) {
+            onNoteSelect(null);
+        }
+    };
+
     const getAllFolders = async () => {
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
@@ -41,7 +47,7 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
             setShowError(false);
         } catch (e) {
             setShowError(true);
-            setErrorMessage(t('sidePanel.errors.loadFoldersFailed', { error: e.message }));
+            setErrorMessage(t('sidePanel.errors.loadFoldersFailed', {error: e.message}));
         }
     }
 
@@ -54,7 +60,7 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
             setShowError(false);
         } catch (e) {
             setShowError(true);
-            setErrorMessage(t('sidePanel.errors.loadNotesFailed', { error: e.message }));
+            setErrorMessage(t('sidePanel.errors.loadNotesFailed', {error: e.message}));
         }
     }
 
@@ -158,7 +164,8 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
                         >
                             <div className="flex items-center gap-3">
                                 <MdOutlineEditNote className="text-(--tertiary)" size={24}/>
-                                <span className="text-sm font-medium text-(--on-surface)">{t('sidePanel.singleNotes')}</span>
+                                <span
+                                    className="text-sm font-medium text-(--on-surface)">{t('sidePanel.singleNotes')}</span>
                                 <span
                                     className="text-xs bg-(--tertiary-fixed) text-(--on-tertiary-fixed) px-2 py-1 rounded-full">
                                     {singleNotes.length}
@@ -182,6 +189,7 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
                                             onMenuToggle={handleMenuToggle}
                                             onNoteUpdate={getAllSingleNotes}
                                             onNoteSelect={onNoteSelect}
+                                            onNoteDelete={handleNoteDelete} // Add this line
                                             isSelected={selectedNote && !selectedNote.folder_id && selectedNote.id === note.id}
                                         />
                                     ))}
@@ -208,7 +216,8 @@ export default function SidePanel({ onNoteSelect, selectedNote }) {
                         >
                             <div className="flex items-center gap-3">
                                 <FaFolder className="text-(--primary)" size={20}/>
-                                <span className="text-sm font-medium text-(--on-surface)">{t('sidePanel.folders')}</span>
+                                <span
+                                    className="text-sm font-medium text-(--on-surface)">{t('sidePanel.folders')}</span>
                                 <span
                                     className="text-xs bg-(--primary-container) text-(--on-primary-container) px-2 py-1 rounded-full">
                                     {folders.length}

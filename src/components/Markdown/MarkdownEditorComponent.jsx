@@ -16,6 +16,26 @@ import EmptyNotePageComponent from "./EmptyNotePageComponent.jsx";
 import DocumentStats from "./DocumentStats.jsx";
 import MarkdownPreview from "./MarkdownPreview.jsx";
 import PanelHeader from "./PanelHeader.jsx";
+import {Textarea} from "./TextArea.jsx";
+
+const useTextareaBehavior = () => {
+    const textareaRef = useRef(null);
+
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const value = e.target.value;
+
+            e.target.value = value.substring(0, start) + '  ' + value.substring(end);
+            e.target.selectionStart = e.target.selectionEnd = start + 2;
+        }
+    }, []);
+
+    return { textareaRef, handleKeyDown };
+};
+
 
 export default function MarkdownEditorComponent({selectedNote}) {
     const {t} = useTranslation();
@@ -30,6 +50,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
     const [lastSaveTime, setLastSaveTime] = useState(null);
     const [theme, setTheme] = useState('atomDark');
 
+    const { textareaRef, handleKeyDown } = useTextareaBehavior();
     const previousMarkdownRef = useRef("");
     const isInitialLoadRef = useRef(true);
     const selectedNoteRef = useRef(selectedNote);
@@ -355,15 +376,10 @@ export default function MarkdownEditorComponent({selectedNote}) {
                             status={t('markdownEditor.panels.editing')}
                             color="green"
                         />
-                        <div
-                            className="flex-1 relative rounded-lg border border-(--outline) bg-(--surface-container) overflow-hidden">
-                            <textarea
-                                spellCheck={false}
-                                autoCorrect="off"
-                                autoCapitalize="off"
+                        <div className="flex-1 relative rounded-lg border border-(--outline) bg-(--surface-container) overflow-hidden">
+                            <Textarea
                                 value={markdown}
-                                onChange={(e) => setMarkdown(e.target.value)}
-                                className="w-full h-full p-4 bg-(--surface-container) text-(--on-surface-container) resize-none outline-none font-mono text-sm leading-relaxed scrollbar-thin placeholder:text-(--on-surface-variant) text-sm"
+                                onChange={setMarkdown}
                                 placeholder={t('markdownEditor.panels.editorPlaceholder')}
                             />
                         </div>

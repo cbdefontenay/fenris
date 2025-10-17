@@ -341,20 +341,20 @@ export function ShellProvider({children}) {
                 toggleTheme('light');
                 return t('shell.themeSetToLight');
             case 'hide navbar':
-            case 'navbar hide':
-                const navbarToHide = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
+                const navbarToHide = document.querySelector('nav, aside, main, [class*="navbar"], [class*="sidebar"], [class*="page-margin-markdown"]');
                 if (navbarToHide) {
                     navbarToHide.style.display = 'none';
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '0px');
+                document.documentElement.style.setProperty('--markdown-margin', '260px');
                 return t('shell.success.navbarHidden');
             case 'show navbar':
-            case 'navbar show':
-                const navbarToShow = document.querySelector('nav, aside, [class*="navbar"], [class*="sidebar"]');
+                const navbarToShow = document.querySelector('nav, aside, main, [class*="navbar"], [class*="sidebar"], [class*="page-margin-markdown"]');
                 if (navbarToShow) {
                     navbarToShow.style.display = 'block';
                 }
                 document.documentElement.style.setProperty('--navbar-margin', '5rem');
+                document.documentElement.style.setProperty('--markdown-margin', '350px');
                 return t('shell.success.navbarShown');
             case 'hide json-stats':
                 const hideStatsSection = document.querySelector('.json-stats');
