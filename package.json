@@ -13,6 +13,7 @@
     "@tailwindcss/oxide": "4.1.14",
     "@tailwindcss/vite": "^4.1.14",
     "@tauri-apps/plugin-dialog": "~2.4.0",
+    "@tauri-apps/plugin-fs": "~2.4.2",
     "@tauri-apps/plugin-sql": "~2.3.0",
     "@tauri-apps/plugin-store": "~2.4.0",
     "i18next": "^25.5.3",

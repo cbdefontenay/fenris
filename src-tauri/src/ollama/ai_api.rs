@@ -1,25 +1,39 @@
-use reqwest::Client;
-use tauri::command;
-use serde_json::{json, Value};
-use std::time::Duration;
+use fs::read_to_string;
 use html::push_html;
-use pulldown_cmark::{Parser, Options, html};
+use pulldown_cmark::{html, Options, Parser};
+use reqwest::Client;
+use serde_json::{json, Value};
+use std::fs;
+use std::path::Path;
+use std::time::Duration;
+use tauri::command;
 
 #[command]
-pub async fn ollama_api_call(prompt: String, model: String) -> Result<String, String> {
+pub async fn ollama_api_call(
+    prompt: String,
+    model: String,
+    file_content: Option<String>,
+) -> Result<String, String> {
     let ollama_base_url = "http://localhost:11434/api/chat";
 
     let client = Client::builder()
-        .timeout(Duration::from_secs(300)) // 5-minute timeout for long responses
+        .timeout(Duration::from_secs(300))
         .build()
         .map_err(|e| e.to_string())?;
+
+    // Combine file content with prompt if provided
+    let final_prompt = if let Some(content) = file_content {
+        format!("File content:\n{}\n\nQuestion: {}", content, prompt)
+    } else {
+        prompt
+    };
 
     let body = json!({
         "model": model,
         "messages": [
             {
                 "role": "user",
-                "content": prompt
+                "content": final_prompt
             }
         ],
         "stream": false
@@ -41,14 +55,11 @@ pub async fn ollama_api_call(prompt: String, model: String) -> Result<String, St
         .await
         .map_err(|e| format!("JSON parse error: {}", e))?;
 
-    // Extract the response content
     if let Some(content) = json_res["message"]["content"].as_str() {
-        // Parse markdown content to HTML
         let markdown_content = content.trim();
         let html_content = markdown_to_html(markdown_content);
         Ok(html_content)
     } else {
-        // Fallback: try to get any response text
         if let Some(done) = json_res["done"].as_bool() {
             if done {
                 Err("Request completed but no content received".to_string())
@@ -61,19 +72,25 @@ pub async fn ollama_api_call(prompt: String, model: String) -> Result<String, St
     }
 }
 
+#[command]
+pub async fn read_file(file_path: String) -> Result<String, String> {
+    let path = Path::new(&file_path);
+
+    if !path.exists() {
+        return Err("File does not exist".to_string());
+    }
+
+    // Check if it's a file (not a directory)
+    if !path.is_file() {
+        return Err("Path is not a file".to_string());
+    }
+
+    read_to_string(&file_path).map_err(|e| format!("Failed to read file: {}", e))
+}
+
 fn markdown_to_html(markdown: &str) -> String {
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
-    options.insert(Options::ENABLE_SMART_PUNCTUATION);
-    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
-    options.insert(Options::ENABLE_PLUSES_DELIMITED_METADATA_BLOCKS);
-    options.insert(Options::ENABLE_OLD_FOOTNOTES);
-    options.insert(Options::ENABLE_MATH);
-    options.insert(Options::ENABLE_GFM);
-    options.insert(Options::ENABLE_DEFINITION_LIST);
-    options.insert(Options::ENABLE_SUPERSCRIPT);
-    options.insert(Options::ENABLE_SUBSCRIPT);
-    options.insert(Options::ENABLE_WIKILINKS);
     options.insert(Options::ENABLE_TABLES);
     options.insert(Options::ENABLE_FOOTNOTES);
     options.insert(Options::ENABLE_TASKLISTS);
@@ -81,6 +98,5 @@ fn markdown_to_html(markdown: &str) -> String {
     let parser = Parser::new_ext(markdown, options);
     let mut html_output = String::new();
     push_html(&mut html_output, parser);
-
     html_output
 }

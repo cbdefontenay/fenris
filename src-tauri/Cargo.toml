@@ -25,3 +25,4 @@ tauri-plugin-store = "2"
 regex = "1.12.2"
 tauri-plugin-sql = { version = "2.3.0", features = ["sqlite"] }
 anyhow = "1.0.100"
+tauri-plugin-fs = "2"

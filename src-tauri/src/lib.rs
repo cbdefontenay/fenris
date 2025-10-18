@@ -5,7 +5,7 @@ use crate::json::{
     delete_json_file, fetch_json, format_json, get_json_file, list_json_files, perform_search,
     save_json_file,
 };
-use crate::ollama::{list_of_models, ollama_api_call};
+use crate::ollama::{list_of_models, ollama_api_call, read_file};
 use crate::sqlite::{
     create_single_note, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite,
     delete_folder_sqlite, delete_note_by_name_sqlite, delete_single_note, get_all_folders,
@@ -144,7 +144,8 @@ pub fn run() {
             is_markdown_full_screen,
             store_and_set_theme,
             store_and_get_theme,
-            handle_shell_theme_command
+            handle_shell_theme_command,
+            read_file
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");

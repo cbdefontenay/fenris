@@ -5,6 +5,7 @@ pub fn list_of_models() -> Vec<String> {
     let list_of_models = vec![
         String::from("llama3.3:70b"),
         String::from("llama3.2"),
+        String::from("llama3.1"),
         String::from("llama3.2:3b"),
         String::from("llama3.2:1b"),
         String::from("llama3.1:405b"),
@@ -90,6 +91,7 @@ pub fn list_of_models() -> Vec<String> {
         String::from("qwen2:72b"),
         String::from("starcoder2:15b"),
         String::from("starcoder2:7b"),
+        String::from("tinyllama"),
         String::from("gemma"),
         String::from("gemma:7b"),
         String::from("gemma:2b"),
