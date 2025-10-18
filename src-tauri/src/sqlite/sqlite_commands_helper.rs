@@ -200,3 +200,10 @@ pub fn update_single_note_content_sqlite(note_id: usize, content: String) -> Res
     );
     Ok(update_single_note_content_command)
 }
+
+#[command]
+pub fn delete_note_by_name_sqlite(note_name: String) -> Result<String, ()> {
+    let delete_note_by_name_command =
+        format!("SELECT id FROM single_notes WHERE title = '{}'", note_name);
+    Ok(delete_note_by_name_command)
+}

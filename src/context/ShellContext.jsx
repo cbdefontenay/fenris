@@ -4,7 +4,13 @@ import {useNavigate} from 'react-router-dom';
 import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
 import i18next from "i18next";
-import {deleteFolderByName, saveFolder, updateFolderByName} from "../data/CreateNotesDataShell.jsx";
+import {
+    deleteFolderByName,
+    deleteNoteByName,
+    saveFolder,
+    saveNoteFromShell,
+    updateFolderByName
+} from "../data/CreateNotesDataShell.jsx";
 
 const ShellContext = createContext();
 
@@ -294,6 +300,40 @@ export function ShellProvider({children}) {
             }
         }
 
+        if (trimmedCmd.startsWith('add note ')) {
+            const noteName = cmd.substring(9).trim();
+            if (!noteName) {
+                return t('shell.errors.addFolder.missingName');
+            }
+            try {
+                const result = await saveNoteFromShell(noteName);
+                if (result.success) {
+                    return t('shell.success.addFolder', {name: noteName});
+                } else {
+                    return t('shell.errors.addFolder.generic', {error: result.error});
+                }
+            } catch (error) {
+                return t('shell.errors.addFolder.generic', {error: error.message});
+            }
+        }
+
+        if (trimmedCmd.startsWith('delete note ')) {
+            const noteName = cmd.substring(12).trim();
+            if (!noteName) {
+                return t('shell.errors.deleteFolder.missingName');
+            }
+            try {
+                const result = await deleteNoteByName(noteName);
+                if (result.success) {
+                    return t('shell.success.deleteFolder', {name: noteName});
+                } else {
+                    return t('shell.errors.deleteFolder.generic', {error: result.error});
+                }
+            } catch (error) {
+                return t('shell.errors.deleteFolder.generic', {error: error.message});
+            }
+        }
+
         switch (trimmedCmd) {
             case 'help':
                 return await cliHelpCommand();
@@ -380,6 +420,8 @@ export function ShellProvider({children}) {
             case 'delete folder':
                 return t('shell.errors.deleteFolder.missingName');
             case 'update folder':
+                return t('shell.errors.updateFolder.missingNames');
+            case 'add note':
                 return t('shell.errors.updateFolder.missingNames');
             case '':
                 return "";
