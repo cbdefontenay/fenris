@@ -13,22 +13,29 @@
   },
   "settings": {
     "header": "Settings",
+    "viewMode": "View Mode",
+    "theme": "Theme",
+    "noteType": "Note Type",
+    "appearance": {
+      "title": "Appearance",
+      "darkMode": "Dark Mode",
+      "description": "Switch between light and dark theme.",
+      "appTheme": "Theme",
+      "themeDescription": "Choose your preferred color theme",
+      "quickToggle": "Dark Mode Quick Toggle",
+      "quickToggleDescription": "Quickly switch between light and dark themes",
+      "themes": {
+        "light": "Light",
+        "lightDescription": "Bright and clean appearance",
+        "dark": "Dark",
+        "darkDescription": "Dark and comfortable for eyes",
+        "nord": "Nord",
+        "nordDescription": "Arctic, north-bluish color palette"
+      }
+    },
     "tabs": {
       "appearance": "Appearance",
       "language": "Language"
-    },
-    "appearance": {
-      "title": "Appearance",
-      "darkMode": "Dark mode",
-      "description": "Switch the theme between light and dark."
-    },
-    "language": {
-      "title": "Language"
-    },
-    "keyboard": {
-      "title": "Keyboard shortcuts",
-      "newFolder": "Create new folder",
-      "saveNote": "Save note"
     }
   },
   "shell": {
@@ -359,12 +366,6 @@
       "editing": "Editing",
       "live": "Live",
       "editorPlaceholder": "Write your markdown here..."
-    },
-    "settings": {
-      "title": "Settings",
-      "viewMode": "View Mode",
-      "theme": "Theme",
-      "noteType": "Note Type"
     },
     "fullscreen": {
       "enter": "Enter fullscreen",

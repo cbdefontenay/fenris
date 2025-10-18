@@ -107,6 +107,58 @@ html.dark {
     --surface-container-highest: rgb(73 69 76);
 }
 
+html.nord {
+    --primary: rgb(161 201 253);
+    --surface-tint: rgb(161 201 253);
+    --on-primary: rgb(0 50 89);
+    --primary-container: rgb(27 73 117);
+    --on-primary-container: rgb(210 228 255);
+    --secondary: rgb(154 203 250);
+    --on-secondary: rgb(0 51 83);
+    --secondary-container: rgb(12 74 115);
+    --on-secondary-container: rgb(206 229 255);
+    --tertiary: rgb(215 189 228);
+    --on-tertiary: rgb(59 41 71);
+    --tertiary-container: rgb(83 63 95);
+    --on-tertiary-container: rgb(243 218 255);
+    --error: rgb(255 178 183);
+    --on-error: rgb(86 29 36);
+    --error-container: rgb(114 51 57);
+    --on-error-container: rgb(255 218 219);
+    --background: rgb(17 20 24);
+    --on-background: rgb(225 226 232);
+    --surface: rgb(17 20 24);
+    --on-surface: rgb(225 226 232);
+    --surface-variant: rgb(67 71 78);
+    --on-surface-variant: rgb(195 198 207);
+    --outline: rgb(141 145 153);
+    --outline-variant: rgb(67 71 78);
+    --shadow: rgb(0 0 0);
+    --scrim: rgb(0 0 0);
+    --inverse-surface: rgb(225 226 232);
+    --inverse-on-surface: rgb(46 49 53);
+    --inverse-primary: rgb(55 97 142);
+    --primary-fixed: rgb(210 228 255);
+    --on-primary-fixed: rgb(0 28 55);
+    --primary-fixed-dim: rgb(161 201 253);
+    --on-primary-fixed-variant: rgb(27 73 117);
+    --secondary-fixed: rgb(206 229 255);
+    --on-secondary-fixed: rgb(0 29 50);
+    --secondary-fixed-dim: rgb(154 203 250);
+    --on-secondary-fixed-variant: rgb(12 74 115);
+    --tertiary-fixed: rgb(243 218 255);
+    --on-tertiary-fixed: rgb(37 20 49);
+    --tertiary-fixed-dim: rgb(215 189 228);
+    --on-tertiary-fixed-variant: rgb(83 63 95);
+    --surface-dim: rgb(17 20 24);
+    --surface-bright: rgb(54 57 62);
+    --surface-container-lowest: rgb(11 14 19);
+    --surface-container-low: rgb(25 28 32);
+    --surface-container: rgb(29 32 36);
+    --surface-container-high: rgb(39 42 47);
+    --surface-container-highest: rgb(50 53 58);
+}
+
 :root {
     --navbar-margin: 5rem;
     --markdown-margin: 350px;

@@ -17,7 +17,6 @@ pub async fn pick_json_file(app: AppHandle) -> Result<String, String> {
 
     match result {
         Some(file_path) => {
-            // Convert FilePath to string path
             let path_string = file_path.to_string();
             let content =
                 read_to_string(&path_string).map_err(|e| format!("Failed to read file: {}", e))?;

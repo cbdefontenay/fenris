@@ -13,22 +13,29 @@
   },
   "settings": {
     "header": "Einstellungen",
-    "tabs": {
-      "appearance": "Erscheinungsbild",
-      "language": "Sprache"
-    },
+    "viewMode": "Ansichtsmodus",
+    "theme": "Modus",
+    "noteType": "Notiztyp",
     "appearance": {
       "title": "Erscheinungsbild",
       "darkMode": "Dunkler Modus",
-      "description": "Wechseln Sie zwischen hellem und dunklem Thema."
+      "description": "Wechseln Sie zwischen hellem und dunklem Thema.",
+      "appTheme": "Modus",
+      "themeDescription": "Wählen Sie Ihr bevorzugtes Farbthema",
+      "quickToggle": "Dark-Mode Schnellumstellung",
+      "quickToggleDescription": "Schnell zwischen Hell- und Dunkelthemen wechseln",
+      "themes": {
+        "light": "Hell",
+        "lightDescription": "Helles und sauberes Erscheinungsbild",
+        "dark": "Dunkel",
+        "darkDescription": "Dunkel und augenfreundlich",
+        "nord": "Nord",
+        "nordDescription": "Arktische, nordlich-blaue Farbpalette"
+      }
     },
-    "language": {
-      "title": "Sprache"
-    },
-    "keyboard": {
-      "title": "Tastenkombinationen",
-      "newFolder": "Neuen Ordner erstellen",
-      "saveNote": "Notiz speichern"
+    "tabs": {
+      "appearance": "Erscheinungsbild",
+      "language": "Sprache"
     }
   },
   "shell": {
@@ -359,12 +366,6 @@
       "editing": "Wird bearbeitet",
       "live": "Live",
       "editorPlaceholder": "Schreiben Sie hier Ihren Markdown-Text..."
-    },
-    "settings": {
-      "title": "Einstellungen",
-      "viewMode": "Ansichtsmodus",
-      "theme": "Thema",
-      "noteType": "Notiztyp"
     },
     "fullscreen": {
       "enter": "Vollbildmodus aktivieren",

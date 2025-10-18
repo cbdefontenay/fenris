@@ -1,4 +1,5 @@
 import {createContext, useContext, useEffect, useState} from "react";
+import {invoke} from "@tauri-apps/api/core";
 
 const ThemeContext = createContext();
 
@@ -6,22 +7,36 @@ export function ThemeProvider({children}) {
     const [theme, setTheme] = useState("light");
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        setTheme(savedTheme);
+        const loadTheme = async () => {
+            try {
+                const savedTheme = await invoke("store_and_get_theme");
+                setTheme(savedTheme);
+                document.documentElement.className = savedTheme;
+            } catch (error) {
+                setTheme("light");
+                document.documentElement.className = "light";
+            }
+        };
 
-        // Apply the theme class to the html element
-        document.documentElement.className = savedTheme;
+        loadTheme();
     }, []);
 
-    const toggleTheme = () => {
-        const newTheme = theme === "light" ? "dark" : "light";
+    const changeTheme = async (newTheme) => {
         setTheme(newTheme);
-        localStorage.setItem("theme", newTheme);
+        await invoke("store_and_set_theme", {
+            appTheme: newTheme,
+        })
         document.documentElement.className = newTheme;
     };
 
+    const toggleTheme = async () => {
+        // Only toggle between light and dark for quick switching
+        const newTheme = theme === "light" ? "dark" : "light";
+        changeTheme(newTheme);
+    };
+
     return (
-        <ThemeContext.Provider value={{theme, toggleTheme}}>
+        <ThemeContext.Provider value={{theme, toggleTheme, changeTheme}}>
             {children}
         </ThemeContext.Provider>
     );

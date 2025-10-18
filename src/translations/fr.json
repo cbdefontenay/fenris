@@ -13,22 +13,29 @@
   },
   "settings": {
     "header": "Paramètres",
-    "tabs": {
-      "appearance": "Apparence",
-      "language": "Langue"
-    },
+    "viewMode": "Mode d'affichage",
+    "theme": "Thème",
+    "noteType": "Type de note",
     "appearance": {
       "title": "Apparence",
       "darkMode": "Mode sombre",
-      "description": "Basculer entre le thème clair et sombre."
+      "description": "Basculer entre les thèmes clair et sombre.",
+      "appTheme": "Thème",
+      "themeDescription": "Choisissez votre thème de couleur préféré",
+      "quickToggle": "Basculer le mode sombre",
+      "quickToggleDescription": "Basculer rapidement entre les thèmes clair et sombre",
+      "themes": {
+        "light": "Clair",
+        "lightDescription": "Apparence lumineuse et épurée",
+        "dark": "Sombre",
+        "darkDescription": "Sombre et confortable pour les yeux",
+        "nord": "Nord",
+        "nordDescription": "Palette de couleurs arctique bleutée du nord"
+      }
     },
-    "language": {
-      "title": "Langue"
-    },
-    "keyboard": {
-      "title": "Raccourcis clavier",
-      "newFolder": "Créer un nouveau dossier",
-      "saveNote": "Sauvegarder la note"
+    "tabs": {
+      "appearance": "Apparence",
+      "language": "Langue"
     }
   },
   "shell": {
@@ -359,12 +366,6 @@
       "editing": "En cours d'édition",
       "live": "En direct",
       "editorPlaceholder": "Écrivez votre markdown ici..."
-    },
-    "settings": {
-      "title": "Paramètres",
-      "viewMode": "Mode d'affichage",
-      "theme": "Thème",
-      "noteType": "Type de note"
     },
     "fullscreen": {
       "enter": "Plein écran",

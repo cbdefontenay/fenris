@@ -37,6 +37,17 @@ export async function setStoredTheme(codeTheme, setCodeTheme) {
     setCodeTheme(state);
 }
 
+export async function getStoredAppTheme() {
+    return await invoke("store_and_get_theme");
+}
+
+export async function setStoredAppTheme(appTheme, setTheme) {
+    const state = await invoke("store_and_set_theme", {
+        appTheme: appTheme,
+    });
+    setTheme(state);
+}
+
 export async function setWordCountForMarkdown(count, setWordCount) {
     const state = await invoke("set_word_count_for_markdown", {
         count: count,

@@ -12,7 +12,7 @@ export function ShellProvider({children}) {
     const [showShell, setShowShell] = useState(false);
     const [command, setCommand] = useState("");
     const [history, setHistory] = useState([]);
-    const {theme, toggleTheme} = useTheme();
+    const {theme, toggleTheme, changeTheme} = useTheme();
     const navigate = useNavigate();
     const {t} = useTranslation();
     const [currentLanguage, setCurrentLanguage] = useState(i18next.language);
@@ -335,11 +335,18 @@ export function ShellProvider({children}) {
                 setShowShell(false);
                 return t('shell.navigatingToAiChatbot');
             case 'theme dark':
-                toggleTheme('dark');
-                return t('shell.themeSetToDark');
             case 'theme light':
-                toggleTheme('light');
-                return t('shell.themeSetToLight');
+            case 'theme nord':
+                const themeArg = trimmedCmd.substring(6).trim();
+                try {
+                    const result = await invoke("handle_shell_theme_command", {themeArg: themeArg});
+                    // Force theme reload by calling changeTheme with the current stored theme
+                    const currentTheme = await invoke("store_and_get_theme");
+                    await changeTheme(currentTheme);
+                    return result;
+                } catch (error) {
+                    return t('shell.error', {error: error.message});
+                }
             case 'hide navbar':
                 const navbarToHide = document.querySelector('nav, aside, main, [class*="navbar"], [class*="sidebar"], [class*="page-margin-markdown"]');
                 if (navbarToHide) {

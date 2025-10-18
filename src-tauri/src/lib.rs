@@ -14,7 +14,18 @@ use crate::sqlite::{
     update_folder_by_name_sqlite, update_folder_sqlite, update_note_content_sqlite,
     update_single_note, update_single_note_content_sqlite,
 };
-use crate::state::{auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state, get_folder_items_state, get_folder_note_by_id, get_folder_state, get_note_state, get_single_note_by_id, get_vec_history, is_markdown_full_screen, reset_add_note_state, reset_folder_items_state, reset_folder_state, reset_note_state, set_add_note_state, set_char_count_for_markdown, set_editor_state, set_folder_items_state, set_folder_name, set_markdown_content, set_note_name, set_vec_history, set_word_count_for_markdown, toggle_view_mode, update_add_note_field, update_folder_items_field, validate_folder_name, validate_note_name, AddNoteManager, AddNoteState, Counter, FolderItemsManager, FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState, NoteManager, NoteState, ShellManager, ShellState};
+use crate::state::{
+    auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state,
+    get_folder_items_state, get_folder_note_by_id, get_folder_state, get_note_state,
+    get_single_note_by_id, get_vec_history, is_markdown_full_screen, reset_add_note_state,
+    reset_folder_items_state, reset_folder_state, reset_note_state, set_add_note_state,
+    set_char_count_for_markdown, set_editor_state, set_folder_items_state, set_folder_name,
+    set_markdown_content, set_note_name, set_vec_history, set_word_count_for_markdown,
+    toggle_view_mode, update_add_note_field, update_folder_items_field, validate_folder_name,
+    validate_note_name, AddNoteManager, AddNoteState, Counter, FolderItemsManager,
+    FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState,
+    NoteManager, NoteState, ShellManager, ShellState,
+};
 use crate::theme::{get_theme, list_of_themes, set_theme};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
@@ -22,12 +33,14 @@ use crate::ui_helpers::{
 use std::sync::Mutex;
 use tauri::{generate_context, Builder};
 use tauri_plugin_dialog::init;
+use crate::store::{handle_shell_theme_command, store_and_get_theme, store_and_set_theme};
 
 mod cli;
 mod json;
 mod ollama;
 mod sqlite;
 mod state;
+mod store;
 mod theme;
 mod ui_helpers;
 
@@ -126,7 +139,10 @@ pub fn run() {
             list_of_themes,
             set_word_count_for_markdown,
             set_char_count_for_markdown,
-            is_markdown_full_screen
+            is_markdown_full_screen,
+            store_and_set_theme,
+            store_and_get_theme,
+            handle_shell_theme_command
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");
