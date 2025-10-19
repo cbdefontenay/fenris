@@ -158,6 +158,7 @@
     "messages": "Messages",
     "clearChat": "Clear Chat",
     "loadingModels": "Loading models...",
+    "uploadFile": "Upload File",
     "startConversation": {
       "title": "Start a conversation",
       "description": "Ask anything to your AI assistant. Select a model and type your message below."
@@ -341,6 +342,11 @@
     "header": {
       "singleNote": "Single Note",
       "folderNote": "Folder Note"
+    },
+    "settings": {
+      "viewMode": "View mode: ",
+      "theme": "Theme",
+      "noteType": "Note type"
     },
     "viewMode": {
       "split": "Split View",

@@ -158,6 +158,7 @@
     "messages": "Messages",
     "clearChat": "Effacer le chat",
     "loadingModels": "Chargement des modèles...",
+    "uploadFile": "Charger un fichier",
     "startConversation": {
       "title": "Démarrer une conversation",
       "description": "Demandez n'importe quoi à votre assistant IA. Sélectionnez un modèle et tapez votre message ci-dessous."
@@ -341,6 +342,11 @@
     "header": {
       "singleNote": "Note simple",
       "folderNote": "Note de dossier"
+    },
+    "settings": {
+      "viewMode": "Mode d'affichage:",
+      "theme": "Thèmes",
+      "noteType": "Type de note"
     },
     "viewMode": {
       "split": "Vue divisée",

@@ -158,6 +158,7 @@
     "messages": "Nachrichten",
     "clearChat": "Chat löschen",
     "loadingModels": "Lade Modelle...",
+    "uploadFile": "Datei hochladen",
     "startConversation": {
       "title": "Starten Sie eine Unterhaltung",
       "description": "Fragen Sie alles an Ihren KI-Assistenten. Wählen Sie ein Modell aus und geben Sie Ihre Nachricht unten ein."
@@ -341,6 +342,11 @@
     "header": {
       "singleNote": "Einzelne Notiz",
       "folderNote": "Ordner-Notiz"
+    },
+    "settings": {
+      "viewMode": "Ansichtsmodus:",
+      "theme": "Modi",
+      "noteType": "Notiz Art"
     },
     "viewMode": {
       "split": "Geteilte Ansicht",

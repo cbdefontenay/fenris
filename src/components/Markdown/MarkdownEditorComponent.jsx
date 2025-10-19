@@ -319,7 +319,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                             <button
                                                 key={mode}
                                                 onClick={() => toggleViewMode(mode)}
-                                                className={`px-2 py-1 rounded transition-all duration-200 ${
+                                                className={`p-1 rounded transition-all duration-200 ml-2 cursor-pointer ${
                                                     viewMode === mode
                                                         ? "bg-(--primary) text-(--on-primary)"
                                                         : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
@@ -337,7 +337,7 @@ export default function MarkdownEditorComponent({selectedNote}) {
                                     <select
                                         value={theme}
                                         onChange={(e) => handleThemeChange(e.target.value)}
-                                        className="cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none focus:ring-2 focus:ring-(--primary) transition-all"
+                                        className="z-50 cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none transition-all"
                                     >
                                         {listOfThemes.map((themeOption) => (
                                             <option className="cursor-pointer" key={themeOption.name}
