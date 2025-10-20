@@ -157,19 +157,13 @@ pub fn get_all_single_note() -> Result<String, ()> {
 
 #[command]
 pub fn get_note_by_id_sqlite(note_id: usize) -> Result<String, ()> {
-    let get_note_command = format!(
-        "SELECT * FROM note WHERE id = {}",
-        note_id
-    );
+    let get_note_command = format!("SELECT * FROM note WHERE id = {}", note_id);
     Ok(get_note_command)
 }
 
 #[command]
 pub fn get_single_note_by_id_sqlite(note_id: usize) -> Result<String, ()> {
-    let get_single_note_command = format!(
-        "SELECT * FROM single_notes WHERE id = {}",
-        note_id
-    );
+    let get_single_note_command = format!("SELECT * FROM single_notes WHERE id = {}", note_id);
     Ok(get_single_note_command)
 }
 
@@ -206,4 +200,10 @@ pub fn delete_note_by_name_sqlite(note_name: String) -> Result<String, ()> {
     let delete_note_by_name_command =
         format!("SELECT id FROM single_notes WHERE title = '{}'", note_name);
     Ok(delete_note_by_name_command)
+}
+
+#[command]
+pub fn vacuum_sqlite() -> Result<String, ()> {
+    let vacuum_db = "VACUUM".to_string();
+    Ok(vacuum_db)
 }

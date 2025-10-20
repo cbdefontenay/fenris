@@ -13,7 +13,7 @@ use crate::sqlite::{
     get_single_note_by_id_sqlite, save_folder_sqlite, save_note_to_folder_sqlite,
     sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite,
     update_folder_sqlite, update_note_content_sqlite, update_single_note,
-    update_single_note_content_sqlite,
+    update_single_note_content_sqlite, vacuum_sqlite,
 };
 use crate::state::{
     auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state,
@@ -145,7 +145,8 @@ pub fn run() {
             store_and_set_theme,
             store_and_get_theme,
             handle_shell_theme_command,
-            read_file
+            read_file,
+            vacuum_sqlite,
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");

@@ -5,12 +5,12 @@ import {useTheme} from "../data/ThemeProvider.jsx";
 import {useTranslation} from "react-i18next";
 import i18next from "i18next";
 import {
-    deleteFolderByName,
-    deleteNoteByName,
-    saveFolder,
-    saveNoteFromShell,
-    updateFolderByName
-} from "../data/CreateNotesDataShell.jsx";
+    AddFolderWithCli,
+    addNoteWithCli,
+    deleteFolderWithCli,
+    deleteNoteWithCli, getCommandDescription, getCommandExplanation, getVacuumFromDb,
+    updateFolderWithCli
+} from "./ShellHelpers.jsx";
 
 const ShellContext = createContext();
 
@@ -95,119 +95,22 @@ export function ShellProvider({children}) {
         }
     }
 
-    // Command explanations with translations
-    const getCommandExplanation = (command) => {
-        const explanations = {
-            help: t('shell.commands.help', {
-                command: "help",
-                usage: "help [command]",
-                description: t('shell.descriptions.help')
-            }),
-            clear: t('shell.commands.clear', {
-                command: "clear",
-                usage: "clear",
-                description: t('shell.descriptions.clear')
-            }),
-            date: t('shell.commands.date', {
-                command: "date",
-                usage: "date",
-                description: t('shell.descriptions.date')
-            }),
-            version: t('shell.commands.version', {
-                command: "version",
-                usage: "version",
-                description: t('shell.descriptions.version')
-            }),
-            pwd: t('shell.commands.pwd', {
-                command: "pwd",
-                usage: "pwd",
-                description: t('shell.descriptions.pwd')
-            }),
-            goto: t('shell.commands.goto', {
-                command: "goto",
-                usage: "goto <page>",
-                example: "goto settings",
-                description: t('shell.descriptions.goto')
-            }),
-            theme: t('shell.commands.theme', {
-                command: "theme",
-                usage: "theme <dark|light>",
-                example: "theme dark",
-                description: t('shell.descriptions.theme')
-            }),
-            lang: t('shell.commands.lang', {
-                command: "lang",
-                usage: "lang <fr|de|en>",
-                description: t('shell.descriptions.lang')
-            }),
-            navbar: t('shell.commands.navbar', {
-                command: "navbar",
-                usage: "navbar <show|hide>",
-                description: t('shell.descriptions.navbar')
-            }),
-            exit: t('shell.commands.exit', {
-                command: "exit",
-                usage: "exit",
-                description: t('shell.descriptions.exit')
-            }),
-            addfolder: t('shell.commands.addfolder', {
-                command: "add folder",
-                usage: "add folder <name>",
-                example: 'add folder "My Folder"',
-                description: t('shell.descriptions.addfolder')
-            }),
-            deletefolder: t('shell.commands.deletefolder', {
-                command: "delete folder",
-                usage: "delete folder <name>",
-                example: 'delete folder "My Folder"',
-                description: t('shell.descriptions.deletefolder')
-            }),
-            updatefolder: t('shell.commands.updatefolder', {
-                command: "update folder",
-                usage: "update folder <current-name> <new-name>",
-                example: 'update folder "Old Name" "New Name"',
-                description: t('shell.descriptions.updatefolder')
-            })
-        };
-        return explanations[command] || t('shell.noHelpAvailable', {command});
-    };
-
     async function cliHelpCommand(explanation = null) {
         try {
             const result = await invoke("cli_help_command", {explanation});
 
             if (explanation) {
-                return getCommandExplanation(result);
+                return getCommandExplanation(result, t);
             } else {
                 const commands = result.split(',');
                 return t('shell.availableCommands', {
-                    commands: commands.map(cmd => `  ${cmd.padEnd(20)} ${getCommandDescription(cmd)}`).join('\n')
+                    commands: commands.map(cmd => `  ${cmd.padEnd(20)} ${getCommandDescription(cmd, t)}`).join('\n')
                 });
             }
         } catch (error) {
             return t('shell.error', {error});
         }
     }
-
-    // Helper function to get short descriptions
-    const getCommandDescription = (cmd) => {
-        const descriptions = {
-            help: t('shell.descriptions.help'),
-            clear: t('shell.descriptions.clear'),
-            date: t('shell.descriptions.date'),
-            version: t('shell.descriptions.version'),
-            pwd: t('shell.descriptions.pwd'),
-            goto: t('shell.descriptions.goto'),
-            theme: t('shell.descriptions.theme'),
-            lang: t('shell.descriptions.lang'),
-            navbar: t('shell.descriptions.navbar'),
-            exit: t('shell.descriptions.exit'),
-            'add folder': t('shell.descriptions.addfolder'),
-            'delete folder': t('shell.descriptions.deletefolder'),
-            'update folder': t('shell.descriptions.updatefolder')
-        };
-        return descriptions[cmd] || t('shell.descriptions.noDescription');
-    };
 
     async function cliDateNow() {
         try {
@@ -228,110 +131,29 @@ export function ShellProvider({children}) {
     const processCommand = async (cmd) => {
         const trimmedCmd = cmd.trim().toLowerCase();
 
-        // Handle help with a specific command
         if (trimmedCmd.startsWith('help ')) {
             const specificCmd = trimmedCmd.substring(5).trim();
             return await cliHelpCommand(specificCmd);
         }
 
         if (trimmedCmd.startsWith('add folder ')) {
-            const folderName = cmd.substring(11).trim();
-            if (!folderName) {
-                return t('shell.errors.addFolder.missingName');
-            }
-            try {
-                const result = await saveFolder(folderName);
-                if (result.success) {
-                    return t('shell.success.addFolder', {name: folderName});
-                } else {
-                    return t('shell.errors.addFolder.generic', {error: result.error});
-                }
-            } catch (error) {
-                return t('shell.errors.addFolder.generic', {error: error.message});
-            }
+            return await AddFolderWithCli(cmd, t);
         }
 
         if (trimmedCmd.startsWith('delete folder ')) {
-            const folderName = cmd.substring(14).trim();
-            if (!folderName) {
-                return t('shell.errors.deleteFolder.missingName');
-            }
-            try {
-                const result = await deleteFolderByName(folderName);
-                if (result.success) {
-                    return t('shell.success.deleteFolder', {name: folderName});
-                } else {
-                    return t('shell.errors.deleteFolder.generic', {error: result.error});
-                }
-            } catch (error) {
-                return t('shell.errors.deleteFolder.generic', {error: error.message});
-            }
+            await deleteFolderWithCli(cmd, t);
         }
 
         if (trimmedCmd.startsWith('update folder ')) {
-            const args = cmd.substring(13).trim();
-
-            const match = args.match(/^("([^"]+)"|'([^']+)'|(\S+))\s+("([^"]+)"|'([^']+)'|(\S+))$/);
-
-            if (!match) {
-                return t('shell.errors.updateFolder.invalidSyntax');
-            }
-
-            const currentFolderName = match[2] || match[3] || match[4];
-            const newFolderName = match[6] || match[7] || match[8];
-
-            if (!currentFolderName || !newFolderName) {
-                return t('shell.errors.updateFolder.missingNames');
-            }
-
-            try {
-                const result = await updateFolderByName(currentFolderName, newFolderName);
-
-                if (result.success) {
-                    return t('shell.success.updateFolder', {
-                        oldName: currentFolderName,
-                        newName: newFolderName
-                    });
-                } else {
-                    return t('shell.errors.updateFolder.generic', {error: result.error});
-                }
-            } catch (error) {
-                return t('shell.errors.updateFolder.generic', {error: error.message});
-            }
+            await updateFolderWithCli(cmd, t)
         }
 
         if (trimmedCmd.startsWith('add note ')) {
-            const noteName = cmd.substring(9).trim();
-            if (!noteName) {
-                return t('shell.errors.addFolder.missingName');
-            }
-            try {
-                const result = await saveNoteFromShell(noteName);
-                if (result.success) {
-                    return t('shell.success.addFolder', {name: noteName});
-                } else {
-                    return t('shell.errors.addFolder.generic', {error: result.error});
-                }
-            } catch (error) {
-                return t('shell.errors.addFolder.generic', {error: error.message});
-            }
+            await addNoteWithCli(cmd, t);
         }
 
         if (trimmedCmd.startsWith('delete note ')) {
-            const noteName = cmd.substring(12).trim();
-            if (!noteName) {
-                return t('shell.errors.deleteFolder.missingName');
-            }
-            try {
-                const result = await deleteNoteByName(noteName);
-                if (result.success) {
-                    return t('shell.success.deleteFolder', {name: noteName});
-                } else {
-                    return t('shell.errors.deleteFolder.generic', {error: result.error});
-                }
-            } catch (error) {
-                return t('shell.errors.deleteFolder.generic', {error: error.message});
-            }
+            await deleteNoteWithCli(cmd, t);
         }
 
         switch (trimmedCmd) {
@@ -351,13 +173,13 @@ export function ShellProvider({children}) {
                 return await cliCurrentDir();
             case 'lang fr':
                 handleLanguageChange('fr');
-                return t('shell.success.languageChanged', {language: 'French'});
+                return t('shell.success.languageChanged', {language: 'Français'});
             case 'lang en':
                 handleLanguageChange('en');
                 return t('shell.success.languageChanged', {language: 'English'});
             case 'lang de':
                 handleLanguageChange('de');
-                return t('shell.success.languageChanged', {language: 'German'});
+                return t('shell.success.languageChanged', {language: 'Deutsch'});
             case 'goto settings':
                 navigate('/settings');
                 setShowShell(false);
@@ -415,15 +237,18 @@ export function ShellProvider({children}) {
                     showStatsSection.style.display = 'block';
                 }
                 return t('shell.success.jsonStatsShown');
-            case 'add folder':
-                return t('shell.errors.addFolder.missingName');
-            case 'delete folder':
-                return t('shell.errors.deleteFolder.missingName');
-            case 'update folder':
-                return t('shell.errors.updateFolder.missingNames');
-            case 'add note':
-                return t('shell.errors.updateFolder.missingNames');
-            case '':
+            case "add folder":
+                return t("shell.errors.addFolder.missingName");
+            case "delete folder":
+                return t("shell.errors.deleteFolder.missingName");
+            case "update folder":
+                return t("shell.errors.updateFolder.missingNames");
+            case "add note":
+                return t("shell.errors.updateFolder.missingNames");
+            case "vacuum":
+                await getVacuumFromDb();
+                return "The VACUUM was successfully executed.";
+            case "":
                 return "";
             default:
                 if (trimmedCmd.startsWith('echo ')) {
@@ -475,3 +300,4 @@ export function useShell() {
     }
     return context;
 }
+
