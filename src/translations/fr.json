@@ -182,7 +182,8 @@
       "failedToLoadModels": "Échec du chargement des modèles",
       "pleaseSelectModel": "Veuillez sélectionner un modèle",
       "pleaseSelectModelFirst": "Veuillez d'abord sélectionner un modèle",
-      "apiError": "Erreur : {{error}}"
+      "apiError": "Erreur : {{error}}",
+      "failedToReadFile": "Échec de la lecture du fichier"
     }
   },
   "jsonFormatter": {
@@ -387,6 +388,57 @@
     "documentStats": {
       "words": "mots",
       "chars": "caractères"
+    }
+  },
+  "aiShellChatBot": {
+    "header": {
+      "title": "Assistant IA",
+      "usingModel": "Utilisation",
+      "file": "Fichier"
+    },
+    "emptyState": {
+      "title": "Démarrer une conversation",
+      "description": "Demandez-moi n'importe quoi ou joignez un fichier pour le contexte. Je suis là pour vous aider !"
+    },
+    "message": {
+      "withAttachedFile": "Avec fichier joint"
+    },
+    "input": {
+      "placeholder": "Demandez-moi n'importe quoi... (Ctrl+Entrée pour envoyer)",
+      "placeholderWithFile": "Posez une question sur le contenu du fichier...",
+      "sendButton": "Envoyer"
+    },
+    "footer": {
+      "hint": "Appuyez sur Esc pour fermer • Ctrl+E pour rouvrir"
+    }
+  },
+  "aiShellSidebar": {
+    "title": "Shell IA",
+    "poweredBy": "Propulsé par Ollama",
+    "model": {
+      "label": "Modèle",
+      "addCustom": "Ajouter un modèle personnalisé",
+      "customPlaceholder": "Entrez le nom du modèle...",
+      "add": "Ajouter",
+      "adding": "Ajout en cours...",
+      "cancel": "Annuler",
+      "loading": "Chargement des modèles...",
+      "select": "Sélectionner un modèle",
+      "helperText": "Modèle introuvable ? Ajoutez-le manuellement ci-dessus."
+    },
+    "file": {
+      "label": "Joindre un fichier",
+      "choose": "Choisir un fichier...",
+      "remove": "Supprimer le fichier"
+    },
+    "stats": {
+      "messages": "Messages"
+    },
+    "clearChat": "Effacer la conversation",
+    "status": {
+      "thinking": "Réflexion...",
+      "ready": "Prêt",
+      "loading": "Chargement des modèles..."
     }
   }
 }

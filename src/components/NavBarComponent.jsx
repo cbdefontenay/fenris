@@ -13,7 +13,6 @@ export default function NavBarComponent({isVisible}) {
     const [isExpanded, setIsExpanded] = useState(false);
     const {t} = useTranslation();
 
-    // Toggle sidebar on mobile
     const toggleSidebar = () => {
         setIsExpanded(!isExpanded);
     };
@@ -30,11 +29,6 @@ export default function NavBarComponent({isVisible}) {
             path: "/json",
         },
         {
-            nameKey: t("navbar.aiChatbot"),
-            icon: <FiCpu className="text-(--tertiary)" size={24} />,
-            path: "/ai-chatbot",
-        },
-        {
             nameKey: t("navbar.settings"),
             icon: <FiSettings className="text-(--tertiary)" size={24} />,
             path: "/settings",
@@ -46,21 +40,19 @@ export default function NavBarComponent({isVisible}) {
             {/* Mobile toggle button */}
             <button
                 onClick={toggleSidebar}
-                className="fixed md:hidden bottom-4 left-4 z-50 p-3 rounded-full bg-(--primary) text-(--on-primary) shadow-lg"
-            >
+                className="fixed md:hidden bottom-4 left-4 z-50 p-3 rounded-full bg-(--primary) text-(--on-primary) shadow-lg">
                 <FiMenu size={24} />
             </button>
 
             {/* Sidebar */}
             <aside
                 className={`sidebar
-        fixed top-0 left-0 h-full z-40
-        bg-(--surface-container-lowest) border-r border-(--outline-variant)
-        transition-all duration-300 ease-in-out
-        ${isExpanded ? "w-64" : "w-20"}
-        ${isExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-      `}
-            >
+                    fixed top-0 left-0 h-full z-40
+                    bg-(--surface-container-lowest) border-r border-(--outline-variant)
+                    transition-all duration-300 ease-in-out
+                    ${isExpanded ? "w-64" : "w-20"}
+                    ${isExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+                  `}>
                 <nav className="navbar h-full flex flex-col pt-6">
                     <ul className="space-y-6 px-2">
                         {navItems.map((item) => (
@@ -68,11 +60,10 @@ export default function NavBarComponent({isVisible}) {
                                 <Link to={item.path}>
                                     <div
                                         className={`
-                    flex items-center p-3 rounded-lg cursor-pointer
-                    hover:bg-(--surface-container-high) transition-colors
-                    group relative
-                  `}
-                                    >
+                                            flex items-center p-3 rounded-lg cursor-pointer
+                                            hover:bg-(--surface-container-high) transition-colors
+                                            group relative
+                                          `}>
                                         <div className="text-(--on-surface-variant) group-hover:text-(--on-surface)">
                                             {item.icon}
                                         </div>
@@ -100,8 +91,7 @@ export default function NavBarComponent({isVisible}) {
             {isExpanded && (
                 <div
                     onClick={toggleSidebar}
-                    className="fixed inset-0 bg-black/50 z-30 md:hidden"
-                />
+                    className="fixed inset-0 bg-(--background)/50 z-30 md:hidden"/>
             )}
             <main className="">
                 <Outlet/>

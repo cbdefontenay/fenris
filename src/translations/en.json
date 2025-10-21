@@ -181,7 +181,8 @@
       "failedToLoadModels": "Failed to load models",
       "pleaseSelectModel": "Please select a model",
       "pleaseSelectModelFirst": "Please select a model first",
-      "apiError": "Error: {{error}}"
+      "apiError": "Error: {{error}}",
+      "failedToReadFile": "Failed to read file"
     }
   },
   "jsonFormatter": {
@@ -387,6 +388,57 @@
     "emptyState": {
       "title": "No Note Selected",
       "description": "Select a note from the sidebar or create a new one to start editing."
+    }
+  },
+  "aiShellChatBot": {
+    "header": {
+      "title": "AI Assistant",
+      "usingModel": "Using",
+      "file": "File"
+    },
+    "emptyState": {
+      "title": "Start a conversation",
+      "description": "Ask me anything or attach a file for context. I'm here to help!"
+    },
+    "message": {
+      "withAttachedFile": "With attached file"
+    },
+    "input": {
+      "placeholder": "Ask me anything... (Ctrl+Enter to send)",
+      "placeholderWithFile": "Ask about the file content...",
+      "sendButton": "Send"
+    },
+    "footer": {
+      "hint": "Press Esc to close • Ctrl+E to reopen"
+    }
+  },
+  "aiShellSidebar": {
+    "title": "AI Shell",
+    "poweredBy": "Powered by Ollama",
+    "model": {
+      "label": "Model",
+      "addCustom": "Add custom model",
+      "customPlaceholder": "Enter model name...",
+      "add": "Add",
+      "adding": "Adding...",
+      "cancel": "Cancel",
+      "loading": "Loading models...",
+      "select": "Select a model",
+      "helperText": "Can't find your model? Add it manually above."
+    },
+    "file": {
+      "label": "Attach File",
+      "choose": "Choose file...",
+      "remove": "Remove file"
+    },
+    "stats": {
+      "messages": "Messages"
+    },
+    "clearChat": "Clear Chat",
+    "status": {
+      "thinking": "Thinking...",
+      "ready": "Ready",
+      "loading": "Loading models..."
     }
   }
 }

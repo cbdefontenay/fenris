@@ -1,6 +1,5 @@
 import {createContext, useContext, useEffect, useState} from "react";
 
-
 const AiContext = createContext();
 
 export function AiProvider({children}) {
@@ -9,7 +8,12 @@ export function AiProvider({children}) {
 
     useEffect(() => {
         const handleKeyDown = (event) => {
-            if (event.ctrlKey && event.key === 'a') {
+            // Only trigger if not in an input/textarea
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            if (event.ctrlKey && event.key === 'e') {
                 event.preventDefault();
                 setShowAiShell(true);
                 setPrompt("");
@@ -19,15 +23,23 @@ export function AiProvider({children}) {
                 setShowAiShell(false);
             }
         };
-    });
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     const value = {
         showAiShell,
         setShowAiShell,
+        prompt,
+        setPrompt
     };
 
     return (
-        <AiContext.Provider value={{value}}>
+        <AiContext.Provider value={value}>
             {children}
         </AiContext.Provider>
     );

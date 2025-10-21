@@ -182,7 +182,8 @@
       "failedToLoadModels": "Modelle konnten nicht geladen werden",
       "pleaseSelectModel": "Bitte wählen Sie ein Modell aus",
       "pleaseSelectModelFirst": "Bitte wählen Sie zuerst ein Modell aus",
-      "apiError": "Fehler: {{error}}"
+      "apiError": "Fehler: {{error}}",
+      "failedToReadFile": "Datei konnte nicht gelesen werden"
     }
   },
   "jsonFormatter": {
@@ -387,6 +388,57 @@
     "documentStats": {
       "words": "Wörter",
       "chars": "Zeichen"
+    }
+  },
+  "aiShellChatBot": {
+    "header": {
+      "title": "KI-Assistent",
+      "usingModel": "Verwende",
+      "file": "Datei"
+    },
+    "emptyState": {
+      "title": "Starte eine Konversation",
+      "description": "Frag mich alles oder hänge eine Datei für Kontext an. Ich bin hier, um zu helfen!"
+    },
+    "message": {
+      "withAttachedFile": "Mit angehängter Datei"
+    },
+    "input": {
+      "placeholder": "Frag mich alles... (Strg+Eingabe zum Senden)",
+      "placeholderWithFile": "Frage zum Dateiinhalt...",
+      "sendButton": "Senden"
+    },
+    "footer": {
+      "hint": "Esc drücken zum Schließen • Strg+E zum Wiederöffnen"
+    }
+  },
+  "aiShellSidebar": {
+    "title": "AI Shell",
+    "poweredBy": "Unterstützt von Ollama",
+    "model": {
+      "label": "Modell",
+      "addCustom": "Benutzerdefiniertes Modell hinzufügen",
+      "customPlaceholder": "Modellnamen eingeben...",
+      "add": "Hinzufügen",
+      "adding": "Wird hinzugefügt...",
+      "cancel": "Abbrechen",
+      "loading": "Lade Modelle...",
+      "select": "Modell auswählen",
+      "helperText": "Modell nicht gefunden? Fügen Sie es manuell hinzu."
+    },
+    "file": {
+      "label": "Datei anhängen",
+      "choose": "Datei auswählen...",
+      "remove": "Datei entfernen"
+    },
+    "stats": {
+      "messages": "Nachrichten"
+    },
+    "clearChat": "Chat löschen",
+    "status": {
+      "thinking": "Denkt nach...",
+      "ready": "Bereit",
+      "loading": "Lade Modelle..."
     }
   }
 }

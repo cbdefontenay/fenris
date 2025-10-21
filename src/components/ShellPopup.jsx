@@ -39,7 +39,7 @@ export default function ShellPopup() {
 
     return (
         <div
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-100 font-mono"
+            className="fixed inset-0 bg-(--background)/50 backdrop-blur-sm flex items-center justify-center z-100 font-mono"
             onClick={handleOverlayClick}
             onKeyDown={handleKeyDown}
         >
@@ -63,14 +63,6 @@ export default function ShellPopup() {
 
                 {/* Terminal Content */}
                 <div className="flex-1 p-4 text-sm overflow-y-auto bg-black">
-                    {/* Welcome Message */}
-                    <div className="text-green-400 mb-4">
-                        Welcome to the Fenris Terminal
-                    </div>
-                    <div className="text-blue-400 mb-6">
-                        Type 'help' for available commands, 'clear' to clear screen.
-                    </div>
-
                     {/* Command History */}
                     {history.map((item, index) => (
                         <div key={index} className="mb-3">

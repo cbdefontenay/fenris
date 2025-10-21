@@ -27,7 +27,7 @@ use crate::state::{
     FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState,
     NoteManager, NoteState, ShellManager, ShellState,
 };
-use crate::store::{handle_shell_theme_command, store_and_get_theme, store_and_set_theme};
+use crate::store::{get_available_models_with_custom, handle_shell_ai_model_command, handle_shell_theme_command, store_and_get_ai_model, store_and_get_theme, store_and_set_ai_model, store_and_set_theme};
 use crate::theme::{get_theme, list_of_themes, set_theme};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
@@ -147,6 +147,10 @@ pub fn run() {
             handle_shell_theme_command,
             read_file,
             vacuum_sqlite,
+            store_and_set_ai_model,
+            handle_shell_ai_model_command,
+            store_and_get_ai_model,
+            get_available_models_with_custom
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");
