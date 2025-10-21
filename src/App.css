@@ -232,3 +232,28 @@ html, body {
         color-scheme: light;
     }
 }
+
+@media (min-width: 1024px) {
+    .json-editor-container {
+        min-height: calc(100vh - 200px);
+        max-height: 80vh;
+    }
+
+    .json-stats-panel {
+        min-width: 320px;
+        max-width: 400px;
+    }
+
+    .json-editor-panel {
+        min-width: 600px;
+    }
+}
+
+.json-editor-content {
+    scroll-behavior: smooth;
+}
+
+.json-editor-pre {
+    font-feature-settings: "calt" 0;
+    font-variant-ligatures: none;
+}

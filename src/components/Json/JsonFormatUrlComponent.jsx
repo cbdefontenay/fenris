@@ -4,14 +4,14 @@ import {useTranslation} from "react-i18next";
 import DaisyToast from "../DaisyToast.jsx";
 import SearchJsonComponent from "./SearchJsonComponent.jsx";
 import {TiCloudStorageOutline} from "react-icons/ti";
-import {FaCheck, FaCloudDownloadAlt, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
+import {FaCheck, FaPaste, FaRegCopy, FaTrash, FaChevronDown} from "react-icons/fa";
 import {LuFileJson} from "react-icons/lu";
 import {VscGitFetch} from "react-icons/vsc";
 import {TfiImport} from "react-icons/tfi";
-import {CiTextAlignCenter} from "react-icons/ci";
-import {MdImportExport, MdOutlineFormatIndentIncrease} from "react-icons/md";
+import {MdImportExport} from "react-icons/md";
 import {RiDeleteBack2Fill} from "react-icons/ri";
-import {BsFiletypeJson} from "react-icons/bs";
+import JsonEditorPanel from "./JsonEditorPanel.jsx";
+import JsonStatsPanel from "./JsonStatsPanel.jsx";
 
 export default function JsonFormatUrlComponent() {
     const [url, setUrl] = useState("");
@@ -80,7 +80,7 @@ export default function JsonFormatUrlComponent() {
 
             setSearchResults(result.matches || []);
             setSearchCount(result.count || 0);
-            setCurrentMatchIndex(0); // Reset to first match
+            setCurrentMatchIndex(0);
         } catch (error) {
             setSearchResults([]);
             setSearchCount(0);
@@ -111,67 +111,6 @@ export default function JsonFormatUrlComponent() {
 
     const handleNavigateMatch = (newIndex) => {
         setCurrentMatchIndex(newIndex);
-    };
-
-    const highlightJsonWithMatches = (jsonText, matches, currentMatchIdx) => {
-        if (!matches || matches.length === 0) return jsonText;
-
-        // Flatten all matches from all lines
-        const allMatches = [];
-        matches.forEach((searchMatch) => {
-            searchMatch.matches.forEach((match) => {
-                allMatches.push({
-                    ...match,
-                    lineNumber: searchMatch.line_number,
-                    line: searchMatch.line
-                });
-            });
-        });
-
-        // Sort matches by their position in the document
-        const sortedMatches = [...allMatches].sort((a, b) => {
-            if (a.lineNumber !== b.lineNumber) {
-                return a.lineNumber - b.lineNumber;
-            }
-            return a.start - b.start;
-        });
-
-        let result = "";
-        const lines = jsonText.split('\n');
-        let matchIndex = 0;
-
-        lines.forEach((line, lineIndex) => {
-            const lineNumber = lineIndex + 1;
-            const lineMatches = sortedMatches.filter(m => m.lineNumber === lineNumber);
-
-            if (lineMatches.length > 0) {
-                let highlightedLine = "";
-                let lastIndex = 0;
-
-                lineMatches.forEach((match, matchInLineIndex) => {
-                    const globalMatchIndex = matchIndex + matchInLineIndex;
-
-                    highlightedLine += line.substring(lastIndex, match.start);
-
-                    const isCurrentMatch = globalMatchIndex === currentMatchIdx;
-                    const highlightClass = isCurrentMatch
-                        ? 'bg-(--tertiary) text-(--on-tertiary) ring-2 ring-(--tertiary)'
-                        : 'bg-yellow-200 text-yellow-900';
-
-                    highlightedLine += `<span id="match-${globalMatchIndex}" class="${highlightClass} px-0.5 rounded mx-0.5 transition-all duration-200">${line.substring(match.start, match.end)}</span>`;
-                    lastIndex = match.end;
-                });
-
-                // Add remaining text after last match
-                highlightedLine += line.substring(lastIndex);
-                result += highlightedLine + '\n';
-                matchIndex += lineMatches.length;
-            } else {
-                result += line + '\n';
-            }
-        });
-
-        return result;
     };
 
     const handleFetch = async () => {
@@ -213,7 +152,7 @@ export default function JsonFormatUrlComponent() {
                     setResponse(formattedJson);
                     setOutputLength(formattedJson.length);
                     setIsEditing(false);
-                    setSearchTerm(""); // Reset search when importing new file
+                    setSearchTerm("");
                     setSearchResults([]);
                     setSearchCount(0);
                     setCurrentMatchIndex(0);
@@ -336,13 +275,12 @@ export default function JsonFormatUrlComponent() {
             setOutputLength(content.length);
             setIsEditing(false);
             setShowStoredFiles(false);
-            setSearchTerm(""); // Reset search when loading stored file
+            setSearchTerm("");
             setSearchResults([]);
             setSearchCount(0);
             setCurrentMatchIndex(0);
             showToast(t('jsonFormatter.toast.fileLoaded'));
         } catch (error) {
-            console.error("Failed to load file:", error);
             showToast(t('jsonFormatter.toast.fileLoadError', {error}));
         }
     };
@@ -418,7 +356,7 @@ export default function JsonFormatUrlComponent() {
 
             {/* Main Content Area */}
             <div className="flex-1 flex p-6 gap-6 overflow-hidden">
-                {/* Left Panel - Input/Quick Actions */}
+                {/* Left Panel - Search & Stats */}
                 <div className="w-80 flex flex-col gap-6">
                     {/* Search Component */}
                     <SearchJsonComponent
@@ -433,233 +371,39 @@ export default function JsonFormatUrlComponent() {
                         onNavigateMatch={handleNavigateMatch}
                     />
 
-                    {/* Stored Files Dropdown  */}
-                    <div className="bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-(--on-surface) flex items-center gap-2">
-                                <TiCloudStorageOutline/>
-                                {t('jsonFormatter.storedFiles.title')}
-                            </h3>
-                            <button
-                                onClick={() => setShowStoredFiles(!showStoredFiles)}
-                                className="cursor-pointer p-2 hover:bg-(--surface-container-high) rounded-lg transition-colors"
-                            >
-                                <FaChevronDown className={`transition-transform ${showStoredFiles ? 'rotate-180' : ''}`}/>
-                            </button>
-                        </div>
-
-                        {showStoredFiles && (
-                            <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {storedFiles.length === 0 ? (
-                                    <p className="text-(--on-surface-variant) text-sm text-center py-4">
-                                        {t('jsonFormatter.storedFiles.empty')}
-                                    </p>
-                                ) : (
-                                    storedFiles.map((fileName, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between p-3 bg-(--surface-container-high) hover:bg-(--surface-container-highest) rounded-lg transition-colors group"
-                                        >
-                                            <button
-                                                onClick={() => loadStoredFile(fileName)}
-                                                className="cursor-pointer flex-1 text-left"
-                                            >
-                                                <div className="text-sm font-medium text-(--on-surface) group-hover:text-(--tertiary) truncate">
-                                                    {fileName}
-                                                </div>
-                                            </button>
-                                            <button
-                                                onClick={(e) => deleteStoredFile(fileName, e)}
-                                                className="cursor-pointer p-1 text-(--on-surface-variant) hover:text-(--error) transition-colors opacity-0 group-hover:opacity-100"
-                                                title={t('jsonFormatter.buttons.delete')}
-                                            >
-                                                <FaTrash size={14}/>
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Stats & Info */}
-                    <div className="json-stats bg-(--surface-container) rounded-xl border border-(--outline-variant) p-5">
-                        <h3 className="text-lg font-semibold text-(--on-surface) mb-4">{t('jsonFormatter.documentInfo.title')}</h3>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.length')}</span>
-                                <span className="font-mono text-(--on-surface)">{outputLength} {t('jsonFormatter.documentInfo.chars')}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.lines')}</span>
-                                <span className="font-mono text-(--on-surface)">
-                                    {response ? response.split('\n').length : 0}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-(--on-surface-variant)">{t('jsonFormatter.documentInfo.status')}</span>
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                    response
-                                        ? 'bg-(--success-container) text-(--on-success-container)'
-                                        : 'bg-(--surface-container-high) text-(--on-surface-variant)'
-                                }`}>
-                                    {response ? t('jsonFormatter.documentInfo.loaded') : t('jsonFormatter.documentInfo.empty')}
-                                </span>
-                            </div>
-                            {searchCount > 0 && (
-                                <>
-                                    <div className="flex justify-between items-center pt-2 border-t border-(--outline-variant)">
-                                        <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.matches')}</span>
-                                        <span className="font-mono text-(--primary) bg-(--primary-container) px-2 py-1 rounded">
-                                            {searchCount}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-(--on-surface-variant)">{t('jsonFormatter.search.currentMatch')}</span>
-                                        <span className="font-mono text-(--secondary) bg-(--secondary-container) px-2 py-1 rounded">
-                                            {currentMatchIndex + 1}
-                                        </span>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
+                    {/* Stats Panel */}
+                    <JsonStatsPanel
+                        storedFiles={storedFiles}
+                        showStoredFiles={showStoredFiles}
+                        setShowStoredFiles={setShowStoredFiles}
+                        onLoadStoredFile={loadStoredFile}
+                        onDeleteStoredFile={deleteStoredFile}
+                        outputLength={outputLength}
+                        response={response}
+                        searchCount={searchCount}
+                        currentMatchIndex={currentMatchIndex}
+                    />
                 </div>
 
                 {/* Right Panel - JSON Editor */}
-                <div
-                    className="flex-1 flex md:h-[710px] lg:h-[710px] flex-col bg-(--surface-container) rounded-xl border border-(--outline-variant) overflow-hidden">
-                    {/* Editor Header */}
-                    <div
-                        className="flex justify-between items-center p-4 border-b border-(--outline-variant) bg-(--surface-container-high)">
-                        <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-semibold text-(--on-surface)">{t('jsonFormatter.editor.title')}</h3>
-                            <div className="flex items-center gap-2 text-sm text-(--on-surface-variant)">
-                                <CiTextAlignCenter/>
-                                {outputLength} {t('jsonFormatter.documentInfo.chars')}
-                            </div>
-                            {saveFileName && (
-                                <span className="text-xs px-2 py-1 bg-(--primary-container) text-(--on-primary-container) rounded-full">
-                                    {saveFileName}
-                                </span>
-                            )}
-                            {searchCount > 0 && (
-                                <span className="text-xs px-2 py-1 bg-(--secondary-container) text-(--on-secondary-container) rounded-full">
-                                    {currentMatchIndex + 1}/{searchCount} {t('jsonFormatter.search.matches')}
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex gap-2">
-                            {isEditing ? (
-                                <button
-                                    onClick={handleSaveEdit}
-                                    className="cursor-pointer px-4 py-2 bg-(--success-container) text-(--on-success-container) rounded-lg hover:bg-(--success) hover:text-(--on-success) transition-colors text-sm font-medium flex items-center gap-2"
-                                >
-                                    <FaCheck/>
-                                    {t('jsonFormatter.buttons.doneEditing')}
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={handlePasteJson}
-                                    className="cursor-pointer px-4 py-2 bg-(--surface-container-high) text-(--on-surface) rounded-lg hover:bg-(--surface-container-highest) transition-colors text-sm font-medium flex items-center gap-2"
-                                >
-                                    <FaPaste/>
-                                    {t('jsonFormatter.buttons.pasteJson')}
-                                </button>
-                            )}
-                            <button
-                                onClick={handleSaveAs}
-                                disabled={!response}
-                                className="cursor-pointer px-4 py-2 bg-(--tertiary-container) text-(--on-tertiary-container) rounded-lg hover:bg-(--tertiary) hover:text-(--on-tertiary) transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
-                            >
-                                <TiCloudStorageOutline/>
-                                {t('jsonFormatter.buttons.saveAs')}
-                            </button>
-                            <button
-                                onClick={handleFormatJson}
-                                disabled={!response}
-                                className="cursor-pointer px-4 py-2 bg-(--secondary-container) text-(--on-secondary-container) rounded-lg hover:bg-(--secondary) hover:text-(--on-secondary) transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
-                            >
-                                <MdOutlineFormatIndentIncrease/>
-                                {t('jsonFormatter.buttons.format')}
-                            </button>
-                            <button
-                                onClick={handleCopy}
-                                disabled={!response}
-                                className="cursor-pointer px-4 py-2 bg-(--surface-container-high) text-(--on-surface) rounded-lg hover:bg-(--surface-container-highest) transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
-                            >
-                                <FaRegCopy/>
-                                {t('jsonFormatter.buttons.copy')}
-                            </button>
-                            <button
-                                onClick={handleClear}
-                                disabled={!response}
-                                className="cursor-pointer px-4 py-2 bg-(--error-container) text-(--on-error-container) rounded-lg hover:bg-(--error) hover:text-(--on-error) transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
-                            >
-                                <RiDeleteBack2Fill/>
-                                {t('jsonFormatter.buttons.clear')}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* JSON Editor - updated for highlighting */}
-                    <div className="flex-1 relative select-text" ref={editorRef}>
-                        {response || isEditing ? (
-                            isEditing ? (
-                                <textarea
-                                    value={response}
-                                    onChange={handleEditChange}
-                                    className="absolute inset-0 p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm overflow-auto whitespace-pre-wrap leading-relaxed resize-none border-0 focus:outline-none"
-                                    placeholder={t('jsonFormatter.input.pastePlaceholder')}
-                                    autoFocus
-                                />
-                            ) : (
-                                <div className="absolute inset-0 overflow-auto">
-                                    <pre className="p-6 bg-(--surface-container-high) text-(--on-surface) font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                                        {searchTerm && searchResults.length > 0 ? (
-                                            <div dangerouslySetInnerHTML={{
-                                                __html: highlightJsonWithMatches(response, searchResults, currentMatchIndex)
-                                            }} />
-                                        ) : (
-                                            response
-                                        )}
-                                   </pre>
-                                </div>
-                            )
-                        ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-center max-w-md">
-                                    <div
-                                        className="w-16 h-16 bg-(--surface-container-highest) rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                        <BsFiletypeJson className="text-(--tertiary)" size={30}/>
-                                    </div>
-                                    <h4 className="text-lg font-medium text-(--on-surface) mb-2">
-                                        {t('jsonFormatter.emptyState.title')}
-                                    </h4>
-                                    <p className="text-(--on-surface-variant) mb-4">
-                                        {t('jsonFormatter.emptyState.description')}
-                                    </p>
-                                    <div className="flex gap-3 justify-center">
-                                        <button
-                                            onClick={chooseJsonFileFromSystem}
-                                            className="cursor-pointer px-4 py-2 bg-(--primary) text-(--on-primary) rounded-lg hover:bg-(--primary-container) hover:text-(--on-primary-container) transition-colors text-sm font-medium flex items-center gap-2"
-                                        >
-                                            <MdImportExport className="text-(--on-primary) font-bold" size={15}/>
-                                            {t('jsonFormatter.buttons.importFile')}
-                                        </button>
-                                        <button
-                                            onClick={handlePasteJson}
-                                            className="cursor-pointer px-4 py-2 bg-(--secondary) text-(--on-secondary) rounded-lg hover:bg-(--secondary-container) hover:text-(--on-secondary-container) transition-colors text-sm font-medium flex items-center gap-2"
-                                        >
-                                            <FaPaste className="text-(--on-primary)" size={15}/>
-                                            {t('jsonFormatter.buttons.pasteJson')}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <JsonEditorPanel
+                    response={response}
+                    isEditing={isEditing}
+                    saveFileName={saveFileName}
+                    searchCount={searchCount}
+                    currentMatchIndex={currentMatchIndex}
+                    onPasteJson={handlePasteJson}
+                    onSaveEdit={handleSaveEdit}
+                    onSaveAs={handleSaveAs}
+                    onFormatJson={handleFormatJson}
+                    onCopy={handleCopy}
+                    onClear={handleClear}
+                    onEditChange={handleEditChange}
+                    searchTerm={searchTerm}
+                    searchResults={searchResults}
+                    editorRef={editorRef}
+                    onImportFile={chooseJsonFileFromSystem}
+                />
             </div>
 
             {/* Save Dialog  */}
