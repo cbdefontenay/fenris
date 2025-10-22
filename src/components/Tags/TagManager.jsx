@@ -55,15 +55,14 @@ export default function TagManager({noteId, noteType = 'single', onTagsChange, e
 
             if (result.rowsAffected > 0) {
                 await loadAllTags();
-                const newTag = await db.select('SELECT * FROM tags WHERE name = ?', [name.trim()]);
+                const newTagFromRust = await invoke("select_all_tags_where_name", {name: name.trim()});
+                const newTag = await db.select(newTagFromRust);
                 return newTag[0];
             } else {
-                // Tag already exists, return existing tag
-                const existingTag = await db.select('SELECT * FROM tags WHERE name = ?', [name.trim()]);
+                const existingTag = await db.select(newTagFromRust);
                 return existingTag[0];
             }
         } catch (error) {
-            console.error('Error creating tag:', error);
             return null;
         }
     }, [loadAllTags]);
@@ -73,10 +72,8 @@ export default function TagManager({noteId, noteType = 'single', onTagsChange, e
 
         try {
             const db = await Database.load('sqlite:fenris_app_notes.db');
-            await db.execute(
-                'INSERT OR IGNORE INTO note_tags (note_id, tag_id, note_type) VALUES (?, ?, ?)',
-                [noteId, tagId, noteType]
-            );
+            const insertOrIgnoreNoteTags = await invoke("insert_or_ignore_note_tag", {noteId: noteId, tagId: tagId, noteType: noteType});
+            await db.execute(insertOrIgnoreNoteTags);
             await loadNoteTags();
             if (onTagsChange) {
                 onTagsChange();
