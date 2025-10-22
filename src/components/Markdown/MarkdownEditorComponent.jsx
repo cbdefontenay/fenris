@@ -6,17 +6,18 @@ import Database from "@tauri-apps/plugin-sql";
 import {useTranslation} from "react-i18next";
 import {
     getStoredTheme,
+    listOfThemes,
     setCharCountForMarkdown,
     setIsMarkdownFullScreen,
     setStoredTheme,
-    setWordCountForMarkdown,
-    listOfThemes
+    setWordCountForMarkdown
 } from "../../data/StateManagementFunctions/MarkdownHelpers.jsx";
 import EmptyNotePageComponent from "./EmptyNotePageComponent.jsx";
 import DocumentStats from "./DocumentStats.jsx";
 import MarkdownPreview from "./MarkdownPreview.jsx";
 import PanelHeader from "./PanelHeader.jsx";
 import {Textarea} from "./TextArea.jsx";
+import TagManager from "../Tags/TagManager.jsx";
 
 const useTextareaBehavior = () => {
     const textareaRef = useRef(null);
@@ -33,7 +34,7 @@ const useTextareaBehavior = () => {
         }
     }, []);
 
-    return { textareaRef, handleKeyDown };
+    return {textareaRef, handleKeyDown};
 };
 
 
@@ -49,8 +50,8 @@ export default function MarkdownEditorComponent({selectedNote}) {
     const [saveStatus, setSaveStatus] = useState("saved");
     const [lastSaveTime, setLastSaveTime] = useState(null);
     const [theme, setTheme] = useState('atomDark');
-
-    const { textareaRef, handleKeyDown } = useTextareaBehavior();
+    const [tags, setTags] = useState([]);
+    const {textareaRef, handleKeyDown} = useTextareaBehavior();
     const previousMarkdownRef = useRef("");
     const isInitialLoadRef = useRef(true);
     const selectedNoteRef = useRef(selectedNote);
@@ -71,6 +72,29 @@ export default function MarkdownEditorComponent({selectedNote}) {
     };
 
     const isSingleNote = useCallback((note) => !note || note.hasOwnProperty('folder_id') === false, []);
+
+    const handleTagsChange = useCallback(async () => {
+        if (!selectedNote) return;
+
+        try {
+            const db = await Database.load('sqlite:fenris_app_notes.db');
+            const noteType = isSingleNote(selectedNote) ? 'single' : 'folder';
+            const query = `
+                SELECT t.*
+                FROM tags t
+                         JOIN note_tags nt ON t.id = nt.tag_id
+                WHERE nt.note_id = ?
+                  AND nt.note_type = ?
+            `;
+            const noteTags = await db.select(query, [selectedNote.id, noteType]);
+            setTags(noteTags);
+        } catch (error) {
+        }
+    }, [selectedNote, isSingleNote]);
+
+    useEffect(() => {
+        handleTagsChange();
+    }, [selectedNote, handleTagsChange]);
 
     const calculateCounts = useCallback((text) => ({
         words: text.trim() ? text.trim().split(/\s+/).length : 0,
@@ -253,130 +277,221 @@ export default function MarkdownEditorComponent({selectedNote}) {
         <div
             className={`h-full w-full flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 p-6 bg-(--background)/30 backdrop-blur-sm' : 'p-4'} overflow-x-hidden`}
             tabIndex={0}>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4 px-2">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-xl font-bold text-(--on-surface) bg-gradient-to-r from-(--primary) to-(--secondary) bg-clip-text">
-                        {title}
-                    </h1>
-                    <span
-                        className="text-xs bg-(--surface-container) px-2 py-1 rounded-full border border-(--outline) text-(--on-surface-container)">
-                        {isSingleNote(selectedNote) ? t('markdownEditor.header.singleNote') : t('markdownEditor.header.folderNote')}
-                    </span>
-                </div>
 
-                <div className="flex items-center gap-3">
-                    {/* Save Status */}
-                    <div className="flex items-center gap-2 text-sm text-(--on-surface-variant)">
-                        <button
-                            onClick={handleManualSave}
-                            disabled={saveStatus === "saved"}
-                            className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed tooltip"
-                            title={t('markdownEditor.saveStatus.saveButton')}
-                        >
-                            {SAVE_STATUS[saveStatus]?.icon}
-                        </button>
-                        <span className="text-xs">{getSaveStatusText()}</span>
+            {/* Header - Hidden in fullscreen */}
+            {!isFullscreen && (
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <div className="flex items-center gap-4 flex-1">
+                        <h1 className="text-xl font-bold text-(--on-surface) bg-gradient-to-r from-(--primary) to-(--secondary) bg-clip-text">
+                            {title}
+                        </h1>
+                        {/* Tags Display in Header */}
+                        <div className="flex flex-wrap gap-1">
+                            {/* Tag Manager */}
+                            {!isFullscreen && (
+                                <div className="items-center justify-center">
+                                    <TagManager
+                                        noteId={selectedNote?.id}
+                                        noteType={isSingleNote(selectedNote) ? 'single' : 'folder'}
+                                        onTagsChange={handleTagsChange}
+                                        existingTags={tags}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <span
+                            className="text-xs bg-(--surface-container) px-2 py-1 rounded-full border border-(--outline) text-(--on-surface-container)">
+                            {isSingleNote(selectedNote) ? t('markdownEditor.header.singleNote') : t('markdownEditor.header.folderNote')}
+
+                        </span>
                     </div>
 
-                    {/* View Mode Toggle */}
-                    <button
-                        onClick={cycleViewMode}
-                        className="cursor-pointer p-2 bg-(--surface-container) border border-(--outline) rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 text-(--on-surface-container) tooltip"
-                        title={t(VIEW_MODES[viewMode]?.tooltip)}
-                    >
-                        {VIEW_MODES[viewMode]?.icon}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {/* Save Status */}
+                        <div className="flex items-center gap-2 text-sm text-(--on-surface-variant)">
+                            <button
+                                onClick={handleManualSave}
+                                disabled={saveStatus === "saved"}
+                                className="cursor-pointer p-2 rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed tooltip"
+                                title={t('markdownEditor.saveStatus.saveButton')}
+                            >
+                                {SAVE_STATUS[saveStatus]?.icon}
+                            </button>
+                            <span className="text-xs">{getSaveStatusText()}</span>
+                        </div>
 
-                    {/* Settings Button */}
-                    <button
-                        onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                        className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
-                        title={t('markdownEditor.settings.title')}
-                    >
-                        <FiSettings className="text-(--on-surface)" size={16}/>
-                    </button>
+                        {/* View Mode Toggle */}
+                        <button
+                            onClick={cycleViewMode}
+                            className="cursor-pointer p-2 bg-(--surface-container) border border-(--outline) rounded-lg hover:bg-(--surface-container-high) transition-all duration-200 text-(--on-surface-container) tooltip"
+                            title={t(VIEW_MODES[viewMode]?.tooltip)}
+                        >
+                            {VIEW_MODES[viewMode]?.icon}
+                        </button>
 
-                    {/* Fullscreen Toggle */}
-                    <button
-                        onClick={handleFullScreenMode}
-                        className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
-                        title={isFullscreen ? t('markdownEditor.fullscreen.exit') : t('markdownEditor.fullscreen.enter')}
-                    >
-                        {isFullscreen ? <FiMinimize2 size={16}/> : <FiMaximize2 size={16}/>}
-                    </button>
+                        {/* Settings Button */}
+                        <button
+                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                            title={t('markdownEditor.settings.title')}
+                        >
+                            <FiSettings className="text-(--on-surface)" size={16}/>
+                        </button>
 
-                    {/* Settings Dropdown */}
-                    {isSettingsOpen && (
-                        <div
-                            className="absolute top-14 right-2 bg-(--surface-container) border border-(--outline) rounded-xl shadow-2xl p-4 z-10 min-w-48">
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span
-                                        className="text-sm font-medium text-(--on-surface)">{t('markdownEditor.settings.viewMode')}</span>
-                                    <div className="flex items-center gap-1 text-xs">
-                                        {["split", "editor", "preview"].map((mode) => (
-                                            <button
-                                                key={mode}
-                                                onClick={() => toggleViewMode(mode)}
-                                                className={`p-1 rounded transition-all duration-200 ml-2 cursor-pointer ${
-                                                    viewMode === mode
-                                                        ? "bg-(--primary) text-(--on-primary)"
-                                                        : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
-                                                }`}
-                                            >
-                                                {t(`markdownEditor.viewMode.${mode}`)}
-                                            </button>
-                                        ))}
+                        {/* Fullscreen Toggle */}
+                        <button
+                            onClick={handleFullScreenMode}
+                            className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                            title={isFullscreen ? t('markdownEditor.fullscreen.exit') : t('markdownEditor.fullscreen.enter')}
+                        >
+                            {isFullscreen ? <FiMinimize2 size={16}/> : <FiMaximize2 size={16}/>}
+                        </button>
+
+                        {/* Settings Dropdown */}
+                        {isSettingsOpen && (
+                            <div
+                                className="absolute top-14 right-2 bg-(--surface-container) border border-(--outline) rounded-xl shadow-2xl p-4 z-10 min-w-48">
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span
+                                            className="text-sm font-medium text-(--on-surface)">{t('markdownEditor.settings.viewMode')}</span>
+                                        <div className="flex items-center gap-1 text-xs">
+                                            {["split", "editor", "preview"].map((mode) => (
+                                                <button
+                                                    key={mode}
+                                                    onClick={() => toggleViewMode(mode)}
+                                                    className={`p-1 rounded transition-all duration-200 ml-2 cursor-pointer ${
+                                                        viewMode === mode
+                                                            ? "bg-(--primary) text-(--on-primary)"
+                                                            : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
+                                                    }`}
+                                                >
+                                                    {t(`markdownEditor.viewMode.${mode}`)}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label
-                                        className="text-sm font-medium block mb-2 text-(--on-surface)">{t('markdownEditor.settings.theme')}</label>
-                                    <select
-                                        value={theme}
-                                        onChange={(e) => handleThemeChange(e.target.value)}
-                                        className="z-50 cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none transition-all"
-                                    >
-                                        {listOfThemes.map((themeOption) => (
-                                            <option className="cursor-pointer" key={themeOption.name}
-                                                    value={themeOption.name}>
-                                                {themeOption.display}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                    <div>
+                                        <label
+                                            className="text-sm font-medium block mb-2 text-(--on-surface)">{t('markdownEditor.settings.theme')}</label>
+                                        <select
+                                            value={theme}
+                                            onChange={(e) => handleThemeChange(e.target.value)}
+                                            className="z-50 cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none transition-all"
+                                        >
+                                            {listOfThemes.map((themeOption) => (
+                                                <option className="cursor-pointer" key={themeOption.name}
+                                                        value={themeOption.name}>
+                                                    {themeOption.display}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                <div className="pt-2 border-t border-(--outline)">
-                                    <div className="text-xs text-(--on-surface-variant)">
-                                        <p>{t('markdownEditor.saveStatus.autoSave')}</p>
-                                        <p>{t('markdownEditor.saveStatus.debounce')}</p>
-                                        <p>
-                                            {t('markdownEditor.settings.noteType')}: {isSingleNote(selectedNote)
-                                            ? t('markdownEditor.header.singleNote')
-                                            : t('markdownEditor.header.folderNote')
-                                        }
-                                        </p>
+                                    <div className="pt-2 border-t border-(--outline)">
+                                        <div className="text-xs text-(--on-surface-variant)">
+                                            <p>{t('markdownEditor.saveStatus.autoSave')}</p>
+                                            <p>{t('markdownEditor.saveStatus.debounce')}</p>
+                                            <p>
+                                                {t('markdownEditor.settings.noteType')}: {isSingleNote(selectedNote)
+                                                ? t('markdownEditor.header.singleNote')
+                                                : t('markdownEditor.header.folderNote')
+                                            }
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* Minimal Header for Fullscreen - Only essential controls */}
+            {isFullscreen && (
+                <div className="flex items-center justify-end mb-4 px-2">
+                    <div className="flex items-center gap-3">
+                        {/* Settings Button */}
+                        <button
+                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                            title={t('markdownEditor.settings.title')}
+                        >
+                            <FiSettings className="text-(--on-surface)" size={16}/>
+                        </button>
+
+                        {/* Fullscreen Toggle */}
+                        <button
+                            onClick={handleFullScreenMode}
+                            className="p-2 cursor-pointer rounded-lg bg-(--surface-container) border border-(--outline) hover:bg-(--surface-container-high) transition-all duration-200 hover:scale-105"
+                            title={t('markdownEditor.fullscreen.exit')}
+                        >
+                            <FiMinimize2 size={16}/>
+                        </button>
+
+                        {/* Settings Dropdown */}
+                        {isSettingsOpen && (
+                            <div
+                                className="absolute top-14 right-2 bg-(--surface-container) border border-(--outline) rounded-xl shadow-2xl p-4 z-10 min-w-48">
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span
+                                            className="text-sm font-medium text-(--on-surface)">{t('markdownEditor.settings.viewMode')}</span>
+                                        <div className="flex items-center gap-1 text-xs">
+                                            {["split", "editor", "preview"].map((mode) => (
+                                                <button
+                                                    key={mode}
+                                                    onClick={() => toggleViewMode(mode)}
+                                                    className={`p-1 rounded transition-all duration-200 ml-2 cursor-pointer ${
+                                                        viewMode === mode
+                                                            ? "bg-(--primary) text-(--on-primary)"
+                                                            : "bg-(--surface-container-high) text-(--on-surface-container-high) hover:bg-(--surface-container-highest)"
+                                                    }`}
+                                                >
+                                                    {t(`markdownEditor.viewMode.${mode}`)}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            className="text-sm font-medium block mb-2 text-(--on-surface)">{t('markdownEditor.settings.theme')}</label>
+                                        <select
+                                            value={theme}
+                                            onChange={(e) => handleThemeChange(e.target.value)}
+                                            className="z-50 cursor-pointer w-full border border-(--outline) rounded-lg px-3 py-2 bg-(--surface) text-(--on-surface) focus:outline-none transition-all"
+                                        >
+                                            {listOfThemes.map((themeOption) => (
+                                                <option className="cursor-pointer" key={themeOption.name}
+                                                        value={themeOption.name}>
+                                                    {themeOption.display}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Editor + Preview Area */}
-            <div className="flex flex-row gap-4 h-full w-full items-stretch flex-1 min-h-0 overflow-hidden">
+            <div className={`flex flex-row gap-4 h-full w-full items-stretch flex-1 min-h-0 overflow-hidden ${isFullscreen ? 'mt-0' : ''}`}>
                 {/* Editor Panel */}
                 {showEditor && (
                     <div className={panelClasses.editor}>
-                        <PanelHeader
-                            title={t('markdownEditor.panels.editor')}
-                            status={t('markdownEditor.panels.editing')}
-                            color="green"
-                        />
-                        <div className="flex-1 relative rounded-lg border border-(--outline) bg-(--surface-container) overflow-hidden">
+                        {!isFullscreen && (
+                            <PanelHeader
+                                title={t('markdownEditor.panels.editor')}
+                                status={t('markdownEditor.panels.editing')}
+                                color="green"
+                            />
+                        )}
+                        <div
+                            className="flex-1 relative rounded-lg border border-(--outline) bg-(--surface-container) overflow-hidden">
                             <Textarea
                                 value={markdown}
                                 onChange={setMarkdown}
@@ -389,11 +504,13 @@ export default function MarkdownEditorComponent({selectedNote}) {
                 {/* Preview Panel */}
                 {showPreview && (
                     <div className={panelClasses.preview}>
-                        <PanelHeader
-                            title={t('markdownEditor.panels.preview')}
-                            status={t('markdownEditor.panels.live')}
-                            color="blue"
-                        />
+                        {!isFullscreen && (
+                            <PanelHeader
+                                title={t('markdownEditor.panels.preview')}
+                                status={t('markdownEditor.panels.live')}
+                                color="blue"
+                            />
+                        )}
                         <div
                             className="flex-1 rounded-lg border border-(--outline) bg-(--surface-container-low) overflow-hidden">
                             <div
@@ -406,23 +523,25 @@ export default function MarkdownEditorComponent({selectedNote}) {
             </div>
 
             {/* Footer */}
-            <div className="flex-shrink-0 mt-3 px-2">
-                <div className="flex items-center justify-between text-sm text-(--on-surface-variant)">
-                    <div className="flex items-center gap-4">
-                        <span
-                            className="font-medium bg-(--surface-container) px-3 py-1 rounded-full border border-(--outline) text-(--on-surface-container) text-xs">
-                            {title}
-                        </span>
-                        <DocumentStats charCount={charCount} wordCount={wordCount}/>
-                        <span className="text-xs opacity-75">
-                            {t('markdownEditor.viewMode.toggle')}: {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
-                        </span>
-                    </div>
-                    <div className="text-xs opacity-75">
-                        {saveStatus === "saved" && lastSaveTime && t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})}
+            {!isFullscreen && (
+                <div className="flex-shrink-0 mt-3 px-2">
+                    <div className="flex items-center justify-between text-sm text-(--on-surface-variant)">
+                        <div className="flex items-center gap-4">
+                            <span
+                                className="font-medium bg-(--surface-container) px-3 py-1 rounded-full border border-(--outline) text-(--on-surface-container) text-xs">
+                                {title}
+                            </span>
+                            <DocumentStats charCount={charCount} wordCount={wordCount}/>
+                            <span className="text-xs opacity-75">
+                                {t('markdownEditor.viewMode.toggle')}: {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
+                            </span>
+                        </div>
+                        <div className="text-xs opacity-75">
+                            {saveStatus === "saved" && lastSaveTime && t('markdownEditor.saveStatus.lastSaved', {time: lastSaveTime.toLocaleTimeString()})}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

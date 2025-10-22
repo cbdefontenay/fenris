@@ -440,5 +440,12 @@
       "ready": "Ready",
       "loading": "Loading models..."
     }
+  },
+  "tags": {
+    "addTag": "Add Tag",
+    "searchTags": "Search tags...",
+    "newTagName": "New tag name...",
+    "noTagsFound": "No tags found",
+    "createNewTag": "Create new tag"
   }
 }

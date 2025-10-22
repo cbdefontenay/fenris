@@ -1,42 +1,55 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {FaChevronDown, FaChevronRight, FaRegFolder} from "react-icons/fa";
 import {RxDotsVertical} from "react-icons/rx";
 import {deleteFolder, updateFolderName} from "../../data/CreateNotesDataShell.jsx";
 import {invoke} from "@tauri-apps/api/core";
 import AddNewNote from "./AddNewNote.jsx";
 import Database from "@tauri-apps/plugin-sql";
-import {MdOutlineEditNote} from "react-icons/md";
 import {createPortal} from "react-dom";
 import {useTranslation} from 'react-i18next';
+import {PiDotsThreeVerticalBold, PiNotePencilBold} from "react-icons/pi";
+import NotesMenuForFolder from "./NoteMenuForFolder.jsx";
+import {GoPencil} from "react-icons/go";
 
-export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuToggle, onFolderUpdate, onNoteSelect, selectedNote}) {
+export default function FolderItemsMenuComponent({
+                                                     folder,
+                                                     isAnyMenuOpen,
+                                                     onMenuToggle,
+                                                     onFolderUpdate,
+                                                     onNoteSelect,
+                                                     selectedNote,
+                                                     onNoteDeleted
+                                                 }) {
     const {t} = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUpdateFolderNameMenuOpen, setIsUpdateFolderNameOpen] = useState(false);
     const [notes, setNotes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-
-    // Add state for folder operations
     const [newFolderName, setNewFolderName] = useState(folder.name);
     const [error, setError] = useState('');
     const [isOperationLoading, setIsOperationLoading] = useState(false);
+    const [isNoteMenuOpen, setIsNoteMenuOpen] = useState(false);
+    const [selectedNoteId, setSelectedNoteId] = useState(null);
+    const [noteMenuButtonRef, setNoteMenuButtonRef] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editingNoteId, setEditingNoteId] = useState(null);
 
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
     const inputRef = useRef(null);
+    const noteButtonRefs = useRef({});
 
-    const loadNotes = async () => {
+    const loadNotes = useCallback(async () => {
         try {
             setIsLoading(true);
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const getNotesCommand = await invoke("get_notes_by_folder_sqlite", { folderId: folder.id });
+            const getNotesCommand = await invoke("get_notes_by_folder_sqlite", {folderId: folder.id});
             const dbNotes = await db.select(getNotesCommand);
 
-            // Ensure each note has the folder_id property for correct type detection
             const notesWithFolderId = dbNotes.map(note => ({
                 ...note,
-                folder_id: folder.id // This ensures the note type is correctly identified
+                folder_id: folder.id
             }));
 
             setNotes(notesWithFolderId);
@@ -45,13 +58,13 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [folder.id]);
 
     useEffect(() => {
         if (isExpanded) {
             loadNotes();
         }
-    }, [isExpanded, folder.id]);
+    }, [isExpanded, loadNotes]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -94,32 +107,40 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         };
     };
 
-    const handleMenuToggle = () => {
+    const handleMenuToggle = useCallback(() => {
         const newState = !isMenuOpen;
         setIsMenuOpen(newState);
         onMenuToggle(newState);
-    };
+    }, [isMenuOpen, onMenuToggle]);
 
-    const handleFolderClick = () => {
-        setIsExpanded(!isExpanded);
-    };
+    const handleFolderClick = useCallback(() => {
+        const next = !isExpanded;
+        if (next && notes.length === 0) {
+            setIsLoading(true);
+        }
+        setIsExpanded(next);
+    }, [isExpanded, notes.length]);
 
-    const handleNoteClick = async (note) => {
+    const handleNoteClick = useCallback(async (note, event) => {
+        // Don't trigger note selection if clicking the menu button or in edit mode
+        if (event.target.closest('.note-menu-button') || isEditMode) {
+            return;
+        }
+
         try {
             const db = await Database.load("sqlite:fenris_app_notes.db");
-            const getNoteByIdCmd = await invoke("get_note_by_id_sqlite", { noteId: note.id });
+            const getNoteByIdCmd = await invoke("get_note_by_id_sqlite", {noteId: note.id});
             const rows = await db.select(getNoteByIdCmd);
-            const fresh = rows && rows[0] ? { ...rows[0], folder_id: folder.id } : { ...note, folder_id: folder.id };
+            const fresh = rows && rows[0] ? {...rows[0], folder_id: folder.id} : {...note, folder_id: folder.id};
             if (onNoteSelect) {
                 onNoteSelect(fresh);
             }
         } catch (e) {
             if (onNoteSelect) {
-                // Fallback to existing note if fetch fails
-                onNoteSelect({ ...note, folder_id: folder.id });
+                onNoteSelect({...note, folder_id: folder.id});
             }
         }
-    };
+    }, [folder.id, onNoteSelect, isEditMode]);
 
     const updateFolderNameHandler = () => {
         setNewFolderName(folder.name);
@@ -133,6 +154,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         if (!isExpanded) {
             setIsExpanded(true);
         }
+        setIsMenuOpen(false);
+        onMenuToggle(false);
     }
 
     const handleSaveFolderName = async () => {
@@ -168,7 +191,6 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
     }
 
     const handleDeleteFolder = async () => {
-        // Use the correct dialog function
         const confirmationDialog = await invoke("delete_folder_dialog", {
             message: t('folderManagement.deleteConfirmation.message'),
             title: t('folderManagement.deleteConfirmation.title'),
@@ -200,7 +222,6 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                 onMenuToggle(true);
             }
         } catch (error) {
-            console.error('Error deleting folder:', error);
             setError(t('folderManagement.errors.deleteFailedWithError', {error: error.message}));
             setIsMenuOpen(true);
             onMenuToggle(true);
@@ -222,6 +243,65 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         }
     }
 
+    const handleNoteMenuToggle = (noteId, event) => {
+        event.stopPropagation();
+        setSelectedNoteId(noteId);
+        setNoteMenuButtonRef(noteButtonRefs.current[noteId]);
+        setIsNoteMenuOpen(!isNoteMenuOpen);
+    }
+
+    const handleNoteDeleted = (deletedNoteId) => {
+        setNotes(notes.filter(note => note.id !== deletedNoteId));
+        setIsNoteMenuOpen(false);
+
+        if (selectedNote && selectedNote.id === deletedNoteId && onNoteDeleted) {
+            onNoteDeleted(deletedNoteId);
+        }
+    };
+
+    const handleNoteUpdated = (updatedNoteId) => {
+        loadNotes();
+        setIsNoteMenuOpen(false);
+    };
+
+    const handleNoteEdit = (noteId) => {
+        setEditingNoteId(noteId);
+        setIsEditMode(true);
+        setIsNoteMenuOpen(false);
+    };
+
+    const handleNoteEditSave = async (noteId, newTitle) => {
+        try {
+            const db = await Database.load("sqlite:fenris_app_notes.db");
+            const updateQuery = `
+                UPDATE note
+                SET title         = ?,
+                    date_modified = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `;
+            await db.execute(updateQuery, [newTitle, noteId]);
+
+            await loadNotes();
+
+            if (selectedNote && selectedNote.id === noteId && onNoteSelect) {
+                const updatedNote = notes.find(note => note.id === noteId);
+                if (updatedNote) {
+                    onNoteSelect({...updatedNote, title: newTitle});
+                }
+            }
+        } catch (error) {
+            console.error("Error updating note:", error);
+        } finally {
+            setIsEditMode(false);
+            setEditingNoteId(null);
+        }
+    };
+
+    const handleNoteEditCancel = () => {
+        setIsEditMode(false);
+        setEditingNoteId(null);
+    };
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             handleSaveFolderName();
@@ -231,17 +311,24 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
         }
     }
 
+    const setNoteButtonRef = (noteId, el) => {
+        noteButtonRefs.current[noteId] = el;
+    };
+
     return (
         <>
             {isUpdateFolderNameMenuOpen &&
                 createPortal(
                     (
-                        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 popup-overlay">
-                            <div className="bg-(--surface) text-(--on-surface) rounded-lg shadow-xl p-6 w-96 max-w-full popup-content">
+                        <div
+                            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 popup-overlay">
+                            <div
+                                className="bg-(--surface) text-(--on-surface) rounded-lg shadow-xl p-6 w-96 max-w-full popup-content">
                                 <h2 className="text-lg font-semibold mb-4">{t('folderManagement.changeFolderName')}</h2>
 
                                 {error && (
-                                    <div className="mb-4 p-3 bg-(--error-container) text-(--on-error-container) rounded-md text-sm">
+                                    <div
+                                        className="mb-4 p-3 bg-(--error-container) text-(--on-error-container) rounded-md text-sm">
                                         {error}
                                     </div>
                                 )}
@@ -277,7 +364,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                                     >
                                         {isOperationLoading ? (
                                             <>
-                                                <div className="w-4 h-4 border-2 border-(--on-primary) border-t-transparent rounded-full animate-spin"></div>
+                                                <div
+                                                    className="w-4 h-4 border-2 border-(--on-primary) border-t-transparent rounded-full animate-spin"></div>
                                                 {t('folderManagement.saving')}
                                             </>
                                         ) : (
@@ -294,7 +382,8 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
 
             <div className="mb-1">
                 {/* Folder Header */}
-                <div className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
+                <div
+                    className="group flex items-center justify-between p-2 rounded-lg hover:bg-(--surface-container-high) transition-colors duration-200">
                     <div
                         className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                         onClick={handleFolderClick}
@@ -341,18 +430,48 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                         {notes.map((note) => (
                             <div
                                 key={note.id}
-                                onClick={() => handleNoteClick(note)}
-                                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                                onClick={(e) => handleNoteClick(note, e)}
+                                className={`group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
                                     selectedNote?.folder_id === folder.id && selectedNote?.id === note.id
                                         ? 'bg-(--surface-variant) text-(--on-surface-variant)'
                                         : 'hover:bg-(--surface-container-high)'
                                 }`}
                             >
-                                <MdOutlineEditNote className="text-(--tertiary)" size={16}/>
-                                <span className="text-sm truncate">{note.title || t('folderManagement.untitled')}</span>
+                                <GoPencil className="text-(--secondary) flex-shrink-0 mr-2" size={16}/>
+
+                                {isEditMode && editingNoteId === note.id ? (
+                                    <input
+                                        type="text"
+                                        defaultValue={note.title}
+                                        onBlur={(e) => handleNoteEditSave(note.id, e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.target.blur();
+                                            } else if (e.key === 'Escape') {
+                                                handleNoteEditCancel();
+                                            }
+                                        }}
+                                        autoFocus
+                                        className="flex-1 text-sm bg-(--surface) border border-(--outline) rounded px-2 py-1 focus:outline-none focus:border-(--primary)"
+                                    />
+                                ) : (
+                                    <>
+                                        <span className="text-sm truncate flex-1 min-w-0">
+                                            {note.title || t('folderManagement.untitled')}
+                                        </span>
+                                        <button
+                                            ref={(el) => setNoteButtonRef(note.id, el)}
+                                            onClick={(e) => handleNoteMenuToggle(note.id, e)}
+                                            className="note-menu-button opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded hover:bg-(--surface-container-highest) transition-all duration-200 flex-shrink-0"
+                                            title={t('folderManagement.noteOptions')}
+                                        >
+                                            <PiDotsThreeVerticalBold className="w-3 h-3 text-(--on-surface-variant)"/>
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         ))}
-                        {notes.length === 0 && (
+                        {!isLoading && notes.length === 0 && (
                             <div className="text-center py-3 text-(--on-surface-variant) text-sm italic">
                                 {t('folderManagement.noNotesInFolder')}
                             </div>
@@ -360,6 +479,18 @@ export default function FolderItemsMenuComponent({folder, isAnyMenuOpen, onMenuT
                     </div>
                 )}
             </div>
+
+            {/* Notes Menu */}
+            <NotesMenuForFolder
+                isNoteMenuOpen={isNoteMenuOpen}
+                setIsNoteMenuOpen={setIsNoteMenuOpen}
+                noteId={selectedNoteId}
+                folderId={folder.id}
+                onNoteUpdated={handleNoteUpdated}
+                onNoteDeleted={handleNoteDeleted}
+                onNoteEdit={handleNoteEdit}
+                buttonRef={noteMenuButtonRef}
+            />
         </>
     );
 }

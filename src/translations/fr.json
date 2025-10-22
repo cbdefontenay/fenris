@@ -440,5 +440,12 @@
       "ready": "Prêt",
       "loading": "Chargement des modèles..."
     }
+  },
+  "tags": {
+    "addTag": "Ajouter un tag",
+    "searchTags": "Rechercher des tags...",
+    "newTagName": "Nom du nouveau tag...",
+    "noTagsFound": "Aucun tag trouvé",
+    "createNewTag": "Créer un nouveau tag"
   }
 }

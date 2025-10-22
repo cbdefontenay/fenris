@@ -7,13 +7,13 @@ use crate::json::{
 };
 use crate::ollama::{list_of_models, ollama_api_call, read_file};
 use crate::sqlite::{
-    create_single_note, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite,
+    create_single_note, create_tag, delete_folder_and_note_sqlite, delete_folder_by_name_sqlite,
     delete_folder_sqlite, delete_note_by_name_sqlite, delete_single_note, get_all_folders,
     get_all_single_note, get_note_by_id_sqlite, get_notes_by_folder_sqlite,
     get_single_note_by_id_sqlite, save_folder_sqlite, save_note_to_folder_sqlite,
-    sqlite_migrations, update_folder_by_id_sqlite, update_folder_by_name_sqlite,
-    update_folder_sqlite, update_note_content_sqlite, update_single_note,
-    update_single_note_content_sqlite, vacuum_sqlite,
+    select_all_tags_by_name, sqlite_migrations, update_folder_by_id_sqlite,
+    update_folder_by_name_sqlite, update_folder_sqlite, update_note_content_sqlite,
+    update_single_note, update_single_note_content_sqlite, vacuum_sqlite,
 };
 use crate::state::{
     auto_save_folder_note, auto_save_single_note, calculate, editor_state, get_add_note_state,
@@ -27,7 +27,10 @@ use crate::state::{
     FolderItemsState, FolderManager, FolderState, MarkdownPreviewManager, MarkdownState,
     NoteManager, NoteState, ShellManager, ShellState,
 };
-use crate::store::{get_available_models_with_custom, handle_shell_ai_model_command, handle_shell_theme_command, store_and_get_ai_model, store_and_get_theme, store_and_set_ai_model, store_and_set_theme};
+use crate::store::{
+    get_available_models_with_custom, handle_shell_ai_model_command, handle_shell_theme_command,
+    store_and_get_ai_model, store_and_get_theme, store_and_set_ai_model, store_and_set_theme,
+};
 use crate::theme::{get_theme, list_of_themes, set_theme};
 use crate::ui_helpers::{
     delete_folder_dialog, delete_single_note_dialog, pick_json_file, save_json_as_file,
@@ -150,7 +153,9 @@ pub fn run() {
             store_and_set_ai_model,
             handle_shell_ai_model_command,
             store_and_get_ai_model,
-            get_available_models_with_custom
+            get_available_models_with_custom,
+            select_all_tags_by_name,
+            create_tag
         ])
         .run(generate_context!())
         .expect("error while running Fenris application");

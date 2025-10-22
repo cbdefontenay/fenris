@@ -88,6 +88,12 @@ export default function SidePanel({onNoteSelect, selectedNote}) {
         }
     }
 
+    const handleNoteDeleted = (deletedNoteId) => {
+        if (selectedNote && selectedNote.id === deletedNoteId) {
+            onNoteSelect(null);
+        }
+    };
+
     const refreshAll = () => {
         getAllFolders();
         getAllSingleNotes();
@@ -242,6 +248,7 @@ export default function SidePanel({onNoteSelect, selectedNote}) {
                                             onFolderUpdate={getAllFolders}
                                             onNoteSelect={onNoteSelect}
                                             selectedNote={selectedNote}
+                                            onNoteDeleted={handleNoteDeleted}
                                         />
                                     ))}
                                 </div>

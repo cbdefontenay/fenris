@@ -25,7 +25,7 @@ function CopyButton({text}) {
     return (
         <button
             onClick={handleCopy}
-            className="p-1.5 rounded bg-(--surface-container-high) border border-(--outline) hover:bg-(--surface-container-highest) transition-all duration-200 group"
+            className="cursor-pointer p-1.5 rounded bg-(--surface-container-high) border border-(--outline) hover:bg-(--surface-container-highest) transition-all duration-200 group"
             title={t('markdownEditor.preview.copyCode')}
         >
             {copied ? (
@@ -64,11 +64,7 @@ export default function MarkdownPreview({markdown, theme}) {
                         if (!inline && language) {
                             return (
                                 <div className="relative group my-3 overflow-x-auto">
-                                    <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                                        <span
-                                            className="text-xs px-2 py-1 bg-(--surface-container-high) text-(--on-surface-container-high) rounded border border-(--outline)">
-                                            {language}
-                                        </span>
+                                    <div className="absolute top-2 right-2 flex items-center gap-1 z-1">
                                         <CopyButton text={codeText}/>
                                     </div>
                                     <SyntaxHighlighterComponent
@@ -209,11 +205,11 @@ export default function MarkdownPreview({markdown, theme}) {
                     },
 
                     strong({node, ...props}) {
-                        return <strong className="text-(--primary) font-bold" {...props} />;
+                        return <strong className="font-bold" {...props} />;
                     },
 
                     em({node, ...props}) {
-                        return <em className="text-(--secondary) italic" {...props} />;
+                        return <em className="italic" {...props} />;
                     },
 
                     img({node, ...props}) {
